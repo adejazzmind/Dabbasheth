@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <div class="position-relative d-inline-block">
+            <img src="https://ui-avatars.com/api/?name=Samson&background=0D6EFD&color=fff&size=128"
+                 class="rounded-circle shadow-sm border border-4 border-white" style="width: 100px;">
+            <span class="position-absolute bottom-0 end-0 bg-success border border-2 border-white rounded-circle p-2"></span>
+        </div>
+        <h3 class="font-weight-bold mt-3 mb-0">Hi, @ViewBag.UserEmail.Split('@')[0]</h3>
+        <span class="badge bg-soft-primary text-primary px-3 py-2 mt-2" style="background: #eef2ff; border-radius: 20px;">
+            <i class="bi bi-shield-check me-1"></i> Tier 3 Verified
+        </span>
+    </div>
+
+    <div class="alert alert-success border-0 shadow-sm d-flex justify-content-between align-items-center p-3 mb-4"
+         style="border-radius: 15px; background: linear-gradient(90deg, #10b981, #34d399); color: white;">
+        <div>
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span class="small font-weight-bold">3 Safety Tips: Secure your funds</span>
+        </div>
+        <button class="btn btn-light btn-sm fw-bold px-3" style="border-radius: 10px; color: #059669;">View</button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+        <div class="list-group list-group-flush">
+            <a href="#" class="list-group-item list-group-item-action border-0 p-4 d-flex align-items-center">
+                <i class="bi bi-clock-history text-success h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold">Transaction History</h6>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action border-0 p-4 d-flex align-items-center">
+                <i class="bi bi-speedometer2 text-info h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold">Account Limits</h6>
+                    <small class="text-muted">View your daily spending power</small>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action border-0 p-4 d-flex align-items-center">
+                <i class="bi bi-credit-card text-primary h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold">Bank Card/Account</h6>
+                    <small class="text-muted">Manage your connected banks</small>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-5" style="border-radius: 20px;">
+        <div class="list-group list-group-flush">
+            <a href="#" class="list-group-item list-group-item-action border-0 p-4 d-flex align-items-center">
+                <i class="bi bi-shield-lock text-warning h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold">Security Center</h6>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+            <a href="#" class="list-group-item list-group-item-action border-0 p-4 d-flex align-items-center">
+                <i class="bi bi-headset text-danger h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">
+                    <h6 class="mb-0 font-weight-bold">Customer Service Center</h6>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+        </div>
+    </div>
+</div>

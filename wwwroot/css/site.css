@@ -1,0 +1,124 @@
+/* DABBASHETH SECURE WALLET - PREMIUM STYLESHEET v3.7
+    CORE FIX: Modal Layering & Interactivity
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* --- 0. CRITICAL MODAL FIX --- */
+/* This ensures the popup is physically IN FRONT of the dark screen */
+.modal {
+    z-index: 3050 !important;
+}
+
+.modal-backdrop {
+    z-index: 3040 !important;
+}
+
+.modal-content {
+    position: relative;
+    z-index: 3060 !important;
+    background-color: var(--bg-card) !important;
+    border-radius: var(--dab-card-radius) !important;
+    border: none !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* --- 1. THEME VARIABLES --- */
+:root {
+    --bg-body: #F4F7FE;
+    --bg-card: #FFFFFF;
+    --bg-nav: rgba(255, 255, 255, 0.95);
+    --text-main: #1B2559;
+    --text-muted: #A3AED0;
+    --border-color: #E9EDF7;
+    --input-bg: #F4F7FE;
+    --dab-primary: #00D09C;
+    --dab-primary-dark: #00B386;
+    --dab-bg-dark: #111C44;
+    --dab-card-radius: 20px;
+}
+
+[data-bs-theme="dark"] {
+    --bg-body: #0B1437;
+    --bg-card: #111C44;
+    --bg-nav: rgba(17, 28, 68, 0.95);
+    --text-main: #FFFFFF;
+    --text-muted: #8F9BBA;
+    --border-color: #1B254B;
+    --input-bg: #0B1437;
+}
+
+/* --- 2. CORE LAYOUT --- */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header.sticky-top {
+    position: sticky !important;
+    top: 0;
+    z-index: 2000 !important;
+    background-color: var(--bg-nav) !important;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+main.flex-grow-1 {
+    flex: 1 0 auto;
+    position: relative;
+    z-index: 1;
+    padding-bottom: 120px;
+}
+
+/* --- 3. PREMIUM COMPONENTS --- */
+h1, h2, h3, h4, h5, .fw-bold {
+    color: var(--text-main) !important;
+    letter-spacing: -0.8px;
+}
+
+.card-dab {
+    background-color: var(--bg-card) !important;
+    border-radius: var(--dab-card-radius);
+    border: 1px solid var(--border-color) !important;
+}
+
+.balance-card {
+    background: linear-gradient(135deg, var(--dab-primary) 0%, var(--dab-bg-dark) 100%) !important;
+    border-radius: 24px;
+    color: white !important;
+    padding: 2rem;
+}
+
+.form-control, .form-select {
+    background-color: var(--input-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.btn-primary {
+    background-color: var(--dab-primary) !important;
+    border: none !important;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 12px;
+}
+
+/* --- 4. NAVIGATION --- */
+.dab-mobile-nav {
+    background-color: var(--bg-card) !important;
+    border-top: 1px solid var(--border-color) !important;
+    border-radius: 24px 24px 0 0;
+    z-index: 2500;
+}

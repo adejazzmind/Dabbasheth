@@ -1,0 +1,105 @@
+﻿@* Views/Account/Register.cshtml *@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Create Account - Dabbasheth Secure Wallet";
+}
+
+<div class="container">
+    @* 1. THE MAIN WRAPPER: Centers the card and manages vertical space *@
+    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
+        <div class="col-md-6 col-lg-5">
+            
+            @* BRANDING AREA *@
+            <div class="text-center mb-4">
+                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm"
+                     style="width: 65px; height: 65px; background-color: rgba(0, 208, 156, 0.1);">
+                    <i class="bi bi-person-plus-fill" style="font-size: 2.2rem; color: var(--dab-primary);"></i>
+                </div>
+                <h1 class="fw-bold" style="letter-spacing: -1.5px; font-size: 2.5rem;">Join Us</h1>
+                <p class="text-muted fw-medium">Secure banking starts with a single step.</p>
+            </div>
+
+            @* 2. THE REGISTRATION CARD *@
+            <div class="card card-dab shadow-lg border-0" id="registerCard" style="opacity: 0;">
+                <div class="card-body p-5">
+                    <h3 class="fw-bold mb-1">Create Account</h3>
+                    <p class="text-muted small mb-4">Please provide your real details for verification.</p>
+
+                    @* System Alerts *@
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger border-0 bg-soft-danger small mb-4 d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                        </div>
+                    }
+
+                    <form asp-controller="Account" asp-action="Register" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Full Name</label>
+                            <input type="text" name="fullName" class="form-control py-3 shadow-none"
+                                   placeholder="e.g. Samson Mayowa Braimoh" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Email Address</label>
+                            <input type="email" name="email" class="form-control py-3 shadow-none"
+                                   placeholder="name@example.com" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Phone Number</label>
+                            <input type="tel" name="phoneNumber" class="form-control py-3 shadow-none"
+                                   placeholder="08012345678" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Password</label>
+                            </div>
+                            <input type="password" name="password" class="form-control py-3 shadow-none"
+                                   placeholder="••••••••" required />
+                            <div class="form-text small text-muted mt-2">Use at least 8 characters for your security.</div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm py-3 mt-2 rounded-pill fw-bold">
+                            Create My Wallet
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            @* 3. LOGIN LINK *@
+            <div class="text-center mt-4 mb-5">
+                <p class="text-muted small">
+                    Already have a Dabbasheth account?
+                    <a asp-controller="Account" asp-action="Login" class="text-success fw-bold text-decoration-none ms-1">
+                        Login Here
+                    </a>
+                </p>
+                <div class="mt-3 opacity-50">
+                    <small class="text-muted"><i class="bi bi-shield-lock-fill me-1"></i> Data protected by 256-bit encryption</small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Smooth Floating Entrance Animation
+            $("#registerCard").animate({
+                "opacity": "1"
+            }, {
+                step: function(now, fx) {
+                    $(this).css("transform", "translateY(" + (20 - (now * 20)) + "px)");
+                },
+                duration: 600,
+                easing: "swing"
+            });
+        });
+    </script>
+}

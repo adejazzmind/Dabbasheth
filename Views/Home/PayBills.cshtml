@@ -1,0 +1,44 @@
+﻿@{
+    ViewData["Title"] = "Pay Bills";
+}
+
+<div class="container mt-5" style="padding-bottom: 120px;">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-dab border-0 shadow-lg p-4">
+                <div class="text-center mb-4">
+                    <div class="bg-soft-warning d-inline-block p-3 rounded-circle mb-3">
+                        <i class="bi bi-lightning-charge-fill text-warning h2"></i>
+                    </div>
+                    <h3 class="fw-bold">Pay Bills</h3>
+                    <p class="text-muted small">Fast airtime and data top-up.</p>
+                </div>
+
+                <form asp-action="ProcessBillPayment" method="post">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">SERVICE PROVIDER</label>
+                        <select name="provider" class="form-select" required>
+                            <option value="">Select Provider...</option>
+                            <option>MTN Nigeria</option>
+                            <option>Airtel</option>
+                            <option>Glo</option>
+                            <option>9Mobile</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">PHONE NUMBER</label>
+                        <input type="number" name="phoneNumber" class="form-control" placeholder="08012345678" required />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">AMOUNT (₦)</label>
+                        <input type="number" name="amount" class="form-control" placeholder="0.00" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
+                        Pay Now
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,156 @@
+﻿@model Dabbasheth.Models.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Hub - IES Life Hub";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5" style="padding-bottom: 120px;">
+    
+    @* --- 1. EXECUTIVE HEADER --- *@
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold mb-0">Admin Command Center</h2>
+            <p class="text-muted">@Model.OrganizationName | @Model.OrganizationType</p>
+        </div>
+        <div class="d-flex flex-column align-items-end">
+            <div class="badge bg-soft-primary text-primary px-4 py-2 rounded-pill mb-1">
+                <i class="bi bi-shield-check me-2"></i>SECURE ADMIN SESSION
+            </div>
+            <small class="text-muted">ID: @DateTime.Now.ToString("yyyyMMdd-HHmm")</small>
+        </div>
+    </div>
+
+    @* --- 2. LIQUIDITY & CUSTOMER STATS --- *@
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card card-dab border-0 shadow-sm p-4 text-center h-100">
+                <div class="bg-soft-info d-inline-block p-3 rounded-circle mx-auto mb-3" style="width: 60px;">
+                    <i class="bi bi-people-fill text-info h4 mb-0"></i>
+                </div>
+                <small class="text-muted text-uppercase fw-bold d-block">Active Customers</small>
+                <h1 class="fw-bold text-dark mt-2">@Model.TotalUsers</h1>
+            </div>
+        </div>
+        <div class="col-md-8 mb-3">
+            <div class="card balance-card p-4 shadow-lg text-white h-100 border-0"
+                 style="background: linear-gradient(135deg, #001f3f 0%, #00d09c 100%);">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <small class="text-uppercase fw-bold opacity-75" style="letter-spacing: 1.5px;">Total System Liquidity</small>
+                        <h1 class="display-5 fw-bold mt-2">₦@Model.TotalSystemBalance.ToString("N2")</h1>
+                        <p class="mb-0 small opacity-75">IES Life Hub Operational Capital</p>
+                    </div>
+                    <i class="bi bi-graph-up-arrow display-4 opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- 3. CUSTOMER LEDGER TABLE --- *@
+    <div class="card card-dab border-0 shadow-sm animate__animated animate__fadeIn">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0">Customer Account Ledger</h4>
+                <div class="input-group w-auto">
+                    <span class="input-group-text bg-light border-0"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search customer...">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle border-0">
+                    <thead class="text-muted small text-uppercase" style="background-color: #f8f9fa;">
+                        <tr>
+                            <th class="ps-3 border-0 py-3">Customer Identity</th>
+                            <th class="border-0 py-3">Wallet Balance</th>
+                            <th class="text-end pe-3 border-0 py-3">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        @foreach (var user in Model.AllUsers.Where(u => u.Role != "Admin"))
+                        {
+                            var wallet = Model.AllWallets.FirstOrDefault(w => w.UserEmail == user.Email);
+                            <tr>
+                                <td class="ps-3 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-soft-primary p-2 me-3 text-primary fw-bold" style="width: 40px; height: 40px; text-align: center;">
+                                            @user.FullName.Substring(0, 1)
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.FullName</div>
+                                            <small class="text-muted">@user.Email</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3">
+                                    <h6 class="fw-bold text-success mb-0">₦@(wallet?.Balance.ToString("N2") ?? "0.00")</h6>
+                                    <small class="text-muted">@wallet?.Currency Verified</small>
+                                </td>
+                                <td class="text-end pe-3 py-3">
+                                    <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                                            onclick="openCreditModal('@user.Email', '@user.FullName')">
+                                        <i class="bi bi-plus-circle me-1"></i> Credit
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* --- 4. EXECUTIVE CREDIT MODAL --- *@
+<div class="modal fade" id="creditModal" tabindex="-1" aria-hidden="true" style="z-index: 3050;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 25px; z-index: 3060;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h4 class="fw-bold">Credit Customer Account</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="creditForm" asp-action="CreditAccount" method="post">
+                    <input type="hidden" name="targetEmail" id="targetEmail" />
+                    
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-2 text-uppercase">Target Identity</label>
+                        <input type="text" id="targetName" class="form-control bg-light border-0 fw-bold" readonly style="border-radius: 12px;" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small fw-bold text-muted mb-2 text-uppercase">Account Bucket</label>
+                        <select name="accountType" class="form-select bg-light border-0" style="border-radius: 12px;">
+                            <option value="Wallet">Main Wallet (IES Liquidity)</option>
+                            <option value="Thrift">Savings Plan (Ajo/Thrift)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="small fw-bold text-muted mb-2 text-uppercase">Credit Amount (₦)</label>
+                        <input type="number" name="amount" class="form-control form-control-lg bg-light border-0"
+                               placeholder="0.00" required style="border-radius: 12px;" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold py-3 shadow">
+                        Execute Official Credit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openCreditModal(email, name) {
+            // Populate hidden and display fields
+            document.getElementById('targetEmail').value = email;
+            document.getElementById('targetName').value = name;
+            
+            // Trigger Modal with Bootstrap Engine
+            var myModal = new bootstrap.Modal(document.getElementById('creditModal'));
+            myModal.show();
+        }
+    </script>
+}

@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Dabbasheth Cards";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">My Cards</h2>
+        <a href="#" class="text-success text-decoration-none fw-bold">Q&A</a>
+    </div>
+
+    <div class="card border-0 shadow-lg mb-4" style="border-radius: 20px; background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); color: white;">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between mb-5">
+                <h5 class="fw-bold">Virtual Card</h5>
+                <i class="bi bi-wifi h4"></i>
+            </div>
+            <h3 class="mb-4" style="letter-spacing: 4px;">**** **** **** 1234</h3>
+            <div class="d-flex justify-content-between align-items-center">
+                <span>@ViewBag.UserEmail</span>
+                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b7/MasterCard_Logo.svg" style="height: 30px;">
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; background-color: #1a1a1a; color: #fff;">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-start mb-4">
+                <i class="bi bi-lightning-charge-fill text-warning h3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">Instant Access</h6>
+                    <small class="text-muted">Use it instantly after quick application.</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-start mb-4">
+                <i class="bi bi-globe text-info h3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">Accepted Everywhere</h6>
+                    <small class="text-muted">Use on Netflix, Google Play, and Shein.</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-start">
+                <i class="bi bi-shield-lock-fill text-success h3 me-3"></i>
+                <div>
+                    <h6 class="fw-bold mb-1">Safe & Secure</h6>
+                    <small class="text-muted">CBN licensed and NDIC Insured.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn btn-success btn-lg w-100 py-3 fw-bold" style="border-radius: 15px; background-color: #00d09c; border: none;">
+        Get It Now
+    </button>
+</div>

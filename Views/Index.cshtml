@@ -1,0 +1,8 @@
+﻿<div class="text-center">
+    <h1 class="display-4">Top Up Your Wallet</h1>
+    <form asp-controller="Payment" asp-action="InitializePayment" method="post">
+        <input type="email" name="email" placeholder="Your Email" required class="form-control mb-2" />
+        <input type="number" name="amount" placeholder="Amount (Naira)" required class="form-control mb-2" />
+        <button type="submit" class="btn btn-success">Pay with Paystack</button>
+    </form>
+</div>
