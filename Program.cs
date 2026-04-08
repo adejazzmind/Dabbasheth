@@ -4,12 +4,13 @@ using Dabbasheth.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Get connection string from Render environment variables
+// ================================================
+// 1. DATABASE CONNECTION (from Render)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 if (string.IsNullOrWhiteSpace(connectionString))
 {
-    throw new InvalidOperationException("Connection string 'DefaultConnection' is missing from Render Environment Variables.");
+    throw new InvalidOperationException("❌ Connection string 'DefaultConnection' is missing in Render Environment Variables.");
 }
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -21,6 +22,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     });
 });
 
+// ================================================
+// 2. SERVICES
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSession(options =>
@@ -30,9 +33,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// ================================================
+// 3. BUILD APP
 var app = builder.Build();
 
-// Auto-migrate + seed
+// ================================================
+// 4. MIGRATION + SEEDING
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -40,27 +46,44 @@ using (var scope = app.Services.CreateScope())
     try
     {
         context.Database.Migrate();
-        Console.WriteLine("✅ Migration successful.");
+        Console.WriteLine("✅ Neon Database Migration Successful.");
 
+        // Seed Admin Users (only once)
         if (!context.Users.Any(u => u.Role == "Admin"))
         {
             context.Users.AddRange(
-                new User { FullName = "Samson Mayowa Braimoh", Email = "adejazzmind@gmail.com", Password = "123", PhoneNumber = "08000000000", Role = "Admin" },
-                new User { FullName = "Tolulope Jumoke Samson", Email = "tolubabe2k@gmail.com", Password = "123", PhoneNumber = "08000000000", Role = "Admin" }
+                new User
+                {
+                    FullName = "Samson Mayowa Braimoh",
+                    Email = "adejazzmind@gmail.com",
+                    Password = "123",
+                    PhoneNumber = "08000000000",
+                    Role = "Admin"
+                },
+                new User
+                {
+                    FullName = "Tolulope Jumoke Samson",
+                    Email = "tolubabe2k@gmail.com",
+                    Password = "123",
+                    PhoneNumber = "08000000000",
+                    Role = "Admin"
+                }
             );
             await context.SaveChangesAsync();
         }
 
-        Console.WriteLine("✅ Database connected and seeded successfully.");
+        Console.WriteLine("✅ Admins seeded successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine("❌ Database Error: " + ex.Message);
+        Console.WriteLine("❌ DATABASE ERROR: " + ex.Message);
         if (ex.InnerException != null)
             Console.WriteLine("Inner: " + ex.InnerException.Message);
     }
 }
 
+// ================================================
+// 5. MIDDLEWARE PIPELINE
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -70,7 +93,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseSession();
+app.UseSession();        // Must be before Authorization
 app.UseAuthorization();
 
 app.MapControllerRoute(

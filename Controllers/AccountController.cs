@@ -14,74 +14,107 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // --- LOGIN GET ---
+        // ────────────────────────────────────────────────────────────────
+        // GET: Login Page
+        // ────────────────────────────────────────────────────────────────
         [HttpGet]
         public IActionResult Login() => View();
 
-        // --- LOGIN POST ---
+        // ────────────────────────────────────────────────────────────────
+        // POST: Login User
+        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password)
         {
-            string cleanEmail = email?.Trim().ToLower();
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            {
+                TempData["Error"] = "Email and password are required.";
+                return View();
+            }
 
-            // Search the Neon database for the user
-            var user = _context.Users.FirstOrDefault(u => u.Email.ToLower() == cleanEmail && u.Password == password);
+            string cleanEmail = email.Trim().ToLower();
+
+            var user = _context.Users.FirstOrDefault(u =>
+                u.Email.ToLower() == cleanEmail && u.Password == password);
 
             if (user != null)
             {
+                // Store user info in TempData for this session
                 TempData["UserEmail"] = user.Email;
                 TempData["UserName"] = user.FullName;
                 TempData["UserRole"] = user.Role;
                 TempData.Keep();
 
-                return user.Role == "Admin" ? RedirectToAction("Index", "Admin") : RedirectToAction("Index", "Home");
+                // Redirect based on role
+                return user.Role == "Admin"
+                    ? RedirectToAction("Index", "Admin")
+                    : RedirectToAction("Index", "Home");
             }
 
-            TempData["Error"] = "Invalid credentials.";
+            TempData["Error"] = "Invalid email or password.";
             return View();
         }
 
-        // --- REGISTER GET ---
+        // ────────────────────────────────────────────────────────────────
+        // GET: Register Page
+        // ────────────────────────────────────────────────────────────────
         [HttpGet]
         public IActionResult Register() => View();
 
-        // --- REGISTER POST (Paystack-Free Version) ---
+        // ────────────────────────────────────────────────────────────────
+        // POST: Register New User (Improved Version)
+        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(User model)
         {
-            // 1. Check if user already exists
-            if (_context.Users.Any(u => u.Email == model.Email))
+            if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Email already exists!";
                 return View(model);
             }
 
-            // 2. Set default customer role
-            model.Role = "Customer";
-
-            // 3. Stage the User for Neon
-            _context.Users.Add(model);
-
-            // 4. Create the Wallet automatically (Starts at 0 balance)
-            _context.Wallets.Add(new Wallet
+            try
             {
-                UserEmail = model.Email,
-                Balance = 0,
-                CreatedAt = DateTime.UtcNow
-            });
+                // Check for existing email (case-insensitive)
+                if (_context.Users.Any(u => u.Email.ToLower() == model.Email.ToLower()))
+                {
+                    TempData["Error"] = "An account with this email already exists!";
+                    return View(model);
+                }
 
-            // 5. Single push to Neon database
-            _context.SaveChanges();
+                // Set default values
+                model.Role = "Customer";
+                model.Email = model.Email.Trim().ToLower();   // Normalize email
 
-            TempData["Message"] = "Account Created Successfully!";
+                // Add User
+                _context.Users.Add(model);
 
-            // 6. Direct redirect to login (skipping payment screens)
-            return RedirectToAction("Login");
+                // Create Wallet automatically
+                _context.Wallets.Add(new Wallet
+                {
+                    UserEmail = model.Email,
+                    Balance = 0,
+                    Currency = "NGN",
+                    CreatedAt = DateTime.UtcNow
+                });
+
+                _context.SaveChanges();
+
+                TempData["Message"] = "Account created successfully! You can now login.";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                // You can add proper logging here later
+                TempData["Error"] = "Registration failed. Please try again later.";
+                return View(model);
+            }
         }
 
-        // --- LOGOUT ---
+        // ────────────────────────────────────────────────────────────────
+        // Logout
+        // ────────────────────────────────────────────────────────────────
         public IActionResult Logout()
         {
             TempData.Clear();

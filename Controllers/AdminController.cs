@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Dabbasheth.Models;
 using Dabbasheth.Data;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace Dabbasheth.Controllers
 {
@@ -14,8 +15,9 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // ─── DASHBOARD ───────────────────────────────────────────────────────
-
+        // ────────────────────────────────────────────────────────────────
+        // ADMIN DASHBOARD
+        // ────────────────────────────────────────────────────────────────
         [HttpGet]
         public IActionResult Index()
         {
@@ -35,73 +37,95 @@ namespace Dabbasheth.Controllers
             return View(viewModel);
         }
 
-        // ─── CREDIT ACTION ───────────────────────────────────────────────────
-
+        // ────────────────────────────────────────────────────────────────
+        // CREDIT ACCOUNT (God Mode)
+        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult CreditAccount(string targetEmail, decimal amount,
                                            string accountType, int? planId)
         {
             var role = TempData.Peek("UserRole")?.ToString();
-            if (role != "Admin") return Unauthorized();
+            if (role != "Admin")
+                return Unauthorized();
 
-            if (amount <= 0)
+            if (string.IsNullOrWhiteSpace(targetEmail) || amount <= 0)
             {
-                TempData["Error"] = "Amount must be greater than zero.";
+                TempData["Error"] = "Invalid email or amount.";
                 return RedirectToAction("Index");
             }
 
-            if (accountType == "Wallet")
+            try
             {
-                var wallet = _context.Wallets
-                    .FirstOrDefault(w => w.UserEmail == targetEmail);
-
-                if (wallet != null)
+                if (accountType == "Wallet")
                 {
-                    wallet.Balance += amount;
-                    AddAdminLog(targetEmail, amount, "Credit: Wallet");
+                    var wallet = _context.Wallets
+                        .FirstOrDefault(w => w.UserEmail.ToLower() == targetEmail.ToLower());
+
+                    if (wallet != null)
+                    {
+                        wallet.Balance += amount;
+                        AddAdminLog(targetEmail, amount, "Credit: Wallet");
+                    }
+                    else
+                    {
+                        // Create wallet if it doesn't exist
+                        _context.Wallets.Add(new Wallet
+                        {
+                            UserEmail = targetEmail.ToLower(),
+                            Balance = amount,
+                            Currency = "NGN",
+                            CreatedAt = DateTime.UtcNow
+                        });
+                        AddAdminLog(targetEmail, amount, "Credit: New Wallet Created");
+                    }
+                }
+                else if (accountType == "Thrift" && planId.HasValue)
+                {
+                    var plan = _context.ThriftPlans
+                        .FirstOrDefault(p => p.Id == planId.Value);
+
+                    if (plan != null)
+                    {
+                        plan.CurrentSavings += amount;
+                        AddAdminLog(targetEmail, amount, $"Credit Thrift: {plan.Title}");
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Thrift plan not found.";
+                        return RedirectToAction("Index");
+                    }
                 }
                 else
                 {
-                    // Create wallet if it somehow doesn't exist yet
-                    _context.Wallets.Add(new Wallet
-                    {
-                        UserEmail = targetEmail,
-                        Balance = amount,
-                        Currency = "NGN",
-                        CreatedAt = DateTime.UtcNow
-                    });
-                    AddAdminLog(targetEmail, amount, "Credit: New Wallet Created");
+                    TempData["Error"] = "Invalid account type selected.";
+                    return RedirectToAction("Index");
                 }
+
+                _context.SaveChanges();
+                TempData["Message"] = $"₦{amount:N2} successfully credited to {targetEmail}!";
             }
-            else if (accountType == "Thrift" && planId.HasValue)
+            catch (Exception ex)
             {
-                var plan = _context.ThriftPlans
-                    .FirstOrDefault(p => p.Id == planId.Value);
-
-                if (plan != null)
-                {
-                    plan.CurrentSavings += amount;
-                    AddAdminLog(targetEmail, amount, $"Credit Thrift: {plan.Title}");
-                }
+                TempData["Error"] = "Failed to credit account. Please try again.";
+                // TODO: Add proper logging in production
+                Console.WriteLine($"Credit Error: {ex.Message}");
             }
 
-            _context.SaveChanges();
-
-            TempData["Message"] = "Account Credited Successfully!";
             return RedirectToAction("Index");
         }
 
-        // ─── PRIVATE HELPER ──────────────────────────────────────────────────
-
+        // ────────────────────────────────────────────────────────────────
+        // PRIVATE HELPER: Add Admin Log
+        // ────────────────────────────────────────────────────────────────
         private void AddAdminLog(string targetEmail, decimal amount, string note)
         {
-            var adminName = TempData.Peek("UserName")?.ToString() ?? "System";
+            var adminName = TempData.Peek("UserName")?.ToString() ?? "System Admin";
 
             _context.Transactions.Add(new TransactionRecord
             {
                 Reference = "ADM-" + Guid.NewGuid().ToString()[..8].ToUpper(),
-                UserEmail = targetEmail,
+                UserEmail = targetEmail.ToLower(),
                 Amount = amount,
                 Description = $"{note} (By {adminName})",
                 Date = DateTime.UtcNow,
