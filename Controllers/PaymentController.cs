@@ -4,17 +4,19 @@ using Dabbasheth.Data;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Dabbasheth.Controllers
 {
     public class PaymentController : Controller
     {
+        private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
 
-        public PaymentController(IConfiguration configuration)
+        public PaymentController(ApplicationDbContext context, IConfiguration configuration)
         {
+            _context = context;
             _configuration = configuration;
-            // PayStackApi initialization removed to prevent crashes if keys are missing
         }
 
         // --- STEP 1: BYPASSED INITIALIZE PAYMENT ---
@@ -23,49 +25,52 @@ namespace Dabbasheth.Controllers
         {
             try
             {
-                // 🛑 BYPASS: Skipping the real Paystack API call entirely.
-                // Instead, we act as if the user already paid and go straight to verification logic.
+                // 🛑 BYPASS MODE: Money is added directly to Neon without calling Paystack
+                string mockReference = "BYPASS-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
 
-                string mockReference = "BYPASS-" + Guid.NewGuid().ToString().Substring(0, 8);
-
-                // We directly call our internal wallet logic
+                // Call the internal wallet logic that talks to Neon
                 bool isUpdated = await UpdateUserWallet(email, (decimal)amount);
 
                 if (isUpdated)
                 {
-                    // Log to mock history so the dashboard shows the "transaction"
-                    MockDatabase.Transactions.Insert(0, new TransactionRecord
+                    // Create a real transaction record in Neon
+                    var txn = new TransactionRecord
                     {
                         Reference = mockReference,
-                        Amount = amount,
-                        Date = DateTime.Now,
-                        Status = "Success (Bypass Mode)"
-                    });
+                        UserEmail = email,
+                        Amount = (decimal)amount,
+                        Description = "Wallet Top-up (Bypass Mode)",
+                        Date = DateTime.UtcNow,
+                        Status = "Success"
+                    };
 
-                    ViewBag.Message = $"Development Mode: ₦{amount} has been added to your wallet without Paystack.";
+                    _context.Transactions.Add(txn);
+                    await _context.SaveChangesAsync();
+
+                    ViewBag.Message = $"Success: ₦{amount} has been added to your REAL Neon wallet.";
                     return View("Success");
                 }
 
-                return RedirectToAction("Index", "Dashboard");
+                return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
             {
-                // This prevents the red "Something went wrong" screen from crashing the app
                 return Content($"Bypass Error: {ex.Message}");
             }
         }
 
-        // --- STEP 2: VERIFY (Kept for routing safety, but Initialize handles it now) ---
+        // --- STEP 2: VERIFY (Route Safety) ---
         [HttpGet]
         public IActionResult Verify(string reference)
         {
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Home");
         }
 
-        // --- STEP 3: WALLET LOGIC (Required to see balance changes) ---
+        // --- STEP 3: WALLET LOGIC (Talking to REAL Database) ---
         private async Task<bool> UpdateUserWallet(string email, decimal amount)
         {
-            var wallet = MockDatabase.Wallets.FirstOrDefault(w => w.UserEmail == email);
+            // Search the REAL Neon database for this user's wallet
+            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail == email);
 
             if (wallet != null)
             {
@@ -73,14 +78,17 @@ namespace Dabbasheth.Controllers
             }
             else
             {
-                MockDatabase.Wallets.Add(new Wallet
+                // If wallet doesn't exist, create it in Neon
+                _context.Wallets.Add(new Wallet
                 {
-                    Id = MockDatabase.Wallets.Count + 1,
                     UserEmail = email,
-                    Balance = amount
+                    Balance = amount,
+                    CreatedAt = DateTime.UtcNow,
+                    Currency = "NGN"
                 });
             }
 
+            await _context.SaveChangesAsync();
             return true;
         }
     }

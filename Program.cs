@@ -3,9 +3,8 @@ using Dabbasheth.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. CONNECTION STRING: Updated with the exact Host from your Neon screenshot
-// This uses the pooler address to ensure stable connections from Render.
-var connectionString = "Host=ep-ancient-cell-anc4zt6c-pooler.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_xpaKdTJ7q4ef;Port=5432;SslMode=Require;TrustServerCertificate=true;";
+// 1. CONNECTION STRING: Using the DIRECT host (non-pooler) for maximum stability
+var connectionString = "Host=ep-ancient-cell-anc4zt6c.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_xpaKdTJ7q4ef;Port=5432;SslMode=Require;TrustServerCertificate=true;";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString, npgsqlOptions =>
@@ -18,7 +17,7 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// 2. THE RENDER AUTO-MIGRATE: Runs on startup to build your tables in the new project
+// 2. THE RENDER AUTO-MIGRATE: Runs on startup to build your tables
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -27,13 +26,13 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
         Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("RENDER SUCCESS: Connected to ep-ancient-cell!");
+        Console.WriteLine("CONNECTION SUCCESS: Database is synced!");
         Console.WriteLine("-----------------------------------------");
     }
     catch (Exception ex)
     {
         Console.WriteLine("*****************************************");
-        Console.WriteLine("RENDER DATABASE ERROR: " + ex.Message);
+        Console.WriteLine("DATABASE ERROR: " + ex.Message);
         if (ex.InnerException != null)
         {
             Console.WriteLine("INNER ERROR: " + ex.InnerException.Message);
