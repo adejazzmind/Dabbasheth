@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Dabbasheth.Models;
 using Dabbasheth.Data;
-using System.Linq;
 
 namespace Dabbasheth.Controllers
 {
@@ -14,15 +13,8 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // GET: Login Page
-        // ────────────────────────────────────────────────────────────────
-        [HttpGet]
-        public IActionResult Login() => View();
+        [HttpGet] public IActionResult Login() => View();
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Login User
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password)
@@ -40,57 +32,42 @@ namespace Dabbasheth.Controllers
 
             if (user != null)
             {
-                // Store user info in TempData for this session
                 TempData["UserEmail"] = user.Email;
                 TempData["UserName"] = user.FullName;
                 TempData["UserRole"] = user.Role;
                 TempData.Keep();
 
-                // Redirect based on role
                 return user.Role == "Admin"
                     ? RedirectToAction("Index", "Admin")
                     : RedirectToAction("Index", "Home");
             }
 
-            TempData["Error"] = "Invalid email or password.";
+            TempData["Error"] = "Invalid credentials.";
             return View();
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // GET: Register Page
-        // ────────────────────────────────────────────────────────────────
-        [HttpGet]
-        public IActionResult Register() => View();
+        [HttpGet] public IActionResult Register() => View();
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Register New User (Improved Version)
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Register(User model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
             try
             {
-                // Check for existing email (case-insensitive)
                 if (_context.Users.Any(u => u.Email.ToLower() == model.Email.ToLower()))
                 {
-                    TempData["Error"] = "An account with this email already exists!";
+                    TempData["Error"] = "Email already exists!";
                     return View(model);
                 }
 
-                // Set default values
                 model.Role = "Customer";
-                model.Email = model.Email.Trim().ToLower();   // Normalize email
+                model.Email = model.Email.Trim().ToLower();
 
-                // Add User
                 _context.Users.Add(model);
 
-                // Create Wallet automatically
                 _context.Wallets.Add(new Wallet
                 {
                     UserEmail = model.Email,
@@ -101,20 +78,16 @@ namespace Dabbasheth.Controllers
 
                 _context.SaveChanges();
 
-                TempData["Message"] = "Account created successfully! You can now login.";
+                TempData["Message"] = "Account created successfully! Login now.";
                 return RedirectToAction("Login");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // You can add proper logging here later
-                TempData["Error"] = "Registration failed. Please try again later.";
+                TempData["Error"] = "Registration failed. Try again.";
                 return View(model);
             }
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // Logout
-        // ────────────────────────────────────────────────────────────────
         public IActionResult Logout()
         {
             TempData.Clear();
