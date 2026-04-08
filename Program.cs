@@ -1,47 +1,66 @@
 using Microsoft.EntityFrameworkCore;
 using Dabbasheth.Data;
+using Dabbasheth.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. CONNECTION STRING: Using the DIRECT host (non-pooler) for maximum stability
-var connectionString = "Host=ep-ancient-cell-anc4zt6c.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_xpaKdTJ7q4ef;Port=5432;SslMode=Require;TrustServerCertificate=true;";
+// Get connection string from Render environment variables
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' is missing from Render Environment Variables.");
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString, npgsqlOptions =>
+{
+    options.UseNpgsql(connectionString, npgsql =>
     {
-        // Retries connection if the network flickers
-        npgsqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
-    }));
+        npgsql.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null);
+        npgsql.CommandTimeout(60);
+    });
+});
 
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(8);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
-// 2. THE RENDER AUTO-MIGRATE: Runs on startup to build your tables
+// Auto-migrate + seed
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
     try
     {
-        var context = services.GetRequiredService<ApplicationDbContext>();
         context.Database.Migrate();
-        Console.WriteLine("-----------------------------------------");
-        Console.WriteLine("CONNECTION SUCCESS: Database is synced!");
-        Console.WriteLine("-----------------------------------------");
+        Console.WriteLine("✅ Migration successful.");
+
+        if (!context.Users.Any(u => u.Role == "Admin"))
+        {
+            context.Users.AddRange(
+                new User { FullName = "Samson Mayowa Braimoh", Email = "adejazzmind@gmail.com", Password = "123", PhoneNumber = "08000000000", Role = "Admin" },
+                new User { FullName = "Tolulope Jumoke Samson", Email = "tolubabe2k@gmail.com", Password = "123", PhoneNumber = "08000000000", Role = "Admin" }
+            );
+            await context.SaveChangesAsync();
+        }
+
+        Console.WriteLine("✅ Database connected and seeded successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine("*****************************************");
-        Console.WriteLine("DATABASE ERROR: " + ex.Message);
+        Console.WriteLine("❌ Database Error: " + ex.Message);
         if (ex.InnerException != null)
-        {
-            Console.WriteLine("INNER ERROR: " + ex.InnerException.Message);
-        }
-        Console.WriteLine("*****************************************");
+            Console.WriteLine("Inner: " + ex.InnerException.Message);
     }
 }
 
-// 3. MIDDLEWARE PIPELINE
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -51,6 +70,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
 app.MapControllerRoute(
