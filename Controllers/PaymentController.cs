@@ -1,91 +1,68 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PayStack.Net;
 using Dabbasheth.Models;
 using Dabbasheth.Data;
-using System.Diagnostics;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dabbasheth.Controllers
 {
     public class PaymentController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly PayStackApi _paystack;
-        private readonly string _token;
 
         public PaymentController(IConfiguration configuration)
         {
             _configuration = configuration;
-
-            // Pulls the secret key from appsettings.json
-            _token = _configuration["Paystack:SecretKey"];
-            _paystack = new PayStackApi(_token);
+            // PayStackApi initialization removed to prevent crashes if keys are missing
         }
 
-        // --- STEP 1: INITIALIZE PAYMENT ---
+        // --- STEP 1: BYPASSED INITIALIZE PAYMENT ---
         [HttpPost]
-        public IActionResult InitializePayment(string email, int amount)
+        public async Task<IActionResult> InitializePayment(string email, int amount)
         {
             try
             {
-                var request = new TransactionInitializeRequest
-                {
-                    AmountInKobo = amount * 100, // Naira to Kobo
-                    Email = email,
-                    Reference = Guid.NewGuid().ToString(),
-                    CallbackUrl = "https://localhost:44300/Payment/Verify"
-                };
+                // 🛑 BYPASS: Skipping the real Paystack API call entirely.
+                // Instead, we act as if the user already paid and go straight to verification logic.
 
-                var response = _paystack.Transactions.Initialize(request);
+                string mockReference = "BYPASS-" + Guid.NewGuid().ToString().Substring(0, 8);
 
-                if (response != null && response.Status)
-                {
-                    return Redirect(response.Data.AuthorizationUrl);
-                }
-
-                return Content($"Paystack Error: {response?.Message ?? "Check Internet/Secret Key."}");
-            }
-            catch (Exception ex)
-            {
-                return Content($"System Error: {ex.Message}");
-            }
-        }
-
-        // --- STEP 2: VERIFY PAYMENT & RECORD TRANSACTION ---
-        [HttpGet]
-        public async Task<IActionResult> Verify(string reference)
-        {
-            var response = _paystack.Transactions.Verify(reference);
-
-            if (response.Status && response.Data.Status == "success")
-            {
-                var amountPaid = response.Data.Amount / 100;
-                var userEmail = response.Data.Customer.Email;
-
-                // 1. Update the User's Balance
-                bool isUpdated = await UpdateUserWallet(userEmail, amountPaid);
+                // We directly call our internal wallet logic
+                bool isUpdated = await UpdateUserWallet(email, (decimal)amount);
 
                 if (isUpdated)
                 {
-                    // 2. LOG TO TRANSACTION HISTORY
-                    // Insert(0, ...) ensures the latest transaction is at the top
+                    // Log to mock history so the dashboard shows the "transaction"
                     MockDatabase.Transactions.Insert(0, new TransactionRecord
                     {
-                        Reference = reference,
-                        Amount = amountPaid,
+                        Reference = mockReference,
+                        Amount = amount,
                         Date = DateTime.Now,
-                        Status = "Success"
+                        Status = "Success (Bypass Mode)"
                     });
 
-                    ViewBag.Message = $"Success! ₦{amountPaid} has been added to your wallet.";
+                    ViewBag.Message = $"Development Mode: ₦{amount} has been added to your wallet without Paystack.";
                     return View("Success");
                 }
-            }
 
-            ViewBag.Message = "We couldn't verify your payment. Please try again.";
-            return View("Error");
+                return RedirectToAction("Index", "Dashboard");
+            }
+            catch (Exception ex)
+            {
+                // This prevents the red "Something went wrong" screen from crashing the app
+                return Content($"Bypass Error: {ex.Message}");
+            }
         }
 
-        // --- STEP 3: WALLET LOGIC ---
+        // --- STEP 2: VERIFY (Kept for routing safety, but Initialize handles it now) ---
+        [HttpGet]
+        public IActionResult Verify(string reference)
+        {
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        // --- STEP 3: WALLET LOGIC (Required to see balance changes) ---
         private async Task<bool> UpdateUserWallet(string email, decimal amount)
         {
             var wallet = MockDatabase.Wallets.FirstOrDefault(w => w.UserEmail == email);
