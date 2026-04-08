@@ -5,7 +5,7 @@
 }
 
 <div class="container">
-    @* 1. THE MAIN WRAPPER: Centers the card and manages vertical space *@
+    @* MAIN WRAPPER *@
     <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
         <div class="col-md-6 col-lg-5">
             
@@ -19,17 +19,17 @@
                 <p class="text-muted fw-medium">Secure banking starts with a single step.</p>
             </div>
 
-            @* 2. THE REGISTRATION CARD *@
+            @* REGISTRATION CARD *@
             <div class="card card-dab shadow-lg border-0" id="registerCard" style="opacity: 0;">
                 <div class="card-body p-5">
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted small mb-4">Please provide your real details for verification.</p>
 
-                    @* System Alerts *@
-                    @if (ViewBag.Error != null)
+                    @* System Alerts - Changed to TempData to match Controller *@
+                    @if (TempData["Error"] != null)
                     {
                         <div class="alert alert-danger border-0 bg-soft-danger small mb-4 d-flex align-items-center">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @ViewBag.Error
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
                         </div>
                     }
 
@@ -38,27 +38,25 @@
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Full Name</label>
-                            <input type="text" name="fullName" class="form-control py-3 shadow-none"
+                            <input type="text" name="FullName" class="form-control py-3 shadow-none"
                                    placeholder="e.g. Samson Mayowa Braimoh" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Email Address</label>
-                            <input type="email" name="email" class="form-control py-3 shadow-none"
+                            <input type="email" name="Email" class="form-control py-3 shadow-none"
                                    placeholder="name@example.com" required />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Phone Number</label>
-                            <input type="tel" name="phoneNumber" class="form-control py-3 shadow-none"
+                            <input type="tel" name="PhoneNumber" class="form-control py-3 shadow-none"
                                    placeholder="08012345678" required />
                         </div>
 
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between">
-                                <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Password</label>
-                            </div>
-                            <input type="password" name="password" class="form-control py-3 shadow-none"
+                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Password</label>
+                            <input type="password" name="Password" class="form-control py-3 shadow-none"
                                    placeholder="••••••••" required />
                             <div class="form-text small text-muted mt-2">Use at least 8 characters for your security.</div>
                         </div>
@@ -70,7 +68,7 @@
                 </div>
             </div>
             
-            @* 3. LOGIN LINK *@
+            @* LOGIN LINK *@
             <div class="text-center mt-4 mb-5">
                 <p class="text-muted small">
                     Already have a Dabbasheth account?
@@ -78,9 +76,6 @@
                         Login Here
                     </a>
                 </p>
-                <div class="mt-3 opacity-50">
-                    <small class="text-muted"><i class="bi bi-shield-lock-fill me-1"></i> Data protected by 256-bit encryption</small>
-                </div>
             </div>
 
         </div>
@@ -90,7 +85,6 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Smooth Floating Entrance Animation
             $("#registerCard").animate({
                 "opacity": "1"
             }, {
