@@ -1,23 +1,30 @@
 ﻿@model List<Dabbasheth.Models.TransactionRecord>
 @{
-    ViewData["Title"] = "Dabbasheth Dashboard";
+    ViewData["Title"] = "Dashboard - IES Life Hub";
+    Layout = "_Layout";
+
     string boldName = TempData.Peek("UserName") as string ?? "Valued Member";
     var hour = DateTime.Now.Hour;
     string timeGreeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 }
 
-@* --- 1. ASSETS --- *@
+<!-- Assets -->
 <audio id="successSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-@* --- 2. MODALS --- *@
+<!-- Modals -->
 <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
         <div class="modal-content border-0 card-dab shadow-lg">
             <div class="modal-body p-5 text-center">
-                <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_afwjh8re.json" background="transparent" speed="1" style="width: 180px; height: 180px; margin: 0 auto;" autoplay></lottie-player>
+                <lottie-player src="https://assets10.lottiefiles.com/packages/lf20_afwjh8re.json"
+                               background="transparent" speed="1"
+                               style="width: 180px; height: 180px; margin: 0 auto;" autoplay></lottie-player>
                 <h3 class="fw-bold mt-4 text-success">Request Received!</h3>
                 <p class="text-muted small">Your transaction is logged and awaiting verification.</p>
-                <button type="button" class="btn btn-primary btn-lg w-100 mt-4 rounded-pill shadow-sm" data-bs-dismiss="modal">Continue</button>
+                <button type="button" class="btn btn-primary btn-lg w-100 mt-4 rounded-pill shadow-sm"
+                        data-bs-dismiss="modal">
+                    Continue
+                </button>
             </div>
         </div>
     </div>
@@ -49,33 +56,34 @@
                 </div>
                 <div class="d-grid gap-2">
                     <button type="button" class="btn btn-primary btn-lg rounded-pill py-3">Download Receipt</button>
-                    <button type="button" class="btn btn-link text-muted text-decoration-none" data-bs-dismiss="modal">Close</button>
-                </div>
-                <div class="receipt-footer mt-4 pt-3 border-top border-dashed">
-                    <small class="text-muted">© 2026 - Dabbasheth Secure Wallet</small>
+                    <button type="button" class="btn btn-link text-muted text-decoration-none"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@* --- 3. UI LAYOUT --- *@
+<!-- Main Content -->
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-9">
-            
-            @* Greeting *@
+
+            <!-- Greeting -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h4 class="text-muted mb-0">@timeGreeting,</h4>
                     <h1 class="fw-bold text-dark" style="letter-spacing: -1.5px; font-size: 2.8rem;">@boldName</h1>
                 </div>
-                <div class="bg-soft-secondary rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 55px; height: 55px;">
+                <div class="bg-soft-secondary rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                     style="width: 55px; height: 55px;">
                     <i class="bi bi-person-check-fill text-primary h3 mb-0"></i>
                 </div>
             </div>
 
-            @* Wallet Card *@
+            <!-- Wallet Balance Card -->
             <div class="card balance-card text-white mb-5 border-0 p-2 shadow-lg">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center">
@@ -95,38 +103,51 @@
                 </div>
             </div>
 
-            @* Quick Actions Grid *@
+            <!-- Quick Actions -->
             <div class="row text-center mb-5 g-2">
+                <!-- Add Money -->
                 <div class="col-3">
                     <form id="addMoneyForm" asp-controller="Payment" asp-action="InitializePayment" method="post">
                         <input type="hidden" name="email" value="@ViewBag.UserEmail" />
-                        <button type="button" class="p-0 border-0 bg-transparent w-100 shadow-none" onclick="handleTransaction('addMoneyForm')">
-                            <div class="rounded-circle bg-soft-primary mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon" style="width: 65px; height: 65px;">
+                        <input type="hidden" name="amount" value="5000" />
+                        <button type="button" class="p-0 border-0 bg-transparent w-100 shadow-none"
+                                onclick="handleTransaction('addMoneyForm')">
+                            <div class="rounded-circle bg-soft-primary mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon"
+                                 style="width: 65px; height: 65px;">
                                 <i class="bi bi-plus-circle-fill text-success h2 mb-0"></i>
                             </div>
                             <small class="fw-bold text-dark">Add Money</small>
                         </button>
                     </form>
                 </div>
+
+                <!-- Withdraw -->
                 <div class="col-3">
                     <a href="@Url.Action("Withdraw", "Home")" class="text-decoration-none">
-                        <div class="rounded-circle bg-soft-danger mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon" style="width: 65px; height: 65px;">
+                        <div class="rounded-circle bg-soft-danger mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon"
+                             style="width: 65px; height: 65px;">
                             <i class="bi bi-bank2 text-danger h2 mb-0"></i>
                         </div>
                         <small class="fw-bold text-dark">Withdraw</small>
                     </a>
                 </div>
+
+                <!-- Pay Bills -->
                 <div class="col-3">
                     <a href="@Url.Action("PayBills", "Home")" class="text-decoration-none">
-                        <div class="rounded-circle bg-soft-secondary mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon" style="width: 65px; height: 65px;">
+                        <div class="rounded-circle bg-soft-secondary mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon"
+                             style="width: 65px; height: 65px;">
                             <i class="bi bi-lightbulb-fill text-warning h2 mb-0"></i>
                         </div>
                         <small class="fw-bold text-dark">Pay Bills</small>
                     </a>
                 </div>
+
+                <!-- Loan -->
                 <div class="col-3">
                     <a href="@Url.Action("Loan", "Home")" class="text-decoration-none">
-                        <div class="rounded-circle bg-soft-info mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon" style="width: 65px; height: 65px;">
+                        <div class="rounded-circle bg-soft-info mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm action-icon"
+                             style="width: 65px; height: 65px;">
                             <i class="bi bi-lightning-charge-fill text-info h2 mb-0"></i>
                         </div>
                         <small class="fw-bold text-dark">Loan Hub</small>
@@ -134,7 +155,7 @@
                 </div>
             </div>
 
-            @* FIX: Wealth Goals & Rewards Cards *@
+            <!-- Wealth Goals & Rewards -->
             <div class="row mb-5 g-3">
                 <div class="col-6">
                     <a href="@Url.Action("Thrift", "Home")" class="text-decoration-none">
@@ -158,7 +179,7 @@
                 </div>
             </div>
 
-            @* TRANSACTION LEDGER *@
+            <!-- Transaction Ledger -->
             <div class="card card-dab shadow-sm mb-5 border-0">
                 <div class="card-body p-4">
                     <h4 class="fw-bold mb-4">Transaction Ledger</h4>
@@ -177,7 +198,8 @@
                                     foreach (var txn in Model)
                                     {
                                         var isNegative = txn.Amount < 0;
-                                        <tr class="transaction-row pointer" onclick="showReceipt('@txn.Reference', '@txn.Amount.ToString("N2")', '@txn.Date.ToString("MMM dd, HH:mm")', '@txn.Status')">
+                                        <tr class="transaction-row pointer"
+                                            onclick="showReceipt('@txn.Reference', '@txn.Amount.ToString("N2")', '@txn.Date.ToString("MMM dd, HH:mm")', '@txn.Status')">
                                             <td class="ps-3 border-0">
                                                 <div class="fw-bold text-dark">@txn.Date.ToString("MMM dd")</div>
                                                 <div class="small text-muted">@txn.Date.ToString("t")</div>
@@ -186,16 +208,25 @@
                                                 @(isNegative ? "" : "+")₦@Math.Abs(txn.Amount).ToString("N2")
                                             </td>
                                             <td class="text-end pe-3 border-0">
-                                                <span class="badge-dab @(txn.Status.Contains("Approved") ? "bg-soft-primary" : "bg-soft-secondary")">@txn.Status</span>
+                                                <span class="badge-dab @(txn.Status.Contains("Approved") ? "bg-soft-primary" : "bg-soft-secondary")">
+                                                    @txn.Status
+                                                </span>
                                             </td>
                                         </tr>
                                     }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4 text-muted">No transactions yet.</td>
+                                    </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -205,7 +236,7 @@
         $(document).ready(function () {
             var msg = '@TempData["Message"]';
             if (msg) {
-                document.getElementById("successSound").play();
+                document.getElementById("successSound").play().catch(() => {});
                 new bootstrap.Modal(document.getElementById('successModal')).show();
             }
         });
@@ -220,7 +251,8 @@
             $('#modalRef').text(ref);
             $('#modalAmount').text('₦' + amount);
             const badge = $('#modalStatus');
-            badge.text(status).attr('class', 'badge-dab ' + (status.includes('Approved') ? 'bg-soft-primary' : 'bg-soft-secondary'));
+            badge.text(status)
+                 .attr('class', 'badge-dab ' + (status.includes('Approved') ? 'bg-soft-primary' : 'bg-soft-secondary'));
             new bootstrap.Modal(document.getElementById('receiptModal')).show();
         }
     </script>

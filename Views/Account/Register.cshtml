@@ -5,11 +5,10 @@
 }
 
 <div class="container">
-    @* MAIN WRAPPER *@
     <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
         <div class="col-md-6 col-lg-5">
             
-            @* BRANDING AREA *@
+            <!-- Branding Area -->
             <div class="text-center mb-4">
                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm"
                      style="width: 65px; height: 65px; background-color: rgba(0, 208, 156, 0.1);">
@@ -19,16 +18,22 @@
                 <p class="text-muted fw-medium">Secure banking starts with a single step.</p>
             </div>
 
-            @* REGISTRATION CARD *@
+            <!-- Registration Card -->
             <div class="card card-dab shadow-lg border-0" id="registerCard" style="opacity: 0;">
                 <div class="card-body p-5">
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted small mb-4">Please provide your real details for verification.</p>
 
-                    @* System Alerts - Changed to TempData to match Controller *@
+                    <!-- Success and Error Messages -->
+                    @if (TempData["Message"] != null)
+                    {
+                        <div class="alert alert-success border-0 mb-4 d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+                        </div>
+                    }
                     @if (TempData["Error"] != null)
                     {
-                        <div class="alert alert-danger border-0 bg-soft-danger small mb-4 d-flex align-items-center">
+                        <div class="alert alert-danger border-0 mb-4 d-flex align-items-center">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
                         </div>
                     }
@@ -68,11 +73,12 @@
                 </div>
             </div>
             
-            @* LOGIN LINK *@
+            <!-- Login Link -->
             <div class="text-center mt-4 mb-5">
                 <p class="text-muted small">
                     Already have a Dabbasheth account?
-                    <a asp-controller="Account" asp-action="Login" class="text-success fw-bold text-decoration-none ms-1">
+                    <a asp-controller="Account" asp-action="Login"
+                           class="text-success fw-bold text-decoration-none ms-1">
                         Login Here
                     </a>
                 </p>
@@ -88,7 +94,7 @@
             $("#registerCard").animate({
                 "opacity": "1"
             }, {
-                step: function(now, fx) {
+                step: function(now) {
                     $(this).css("transform", "translateY(" + (20 - (now * 20)) + "px)");
                 },
                 duration: 600,

@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Login - IES Life Hub";
     Layout = "_Layout";
 }
 
@@ -11,8 +11,22 @@
                 <i class="bi bi-shield-lock-fill text-primary h2 mb-0"></i>
             </div>
             <h2 class="fw-bold text-dark">Welcome Back</h2>
-            <p class="text-muted small">Sign in to **IES Life Hub (Dabbasheth)**</p>
+            <p class="text-muted small">Sign in to IES Life Hub (Dabbasheth)</p>
         </div>
+
+        <!-- Success & Error Messages -->
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success border-0 mb-4 d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger border-0 mb-4 d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            </div>
+        }
 
         <form asp-action="Login" method="post">
             <div class="mb-3">
@@ -24,14 +38,17 @@
             <div class="mb-4 position-relative">
                 <div class="d-flex justify-content-between">
                     <label class="form-label small fw-bold text-muted">PASSWORD</label>
-                    <a href="#" class="text-decoration-none small fw-bold">Forgot?</a>
+                    <a href="#" class="text-decoration-none small fw-bold">Forgot Password?</a>
                 </div>
                 
-                @* PASSWORD EYE INTEGRATION *@
                 <div class="input-group">
-                    <input type="password" name="password" id="loginPassword" class="form-control form-control-lg bg-light border-0"
-                           placeholder="••••••••" required style="border-radius: 15px 0 0 15px;" />
-                    <span class="input-group-text bg-light border-0" style="border-radius: 0 15px 15px 0; cursor: pointer;" onclick="togglePasswordVisibility()">
+                    <input type="password" name="password" id="loginPassword"
+                           class="form-control form-control-lg bg-light border-0"
+                           placeholder="••••••••" required
+                           style="border-radius: 15px 0 0 15px;" />
+                    <span class="input-group-text bg-light border-0"
+                          style="border-radius: 0 15px 15px 0; cursor: pointer;"
+                          onclick="togglePasswordVisibility()">
                         <i class="bi bi-eye-slash text-muted" id="eyeIcon"></i>
                     </span>
                 </div>
@@ -43,7 +60,10 @@
         </form>
 
         <div class="text-center mt-4">
-            <p class="small text-muted">New to Dabbasheth? <a asp-action="Register" class="fw-bold text-decoration-none">Create Account</a></p>
+            <p class="small text-muted">
+                New to Dabbasheth?
+                <a asp-action="Register" class="fw-bold text-decoration-none">Create Account</a>
+            </p>
         </div>
     </div>
 </div>

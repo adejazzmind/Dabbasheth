@@ -1,9 +1,9 @@
-using Dabbasheth.Data;
-using Dabbasheth.Models;
 using Microsoft.AspNetCore.Mvc;
+using Dabbasheth.Models;
+using Dabbasheth.Data;
 using System;
-using System.Diagnostics;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Dabbasheth.Controllers
 {
@@ -16,18 +16,21 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        private string GetLoggedInUserEmail()
+        // ────────────────────────────────────────────────────────────────
+        // Helper: Get Current Logged-in User Email
+        // ────────────────────────────────────────────────────────────────
+        private string? GetLoggedInUserEmail()
         {
             var email = TempData.Peek("UserEmail") as string;
             return string.IsNullOrEmpty(email) ? null : email.ToLower();
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Dashboard
+        // DASHBOARD
         // ────────────────────────────────────────────────────────────────
         public IActionResult Index()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -44,11 +47,11 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Thrift / Wealth Goals
+        // THRIFT / WEALTH GOALS
         // ────────────────────────────────────────────────────────────────
         public IActionResult Thrift()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -63,11 +66,11 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Withdraw
+        // WITHDRAW
         // ────────────────────────────────────────────────────────────────
         public IActionResult Withdraw()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -78,11 +81,11 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Pay Bills
+        // PAY BILLS
         // ────────────────────────────────────────────────────────────────
         public IActionResult PayBills()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -93,11 +96,11 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Loan
+        // LOAN
         // ────────────────────────────────────────────────────────────────
         public IActionResult Loan()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -106,24 +109,24 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Rewards
+        // REWARDS
         // ────────────────────────────────────────────────────────────────
         public IActionResult Rewards()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
-            ViewBag.Cashback = 36.50m;   // You can make this dynamic later
+            ViewBag.Cashback = 36.50m;
             return View();
         }
 
         // ────────────────────────────────────────────────────────────────
-        // Profile
+        // PROFILE
         // ────────────────────────────────────────────────────────────────
         public IActionResult Profile()
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
@@ -135,18 +138,19 @@ namespace Dabbasheth.Controllers
         }
 
         // ────────────────────────────────────────────────────────────────
-        // POST: Process Loan
+        // POST ACTIONS
         // ────────────────────────────────────────────────────────────────
+
         [HttpPost]
         public IActionResult ProcessLoan(decimal loanAmount)
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email) || loanAmount <= 0)
                 return RedirectToAction("Index");
 
             _context.Transactions.Add(new TransactionRecord
             {
-                Reference = "LOAN-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                Reference = "LOAN-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                 UserEmail = email,
                 Amount = loanAmount,
                 Description = $"IES Loan Application: ₦{loanAmount:N2}",
@@ -155,24 +159,20 @@ namespace Dabbasheth.Controllers
             });
 
             _context.SaveChanges();
-
             TempData["Message"] = "Loan application submitted! Admin will review shortly.";
             return RedirectToAction("Index");
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Process Withdrawal
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         public IActionResult ProcessWithdrawal(decimal amount, string bankName, string accountNumber)
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email) || amount <= 0)
                 return RedirectToAction("Index");
 
             _context.Transactions.Add(new TransactionRecord
             {
-                Reference = "WTH-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                Reference = "WTH-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                 UserEmail = email,
                 Amount = amount * -1,
                 Description = $"Withdrawal to {bankName} ({accountNumber})",
@@ -181,24 +181,20 @@ namespace Dabbasheth.Controllers
             });
 
             _context.SaveChanges();
-
             TempData["Message"] = "Withdrawal request sent!";
             return RedirectToAction("Index");
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Process Bill Payment
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         public IActionResult ProcessBillPayment(decimal amount, string provider, string phoneNumber)
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email) || amount <= 0)
                 return RedirectToAction("Index");
 
             _context.Transactions.Add(new TransactionRecord
             {
-                Reference = "BILL-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                Reference = "BILL-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                 UserEmail = email,
                 Amount = amount * -1,
                 Description = $"{provider} Airtime: {phoneNumber}",
@@ -207,18 +203,14 @@ namespace Dabbasheth.Controllers
             });
 
             _context.SaveChanges();
-
             TempData["Message"] = "Payment Successful!";
             return RedirectToAction("Index");
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Create Thrift Plan
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         public IActionResult CreateThriftPlan(string title, decimal targetAmount, string frequency, int durationMonths)
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Thrift");
 
@@ -235,18 +227,14 @@ namespace Dabbasheth.Controllers
             });
 
             _context.SaveChanges();
-
             TempData["Message"] = "Goal Created Successfully!";
             return RedirectToAction("Thrift");
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // POST: Save to Thrift
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         public IActionResult SaveToThrift(int planId, decimal amount)
         {
-            string email = GetLoggedInUserEmail();
+            string? email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email) || amount <= 0)
                 return RedirectToAction("Thrift");
 
@@ -257,7 +245,7 @@ namespace Dabbasheth.Controllers
 
                 _context.Transactions.Add(new TransactionRecord
                 {
-                    Reference = "SAV-" + Guid.NewGuid().ToString().Substring(0, 8).ToUpper(),
+                    Reference = "SAV-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                     UserEmail = email,
                     Amount = amount * -1,
                     Description = $"Savings: {plan.Title}",
@@ -272,10 +260,16 @@ namespace Dabbasheth.Controllers
             return RedirectToAction("Thrift");
         }
 
+        // ────────────────────────────────────────────────────────────────
+        // ERROR PAGE
+        // ────────────────────────────────────────────────────────────────
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }
