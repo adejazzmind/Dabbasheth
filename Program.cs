@@ -4,8 +4,13 @@ using Dabbasheth.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === PERMANENT CONNECTION STRING (Hardcoded for now) ===
+// === FINAL CORRECT CONNECTION STRING ===
 var connectionString = "Host=ep-ancient-cell-anc4zt6c.us-east-1.aws.neon.tech;Database=neondb;Username=neondb_owner;Password=npg_xpaKdTJ7q4ef;Port=5432;SslMode=Require;TrustServerCertificate=true;";
+
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException("Connection string is missing.");
+}
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -27,14 +32,14 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// Auto Migrate + Seed Admins
+// Auto-migrate and seed
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
         context.Database.Migrate();
-        Console.WriteLine("✅ Database connected successfully!");
+        Console.WriteLine("✅ Successfully connected to Neon Database!");
 
         if (!context.Users.Any(u => u.Role == "Admin"))
         {
@@ -44,19 +49,16 @@ using (var scope = app.Services.CreateScope())
             );
             await context.SaveChangesAsync();
         }
-        Console.WriteLine("✅ Admins seeded.");
+        Console.WriteLine("✅ Admins seeded successfully.");
     }
     catch (Exception ex)
     {
-        Console.WriteLine("❌ DB ERROR: " + ex.Message);
+        Console.WriteLine("❌ Database Error: " + ex.Message);
     }
 }
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+app.UseExceptionHandler("/Home/Error");
+app.UseHsts();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
