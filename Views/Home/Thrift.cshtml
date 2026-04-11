@@ -1,174 +1,131 @@
 ﻿@model List<Dabbasheth.Models.ThriftPlan>
 @{
-    ViewData["Title"] = "Wealth Goals - Dabbasheth";
-    decimal currentBalance = ViewBag.Balance ?? 0.00m;
+    Layout = "_Layout";
+    ViewData["Title"] = "Target Savings";
 }
 
-<div class="container mt-5" style="padding-bottom: 150px !important;">
-    
-    @* --- 1. HEADER SECTION --- *@
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0 text-dark">Wealth Goals</h2>
-            <p class="text-muted">Smart savings for a brighter future.</p>
-        </div>
-        @* Trigger for New Plan Modal *@
-        <button class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm" data-bs-toggle="modal" data-bs-target="#newPlanModal">
-            <i class="bi bi-plus-lg me-2"></i>New Goal
-        </button>
-    </div>
-
-    @* --- 2. PREMIUM BALANCE CARD --- *@
-    <div class="balance-card mb-5 d-flex justify-content-between align-items-center shadow-lg p-4">
-        <div>
-            <small class="text-uppercase fw-bold opacity-75" style="letter-spacing: 1.5px;">Current Balance</small>
-            <h2 class="mb-0 fw-bold">₦@currentBalance.ToString("N2")</h2>
-        </div>
-        <div class="opacity-25">
-            <i class="bi bi-piggy-bank-fill" style="font-size: 3.5rem;"></i>
-        </div>
-    </div>
-
-    @* --- 3. DYNAMIC SUCCESS ALERTS --- *@
-    @if (TempData["Message"] != null)
-    {
-        <div class="alert alert-success border-0 mb-4 shadow-sm py-3 animate__animated animate__fadeInUp" style="border-radius: 15px;">
-            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
-        </div>
-    }
-
-    @* --- 4. SAVINGS PLANS GRID --- *@
-    <div class="row">
-        @if (Model != null && Model.Any())
-        {
-            foreach (var plan in Model)
-            {
-                var progress = plan.TargetAmount > 0 ? (plan.CurrentSavings / plan.TargetAmount) * 100 : 0;
-                
-                <div class="col-md-4 mb-4">
-                    <div class="card card-dab shadow-sm h-100 border-0 p-4">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge rounded-pill bg-soft-primary text-primary px-3 fw-bold">@plan.Frequency</span>
-                            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> @plan.MaturityDate.ToString("MMM yyyy")</small>
-                        </div>
-                        
-                        <h5 class="fw-bold mb-1 text-dark">@plan.Title</h5>
-                        <p class="text-muted small mb-4">Target: ₦@plan.TargetAmount.ToString("N2")</p>
-                        
-                        <div class="mt-auto">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="small fw-bold">₦@plan.CurrentSavings.ToString("N2")</span>
-                                <span class="small fw-bold text-primary">@progress.ToString("N0")%</span>
-                            </div>
-                            <div class="progress mb-4" style="height: 10px; border-radius: 10px; background-color: var(--input-bg);">
-                                <div class="progress-bar" role="progressbar"
-                                     style="width: @progress%; border-radius: 10px; background-color: var(--dab-primary);"></div>
-                            </div>
-                            
-                            <button class="btn btn-outline-primary w-100 py-2 rounded-pill fw-bold"
-                                    onclick="openSavePopup('@plan.Id', '@plan.Title', @currentBalance)">
-                                <i class="bi bi-plus-circle me-1"></i> Add Funds
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-        }
-        else
-        {
-            <div class="col-12 text-center py-5">
-                <i class="bi bi-folder2-open display-1 text-muted opacity-25"></i>
-                <p class="mt-3 fw-bold text-muted">No wealth goals yet. Start saving today!</p>
-            </div>
-        }
-    </div>
+<div class="p-3">
+    <h4 class="fw-bold">Target Savings</h4>
 </div>
 
-@* --- 5. NEW PLAN MODAL (Fixed Stacking & Account Types) --- *@
-<div class="modal fade" id="newPlanModal" tabindex="-1" aria-hidden="true" style="z-index: 3050;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="z-index: 3060;">
-            <div class="modal-header border-0 p-4 pb-0">
-                <h4 class="fw-bold">Launch Wealth Goal</h4>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<div class="mx-3 p-4 rounded-4 mb-4 shadow-sm" style="background: linear-gradient(135deg, #012E24 0%, #00D09C 100%); color: white;">
+    <h6 class="fw-bold opacity-75">Saving Challenge 2026</h6>
+    <h3 class="fw-bold mt-2">Special Target</h3>
+    <p class="small opacity-75">Choose your own amount and frequency to reach your goals faster.</p>
+</div>
+
+<div class="mx-3 bg-white rounded-4 shadow-sm p-4 mb-5">
+    <h6 class="fw-bold mb-4 text-uppercase small text-muted">Set Your Savings Goal</h6>
+    
+    <form asp-action="CreateThriftPlan" method="post">
+        @Html.AntiForgeryToken()
+        
+        <div class="mb-3">
+            <label class="form-label small fw-bold">What are you saving for?</label>
+            <input type="text" name="title" class="form-control form-control-lg bg-light border-0"
+                   placeholder="e.g. New Laptop, Rent, School Fees" required style="border-radius: 15px;" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label small fw-bold">Target Amount (₦)</label>
+            <input type="number" name="targetAmount" class="form-control form-control-lg bg-light border-0"
+                   placeholder="Enter any amount" min="1000" required style="border-radius: 15px;" />
+            <div class="form-text small">Minimum target is ₦1,000</div>
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label small fw-bold d-block mb-3">How often do you want to save?</label>
+            <div class="row g-2">
+                <div class="col-3">
+                    <input type="radio" class="btn-check" name="frequency" id="freqDaily" value="Daily" checked>
+                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqDaily">Daily</label>
+                </div>
+                <div class="col-3">
+                    <input type="radio" class="btn-check" name="frequency" id="freqWeekly" value="Weekly">
+                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqWeekly">Weekly</label>
+                </div>
+                <div class="col-3">
+                    <input type="radio" class="btn-check" name="frequency" id="freqMonthly" value="Monthly">
+                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqMonthly">Monthly</label>
+                </div>
+                <div class="col-3">
+                    <input type="radio" class="btn-check" name="frequency" id="freqYearly" value="Yearly">
+                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqYearly">Yearly</label>
+                </div>
             </div>
-            <div class="modal-body p-4">
-                <form id="launchPlanForm" asp-controller="Home" asp-action="CreateThriftPlan" method="post">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">GOAL TITLE</label>
-                        <input type="text" name="title" class="form-control" placeholder="e.g. Dream House, Laptop" required />
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill py-3 fw-bold shadow-sm">
+            Start Savings Goal
+        </button>
+    </form>
+</div>
+
+<div class="px-3">
+    <h6 class="fw-bold mb-3">Your Active Goals</h6>
+    
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var plan in Model)
+        {
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="badge bg-soft-success text-success mb-1">@plan.Frequency Plan</span>
+                        <h6 class="fw-bold mb-0">@plan.Title</h6>
+                        <small class="text-muted">Matures: @plan.MaturityDate.ToString("MMM dd, yyyy")</small>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">TARGET AMOUNT (₦)</label>
-                        <input type="number" name="targetAmount" class="form-control" placeholder="0.00" required />
+                    <div class="text-end">
+                        <div class="text-success fw-bold">₦@plan.CurrentSavings.ToString("N2")</div>
+                        <small class="text-muted">Target: ₦@plan.TargetAmount.ToString("N2")</small>
                     </div>
-                    <div class="row mb-4">
-                        <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">FREQUENCY</label>
-                            <select name="frequency" class="form-select">
-                                <option value="Daily">Daily Savings</option>
-                                <option value="Weekly" selected>Weekly Savings</option>
-                                <option value="Monthly">Monthly Savings</option>
-                                <option value="LongTerm">Long Term (Yearly)</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold text-muted">DURATION (MONTHS)</label>
-                            <input type="number" name="durationMonths" class="form-control" value="6" />
-                        </div>
+                </div>
+
+                @* ✅ LIVE CALCULATION ENGINE *@
+                @{
+                    double current = (double)plan.CurrentSavings;
+                    double target = (double)plan.TargetAmount;
+                    double progress = (target > 0) ? (current / target) * 100 : 0;
+                    
+                    // Cap at 100% to keep the bar inside the container
+                    if (progress > 100) progress = 100;
+                }
+                
+                <div class="progress mb-3" style="height: 12px; border-radius: 10px; background-color: #f0f0f0;">
+                    <div class="progress-bar bg-success" role="progressbar"
+                         style="width: @progress.ToString("0")%"
+                         aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
+                        @if (progress > 10)
+                        {
+                            <small class="fw-bold">@progress.ToString("0")%</small>
+                        }
                     </div>
-                    @* Calls the handleTransaction function from site.js *@
-                    <button type="button" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold py-3"
-                            onclick="handleTransaction('launchPlanForm')">
-                        Launch Savings Plan
+                </div>
+
+                <form asp-action="DepositToThrift" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="planId" value="@plan.Id" />
+                    
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text border-0 bg-light rounded-start-pill ps-3">₦</span>
+                        <input type="number" name="amount" class="form-control border-0 bg-light"
+                               placeholder="Amt to save" required />
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success btn-sm px-4 rounded-pill fw-bold shadow-sm">
+                        Save Now
                     </button>
                 </form>
             </div>
-        </div>
-    </div>
-</div>
-
-@* --- 6. HIDDEN DEPOSIT FORM --- *@
-<form id="saveForm" asp-controller="Home" asp-action="SaveToThrift" method="post" style="display:none;">
-    <input type="hidden" name="planId" id="formPlanId" />
-    <input type="hidden" name="amount" id="formAmount" />
-</form>
-
-@section Scripts {
-    <script>
-        // --- DEPOSIT POPUP LOGIC ---
-        function openSavePopup(planId, planTitle, numericBalance) {
-            Swal.fire({
-                title: 'Deposit to ' + planTitle,
-                html: `<div class="mb-2 text-muted">Available: <b>₦${numericBalance.toLocaleString()}</b></div>`,
-                input: 'number',
-                inputAttributes: { min: 1, max: numericBalance, step: 1 },
-                inputPlaceholder: 'How much to save?',
-                showCancelButton: true,
-                confirmButtonText: 'Confirm Deposit',
-                confirmButtonColor: '#00D09C',
-                cancelButtonText: 'Cancel',
-                customClass: { popup: 'rounded-4' },
-                inputValidator: (value) => {
-                    if (!value || value <= 0) return 'Enter a valid amount!';
-                    if (parseFloat(value) > numericBalance) return 'Insufficient balance!';
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('formPlanId').value = planId;
-                    document.getElementById('formAmount').value = result.value;
-                    
-                    // Show loading state
-                    Swal.fire({
-                        title: 'Securing Funds...',
-                        allowOutsideClick: false,
-                        didOpen: () => { Swal.showLoading(); }
-                    });
-                    
-                    // Submit the hidden form
-                    setTimeout(() => { document.getElementById('saveForm').submit(); }, 800);
-                }
-            });
         }
-    </script>
-}
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="bg-soft-secondary d-inline-block p-4 rounded-circle mb-3">
+                <i class="bi bi-piggy-bank text-muted h1"></i>
+            </div>
+            <p class="text-muted">You haven't set any savings goals yet.<br>Start your first challenge above!</p>
+        </div>
+    }
+</div>

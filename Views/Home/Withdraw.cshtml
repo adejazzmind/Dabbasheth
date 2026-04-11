@@ -1,60 +1,90 @@
 ﻿@{
-    ViewData["Title"] = "Withdraw Funds - IES Life Hub";
-    decimal balance = ViewBag.Balance ?? 0.00m;
+    ViewData["Title"] = "Withdraw - IES Life Hub";
+    Layout = "_Layout";
 }
 
-<div class="container mt-5" style="padding-bottom: 120px;">
+<div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card border-0 shadow-lg p-4 p-md-5" style="border-radius: 30px;">
-                
-                <div class="text-center mb-4">
-                    <div class="bg-soft-danger d-inline-block p-3 rounded-circle mb-3" style="background: rgba(220, 53, 69, 0.1);">
-                        <i class="bi bi-bank2 text-danger display-6"></i>
-                    </div>
-                    <h3 class="fw-bold">Withdraw Funds</h3>
-                    <p class="text-muted small">Move money from your IES Hub wallet to your bank.</p>
+        <div class="col-md-8 col-lg-6">
+
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <div class="bg-soft-danger d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+                     style="width: 80px; height: 80px;">
+                    <i class="bi bi-bank2 text-danger" style="font-size: 2.5rem;"></i>
                 </div>
+                <h2 class="fw-bold">Withdraw Funds</h2>
+                <p class="text-muted">Transfer money from your wallet to your bank account</p>
+            </div>
 
-                @* WALLET PREVIEW *@
-                <div class="alert bg-light border-0 d-flex justify-content-between align-items-center mb-4" style="border-radius: 15px;">
-                    <small class="fw-bold text-muted">AVAILABLE</small>
-                    <span class="fw-bold text-dark">₦@balance.ToString("N2")</span>
-                </div>
-
-                <form asp-action="ProcessWithdrawal" method="post" id="withdrawForm">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">DESTINATION BANK</label>
-                        <select name="bankName" class="form-select bg-light border-0" required style="border-radius: 12px;">
-                            <option value="">Select Bank...</option>
-                            <option>Access Bank</option>
-                            <option>GTBank</option>
-                            <option>Zenith Bank</option>
-                            <option>Kuda MFB</option>
-                            <option>Moniepoint</option>
-                        </select>
+            <!-- Current Balance -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted small fw-bold">CURRENT WALLET BALANCE</span>
+                        <span class="h4 fw-bold text-success mb-0">₦@ViewBag.Balance?.ToString("N2")</span>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">ACCOUNT NUMBER</label>
-                        <input type="number" name="accountNumber" class="form-control bg-light border-0" placeholder="0123456789" required style="border-radius: 12px;" />
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted">AMOUNT TO WITHDRAW (₦)</label>
-                        <input type="number" name="amount" class="form-control form-control-lg bg-light border-0"
-                               max="@balance" placeholder="0.00" required style="border-radius: 12px;" />
-                    </div>
-
-                    <button type="button" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold py-3 shadow" onclick="handleTransaction('withdrawForm')">
-                        Complete Withdrawal
-                    </button>
-                </form>
-
-                <div class="text-center mt-4">
-                    <small class="text-muted"><i class="bi bi-shield-check me-1"></i> End-to-end encrypted transaction</small>
                 </div>
             </div>
+
+            <!-- Withdraw Form -->
+            <div class="card card-dab shadow-sm border-0">
+                <div class="card-body p-5">
+                    <form asp-controller="Home" asp-action="ProcessWithdrawal" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Withdrawal Amount</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-0 fw-bold">₦</span>
+                                <input type="number" name="amount" class="form-control border-0 shadow-none"
+                                       placeholder="Enter amount" min="1000" step="100" required />
+                            </div>
+                            <div class="form-text small text-muted mt-2">
+                                Minimum withdrawal: ₦1,000
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Bank Account Number</label>
+                            <input type="text" name="accountNumber" class="form-control py-3"
+                                   placeholder="e.g. 0123456789" maxlength="10" required />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Bank Name</label>
+                            <input type="text" name="bankName" class="form-control py-3"
+                                   placeholder="e.g. GTBank, Zenith, First Bank" required />
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label small fw-bold text-uppercase text-muted">Account Holder Name</label>
+                            <input type="text" name="accountName" class="form-control py-3"
+                                   placeholder="Full name on the account" required />
+                        </div>
+
+                        <button type="submit" class="btn btn-danger btn-lg w-100 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-arrow-down-circle me-2"></i>
+                            Proceed with Withdrawal
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Note -->
+            <div class="text-center mt-4">
+                <small class="text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    Withdrawals are processed within 24 hours. Transaction fee may apply.
+                </small>
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="@Url.Action("Index", "Home")" class="btn btn-link text-muted text-decoration-none">
+                    ← Back to Dashboard
+                </a>
+            </div>
+
         </div>
     </div>
 </div>

@@ -1,5 +1,4 @@
-﻿@* Views/Account/Register.cshtml *@
-@{
+﻿@{
     Layout = "_Layout";
     ViewData["Title"] = "Create Account - Dabbasheth Secure Wallet";
 }
@@ -7,8 +6,8 @@
 <div class="container">
     <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
         <div class="col-md-6 col-lg-5">
-            
-            <!-- Branding Area -->
+
+            <!-- Branding -->
             <div class="text-center mb-4">
                 <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm"
                      style="width: 65px; height: 65px; background-color: rgba(0, 208, 156, 0.1);">
@@ -24,7 +23,7 @@
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted small mb-4">Please provide your real details for verification.</p>
 
-                    <!-- Success and Error Messages -->
+                    <!-- Messages -->
                     @if (TempData["Message"] != null)
                     {
                         <div class="alert alert-success border-0 mb-4 d-flex align-items-center">
@@ -72,7 +71,7 @@
                     </form>
                 </div>
             </div>
-            
+
             <!-- Login Link -->
             <div class="text-center mt-4 mb-5">
                 <p class="text-muted small">

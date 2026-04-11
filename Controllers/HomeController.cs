@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Dabbasheth.Models;
 using Dabbasheth.Data;
+using Dabbasheth.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Dabbasheth.Controllers
 {
@@ -16,260 +17,156 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // Helper: Get Current Logged-in User Email
-        // ────────────────────────────────────────────────────────────────
-        private string? GetLoggedInUserEmail()
-        {
-            var email = TempData.Peek("UserEmail") as string;
-            return string.IsNullOrEmpty(email) ? null : email.ToLower();
-        }
+        // --- 0. IDENTITY HELPER ---
+        private string GetLoggedInUserEmail() => TempData.Peek("UserEmail") as string;
 
-        // ────────────────────────────────────────────────────────────────
-        // DASHBOARD
-        // ────────────────────────────────────────────────────────────────
+        // --- 1. CORE VIEWS ---
+
         public IActionResult Index()
         {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email);
+            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email.ToLower());
             var transactions = _context.Transactions
-                .Where(t => t.UserEmail.ToLower() == email)
-                .OrderByDescending(t => t.Date)
-                .ToList();
+                .Where(t => t.UserEmail.ToLower() == email.ToLower())
+                .OrderByDescending(t => t.Date).ToList();
 
-            ViewBag.Balance = wallet?.Balance ?? 0.00m;
+            ViewBag.Balance = wallet?.Balance ?? 0m;
             ViewBag.UserEmail = email;
-
             return View(transactions);
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // THRIFT / WEALTH GOALS
-        // ────────────────────────────────────────────────────────────────
-        public IActionResult Thrift()
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            var plans = _context.ThriftPlans
-                .Where(p => p.UserEmail.ToLower() == email && p.Status == "Active")
-                .ToList();
-
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email);
-            ViewBag.Balance = wallet?.Balance ?? 0.00m;
-
-            return View(plans);
-        }
-
-        // ────────────────────────────────────────────────────────────────
-        // WITHDRAW
-        // ────────────────────────────────────────────────────────────────
-        public IActionResult Withdraw()
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email);
-            ViewBag.Balance = wallet?.Balance ?? 0.00m;
-
-            return View();
-        }
-
-        // ────────────────────────────────────────────────────────────────
-        // PAY BILLS
-        // ────────────────────────────────────────────────────────────────
-        public IActionResult PayBills()
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email);
-            ViewBag.Balance = wallet?.Balance ?? 0.00m;
-
-            return View();
-        }
-
-        // ────────────────────────────────────────────────────────────────
-        // LOAN
-        // ────────────────────────────────────────────────────────────────
-        public IActionResult Loan()
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            ViewBag.UserEmail = email;
-            return View();
-        }
-
-        // ────────────────────────────────────────────────────────────────
-        // REWARDS
-        // ────────────────────────────────────────────────────────────────
-        public IActionResult Rewards()
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            ViewBag.Cashback = 36.50m;
-            return View();
-        }
-
-        // ────────────────────────────────────────────────────────────────
-        // PROFILE
-        // ────────────────────────────────────────────────────────────────
         public IActionResult Profile()
         {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Login", "Account");
-
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email);
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
             ViewBag.UserEmail = email;
-            ViewBag.Balance = wallet?.Balance ?? 0.00m;
-
             return View();
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // POST ACTIONS
-        // ────────────────────────────────────────────────────────────────
+        // --- 2. THRIFT ENGINE (THE LIVE CALCULATION AREA) ---
 
-        [HttpPost]
-        public IActionResult ProcessLoan(decimal loanAmount)
+        public IActionResult Thrift()
         {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email) || loanAmount <= 0)
-                return RedirectToAction("Index");
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
-            _context.Transactions.Add(new TransactionRecord
-            {
-                Reference = "LOAN-" + Guid.NewGuid().ToString()[..8].ToUpper(),
-                UserEmail = email,
-                Amount = loanAmount,
-                Description = $"IES Loan Application: ₦{loanAmount:N2}",
-                Date = DateTime.UtcNow,
-                Status = "Pending Approval"
-            });
+            var plans = _context.ThriftPlans
+                .Where(p => p.UserEmail.ToLower() == email.ToLower()).ToList();
 
-            _context.SaveChanges();
-            TempData["Message"] = "Loan application submitted! Admin will review shortly.";
-            return RedirectToAction("Index");
+            ViewBag.ThriftPlans = plans;
+            ViewBag.TotalSavings = plans.Sum(p => (decimal?)p.CurrentSavings) ?? 0m;
+            return View();
         }
 
         [HttpPost]
-        public IActionResult ProcessWithdrawal(decimal amount, string bankName, string accountNumber)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateThriftPlan(string title, decimal targetAmount, string frequency)
         {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email) || amount <= 0)
-                return RedirectToAction("Index");
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email) || targetAmount <= 0) return RedirectToAction("Thrift");
 
-            _context.Transactions.Add(new TransactionRecord
+            try
             {
-                Reference = "WTH-" + Guid.NewGuid().ToString()[..8].ToUpper(),
-                UserEmail = email,
-                Amount = amount * -1,
-                Description = $"Withdrawal to {bankName} ({accountNumber})",
-                Date = DateTime.UtcNow,
-                Status = "Pending Approval"
-            });
+                var newPlan = new ThriftPlan
+                {
+                    Title = title.Trim(),
+                    TargetAmount = targetAmount,
+                    CurrentSavings = 0,
+                    Frequency = frequency ?? "Daily",
+                    UserEmail = email,
+                    Status = "Active",
+                    StartDate = DateTime.UtcNow
+                };
 
-            _context.SaveChanges();
-            TempData["Message"] = "Withdrawal request sent!";
-            return RedirectToAction("Index");
-        }
+                newPlan.CalculateMaturity();
+                _context.ThriftPlans.Add(newPlan);
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "✅ Savings goal created!";
+            }
+            catch (Exception ex) { TempData["Error"] = "Error: " + ex.Message; }
 
-        [HttpPost]
-        public IActionResult ProcessBillPayment(decimal amount, string provider, string phoneNumber)
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email) || amount <= 0)
-                return RedirectToAction("Index");
-
-            _context.Transactions.Add(new TransactionRecord
-            {
-                Reference = "BILL-" + Guid.NewGuid().ToString()[..8].ToUpper(),
-                UserEmail = email,
-                Amount = amount * -1,
-                Description = $"{provider} Airtime: {phoneNumber}",
-                Date = DateTime.UtcNow,
-                Status = "Success"
-            });
-
-            _context.SaveChanges();
-            TempData["Message"] = "Payment Successful!";
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult CreateThriftPlan(string title, decimal targetAmount, string frequency, int durationMonths)
-        {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email))
-                return RedirectToAction("Thrift");
-
-            _context.ThriftPlans.Add(new ThriftPlan
-            {
-                UserEmail = email,
-                Title = title,
-                TargetAmount = targetAmount,
-                CurrentSavings = 0,
-                Frequency = frequency,
-                StartDate = DateTime.UtcNow,
-                MaturityDate = DateTime.UtcNow.AddMonths(durationMonths),
-                Status = "Active"
-            });
-
-            _context.SaveChanges();
-            TempData["Message"] = "Goal Created Successfully!";
             return RedirectToAction("Thrift");
         }
 
+        // ✅ THE BULLETPROOF LIVE CALCULATION
         [HttpPost]
-        public IActionResult SaveToThrift(int planId, decimal amount)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DepositToThrift(int planId, decimal amount)
         {
-            string? email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email) || amount <= 0)
-                return RedirectToAction("Thrift");
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
-            var plan = _context.ThriftPlans.FirstOrDefault(p => p.Id == planId);
-            if (plan != null && plan.UserEmail.ToLower() == email)
+            try
             {
+                // 1. Fetch data with explicit tracking for accuracy
+                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
+                var plan = await _context.ThriftPlans.FindAsync(planId);
+
+                // 2. Validation Checks
+                if (wallet == null || plan == null)
+                {
+                    TempData["Error"] = "Account data sync error.";
+                    return RedirectToAction("Thrift");
+                }
+                if (amount <= 0)
+                {
+                    TempData["Error"] = "Please enter a valid amount.";
+                    return RedirectToAction("Thrift");
+                }
+
+                // 3. Balance Check
+                if (wallet.Balance < amount)
+                {
+                    TempData["Error"] = $"❌ Insufficient Funds. Your balance is ₦{wallet.Balance:N2}";
+                    return RedirectToAction("Thrift");
+                }
+
+                // 4. THE LIVE MATH (Atomic Swap)
+                wallet.Balance -= amount;
                 plan.CurrentSavings += amount;
 
+                // 5. UPDATE CONTEXT EXPLICITLY
+                _context.Wallets.Update(wallet);
+                _context.ThriftPlans.Update(plan);
+
+                // 6. CREATE AUDIT TRAIL
                 _context.Transactions.Add(new TransactionRecord
                 {
                     Reference = "SAV-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                     UserEmail = email,
-                    Amount = amount * -1,
-                    Description = $"Savings: {plan.Title}",
+                    Amount = amount,
+                    Description = $"Thrift Savings: {plan.Title}",
                     Date = DateTime.UtcNow,
                     Status = "Success"
                 });
 
-                _context.SaveChanges();
-                TempData["Message"] = "Savings Updated!";
+                // Status Update if Milestone Reached
+                if (plan.CurrentSavings >= plan.TargetAmount) plan.Status = "Completed";
+
+                await _context.SaveChangesAsync();
+                TempData["Message"] = "✅ ₦" + amount.ToString("N2") + " saved successfully!";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "Database Error: " + ex.Message;
             }
 
             return RedirectToAction("Thrift");
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // ERROR PAGE
-        // ────────────────────────────────────────────────────────────────
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        // --- 3. OTHER OPERATIONS ---
+        public IActionResult Withdraw()
         {
-            return View(new ErrorViewModel
-            {
-                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
-            });
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
+            var wallet = _context.Wallets.FirstOrDefault(w => w.UserEmail.ToLower() == email.ToLower());
+            ViewBag.Balance = wallet?.Balance ?? 0m;
+            return View();
         }
+
+        public IActionResult PayBills() => View();
+        public IActionResult Rewards() { ViewBag.Cashback = 36.00m; return View(); }
     }
 }

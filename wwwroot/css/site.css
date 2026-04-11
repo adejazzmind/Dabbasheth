@@ -1,124 +1,144 @@
-/* DABBASHETH SECURE WALLET - PREMIUM STYLESHEET v3.7
-    CORE FIX: Modal Layering & Interactivity
-*/
+/* ======================================================
+   IES URBAN HUB x DABBASHETH THEME v5.0
+   THEME: Urban Emerald | Metallic Gold | Crisp White
+   ====================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
-/* --- 0. CRITICAL MODAL FIX --- */
-/* This ensures the popup is physically IN FRONT of the dark screen */
-.modal {
-    z-index: 3050 !important;
-}
-
-.modal-backdrop {
-    z-index: 3040 !important;
-}
-
-.modal-content {
-    position: relative;
-    z-index: 3060 !important;
-    background-color: var(--bg-card) !important;
-    border-radius: var(--dab-card-radius) !important;
-    border: none !important;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* --- 1. THEME VARIABLES --- */
 :root {
-    --bg-body: #F4F7FE;
-    --bg-card: #FFFFFF;
-    --bg-nav: rgba(255, 255, 255, 0.95);
-    --text-main: #1B2559;
-    --text-muted: #A3AED0;
-    --border-color: #E9EDF7;
-    --input-bg: #F4F7FE;
-    --dab-primary: #00D09C;
-    --dab-primary-dark: #00B386;
-    --dab-bg-dark: #111C44;
-    --dab-card-radius: 20px;
+    /* --- 1. URBAN COLOR PALETTE --- */
+    --urban-emerald: #014134; /* Deep Professional Green */
+    --urban-gold: #D4AF37; /* Metallic Light Gold */
+    --urban-white: #FFFFFF;
+    --urban-bg: #F8F9FA;
+    --urban-card: #FFFFFF;
+    --urban-text: #1A1A1A;
+    --urban-muted: #8E8E93;
+    /* Global Token Sync */
+    --opay-green: var(--urban-emerald); /* Overriding legacy OPay green */
+    --glass-bg: rgba(255, 255, 255, 0.95);
 }
 
 [data-bs-theme="dark"] {
-    --bg-body: #0B1437;
-    --bg-card: #111C44;
-    --bg-nav: rgba(17, 28, 68, 0.95);
-    --text-main: #FFFFFF;
-    --text-muted: #8F9BBA;
-    --border-color: #1B254B;
-    --input-bg: #0B1437;
+    --urban-bg: #010101;
+    --urban-card: #1C1C1E;
+    --urban-text: #FFFFFF;
 }
 
-/* --- 2. CORE LAYOUT --- */
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
+/* --- 2. GLOBAL BASE STYLES --- */
 body {
+    background-color: var(--urban-bg) !important;
+    color: var(--urban-text) !important;
     font-family: 'Poppins', sans-serif;
-    background-color: var(--bg-body) !important;
-    color: var(--text-main) !important;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    padding-bottom: 90px;
+    transition: background-color 0.3s ease;
 }
 
-header.sticky-top {
-    position: sticky !important;
-    top: 0;
-    z-index: 2000 !important;
-    background-color: var(--bg-nav) !important;
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border-bottom: 1px solid var(--border-color);
+/* Luxury Text & Background Tints */
+.text-gold {
+    color: var(--urban-gold) !important;
 }
 
-main.flex-grow-1 {
-    flex: 1 0 auto;
-    position: relative;
-    z-index: 1;
-    padding-bottom: 120px;
+.bg-soft-gold {
+    background-color: rgba(212, 175, 55, 0.1) !important;
 }
 
-/* --- 3. PREMIUM COMPONENTS --- */
-h1, h2, h3, h4, h5, .fw-bold {
-    color: var(--text-main) !important;
-    letter-spacing: -0.8px;
+.bg-soft-success {
+    background-color: rgba(1, 65, 52, 0.08) !important;
+}
+
+/* --- 3. PREMIUM ADMIN COMPONENTS (CEO/MD) --- */
+.premium-card, .balance-card {
+    background: linear-gradient(135deg, var(--urban-emerald) 0%, #001f1a 100%) !important;
+    border-bottom: 4px solid var(--urban-gold) !important;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(1, 65, 52, 0.25);
+    color: white;
 }
 
 .card-dab {
-    background-color: var(--bg-card) !important;
-    border-radius: var(--dab-card-radius);
-    border: 1px solid var(--border-color) !important;
+    background-color: var(--urban-card) !important;
+    border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important; /* Subtle Gold Border */
 }
 
-.balance-card {
-    background: linear-gradient(135deg, var(--dab-primary) 0%, var(--dab-bg-dark) 100%) !important;
-    border-radius: 24px;
-    color: white !important;
-    padding: 2rem;
-}
-
-.form-control, .form-select {
-    background-color: var(--input-bg) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-main) !important;
-    border-radius: 12px;
-    padding: 12px;
-}
-
-.btn-primary {
-    background-color: var(--dab-primary) !important;
-    border: none !important;
-    border-radius: 12px;
+.admin-liquidity-badges .badge {
+    background-color: var(--urban-white);
+    color: var(--urban-emerald);
+    border: 1px solid var(--urban-gold);
+    border-radius: 50px;
+    padding: 8px 16px;
     font-weight: 600;
-    padding: 12px;
 }
 
-/* --- 4. NAVIGATION --- */
-.dab-mobile-nav {
-    background-color: var(--bg-card) !important;
-    border-top: 1px solid var(--border-color) !important;
-    border-radius: 24px 24px 0 0;
-    z-index: 2500;
+/* --- 4. URBAN USER COMPONENTS --- */
+.glass-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+/* Rebranded Feature Grid */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 20px;
+    background: var(--urban-card);
+    border-radius: 24px;
+    margin: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(212, 175, 55, 0.05);
+}
+
+.action-pill:hover .icon-box {
+    transform: translateY(-5px);
+    border-color: var(--urban-gold);
+    box-shadow: 0 10px 15px rgba(212, 175, 55, 0.1);
+}
+
+/* --- 5. BUTTONS & NAV --- */
+.btn-gold {
+    background-color: var(--urban-gold) !important;
+    color: var(--urban-emerald) !important;
+    border: none;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+    .btn-gold:hover {
+        background-color: #c4a02d !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    }
+
+.opay-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: var(--urban-card);
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid rgba(212, 175, 55, 0.1);
+    z-index: 1050;
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
+}
+
+    .opay-bottom-nav a.text-success {
+        color: var(--urban-gold) !important; /* Gold for active tab */
+    }
+
+/* --- 6. UTILITIES --- */
+.border-gold {
+    border-color: var(--urban-gold) !important;
 }

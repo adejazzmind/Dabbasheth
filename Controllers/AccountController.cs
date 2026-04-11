@@ -2,6 +2,9 @@
 using Dabbasheth.Models;
 using Dabbasheth.Data;
 using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dabbasheth.Controllers
 {
@@ -14,18 +17,16 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // LOGIN - GET
-        // ────────────────────────────────────────────────────────────────
+        // ==========================================
+        // 1. LOGIN SYSTEM
+        // ==========================================
+
         [HttpGet]
         public IActionResult Login() => View();
 
-        // ────────────────────────────────────────────────────────────────
-        // LOGIN - POST
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -37,16 +38,19 @@ namespace Dabbasheth.Controllers
             {
                 string cleanEmail = email.Trim().ToLower();
 
-                var user = _context.Users.FirstOrDefault(u =>
+                // Check database for user
+                var user = await _context.Users.FirstOrDefaultAsync(u =>
                     u.Email.ToLower() == cleanEmail && u.Password == password);
 
                 if (user != null)
                 {
+                    // Set Session State
                     TempData["UserEmail"] = user.Email;
                     TempData["UserName"] = user.FullName;
                     TempData["UserRole"] = user.Role;
                     TempData.Keep();
 
+                    // Routing Logic for MD/CEO vs Customers
                     return user.Role == "Admin"
                         ? RedirectToAction("Index", "Admin")
                         : RedirectToAction("Index", "Home");
@@ -57,72 +61,78 @@ namespace Dabbasheth.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Login Error: {ex.Message}");
-                TempData["Error"] = "Unable to connect to the server. Please try again later.";
+                TempData["Error"] = "Authentication server error. Please try again.";
                 return View();
             }
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // REGISTER - GET
-        // ────────────────────────────────────────────────────────────────
+        // ==========================================
+        // 2. REGISTRATION SYSTEM (Growth Engine)
+        // ==========================================
+
         [HttpGet]
         public IActionResult Register() => View();
 
-        // ────────────────────────────────────────────────────────────────
-        // REGISTER - POST (Join Hub)
-        // ────────────────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(User model)
+        public async Task<IActionResult> Register(string fullName, string email, string password)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                return View(model);
+                TempData["Error"] = "All fields are required to join the Hub.";
+                return RedirectToAction("Login");
             }
 
             try
             {
-                string cleanEmail = model.Email.Trim().ToLower();
+                string cleanEmail = email.Trim().ToLower();
 
-                // Check for duplicate email
-                if (_context.Users.Any(u => u.Email.ToLower() == cleanEmail))
+                // 🛑 BLOCK: Duplicate Emails
+                if (await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail))
                 {
-                    TempData["Error"] = "An account with this email already exists!";
-                    return View(model);
+                    TempData["Error"] = "This email is already linked to a Dabbasheth wallet.";
+                    return RedirectToAction("Login");
                 }
 
-                // Prepare user
-                model.Email = cleanEmail;
-                model.Role = "Customer";
+                // ✅ STEP 1: Define the User Profile
+                var newUser = new User
+                {
+                    FullName = fullName.Trim(),
+                    Email = cleanEmail,
+                    Password = password, // Security Note: Implement hashing later
+                    Role = "Customer",
+                    CreatedAt = DateTime.UtcNow
+                };
 
-                _context.Users.Add(model);
-
-                // Create wallet automatically
-                _context.Wallets.Add(new Wallet
+                // ✅ STEP 2: Define the Virtual Wallet
+                var newWallet = new Wallet
                 {
                     UserEmail = cleanEmail,
-                    Balance = 0,
+                    Balance = 0m,
                     Currency = "NGN",
+                    WalletNumber = "DAB-" + new Random().Next(10000000, 99999999).ToString(),
                     CreatedAt = DateTime.UtcNow
-                });
+                };
 
-                _context.SaveChanges();
+                // ✅ STEP 3: Atomic Save to Database
+                _context.Users.Add(newUser);
+                _context.Wallets.Add(newWallet);
+                await _context.SaveChangesAsync();
 
-                TempData["Message"] = "Account created successfully! You can now login.";
+                TempData["Message"] = "Welcome to IES Life Hub! Your wallet is ready. Please login.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Register Error: {ex.Message}");
-                TempData["Error"] = "Failed to create account. Please try again later.";
-                return View(model);
+                TempData["Error"] = "Registration Failed: " + ex.Message;
+                return RedirectToAction("Login");
             }
         }
 
-        // ────────────────────────────────────────────────────────────────
-        // LOGOUT
-        // ────────────────────────────────────────────────────────────────
+        // ==========================================
+        // 3. SESSION TERMINATION
+        // ==========================================
+
         public IActionResult Logout()
         {
             TempData.Clear();
