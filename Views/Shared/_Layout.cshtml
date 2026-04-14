@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    @* ✅ NATIVE APP VIEWPORT - Prevents zooming and enables app-like scaling *@
+    @* ✅ NATIVE APP VIEWPORT - Prevents zooming, handles phone notches, and enables app-like scaling *@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#014134">
     <title>@ViewData["Title"] - IES Urban Hub</title>
     
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -20,25 +21,66 @@
         --urban-gold: #D4AF37;
         }
 
-        /* 💡 NATIVE APP STRUCTURE */
+        /* 📱 NATIVE APP STRUCTURE */
         body {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
         margin: 0;
         background-color: #fbfbfb;
-        /* Prevents the 'gray flash' on taps on mobile */
-        -webkit-tap-highlight-color: transparent;
+        -webkit-tap-highlight-color: transparent; /* Removes blue flash on mobile taps */
         }
 
         main {
         flex: 1 0 auto;
-        /* Ensures content starts below the fixed header if one exists */
         }
 
-        /* Hidden scrollbar but keep functionality */
+        /* Hide Scrollbar for App-like Feel */
         ::-webkit-scrollbar {
         display: none;
+        }
+
+        /* 📱 MOBILE BOTTOM NAV STYLING */
+        .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 70px;
+        background: #ffffff;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        z-index: 1050;
+        box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
+        padding-bottom: env(safe-area-inset-bottom); /* Fix for iPhone Notch */
+        }
+
+        .mobile-nav .nav-item {
+        text-decoration: none;
+        color: #8e8e93;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 500;
+        transition: 0.2s;
+        }
+
+        .mobile-nav .nav-item i {
+        font-size: 22px;
+        margin-bottom: 2px;
+        }
+
+        /* Active State Logic */
+        .mobile-nav .nav-item.active {
+        color: var(--urban-emerald) !important;
+        }
+        
+        .mobile-nav .nav-item.active i {
+        color: var(--urban-emerald);
+        transform: translateY(-2px);
         }
 
         .main-footer {
@@ -46,14 +88,11 @@
         background-color: #ffffff;
         border-top: 1px solid rgba(0,0,0,0.05);
         padding: 40px 0;
-        /* Bottom margin accommodates the floating mobile nav */
-        margin-bottom: 100px;
+        margin-bottom: 80px; /* Space for the floating bottom nav */
         }
 
-        /* Bottom Nav Active State Logic */
-        .mobile-nav a.active {
+        .text-gold {
         color: var(--urban-gold) !important;
-        transform: translateY(-2px);
         }
     </style>
 </head>
@@ -61,10 +100,29 @@
 
     <main role="main">
         @RenderBody()
-        
-        @* Dynamic spacer to prevent the floating Nav from covering the last content *@
-        <div class="footer-spacer" style="height: 120px;"></div>
+        @* Prevents content from being hidden behind the bottom nav *@
+        <div class="footer-spacer d-md-none" style="height: 90px;"></div>
     </main>
+
+    @* --- 📱 NATIVE MOBILE BOTTOM NAV --- *@
+    <div class="mobile-nav d-md-none">
+        <a href="/Home/Index" class="nav-item">
+            <i class="bi bi-house-door"></i>
+            <span>Home</span>
+        </a>
+        <a href="/Thrift/Index" class="nav-item">
+            <i class="bi bi-piggy-bank"></i>
+            <span>Ajo</span>
+        </a>
+        <a href="/Wallet/Transactions" class="nav-item">
+            <i class="bi bi-arrow-left-right"></i>
+            <span>History</span>
+        </a>
+        <a href="/Admin/Index" class="nav-item">
+            <i class="bi bi-shield-lock"></i>
+            <span>Admin</span>
+        </a>
+    </div>
 
     <footer class="main-footer">
         <div class="container text-center">
@@ -82,17 +140,17 @@
 
     <script>
         $(document).ready(function() {
-        // Intelligent Active Tab Highlighter
+        // Intelligent Active Tab Highlighter for the Bottom Nav
         const path = window.location.pathname.toLowerCase();
             
-        $('.mobile-nav a, .opay-bottom-nav a').each(function() {
+        $('.mobile-nav .nav-item').each(function() {
         const href = $(this).attr('href').toLowerCase();
                 
-        // Match current path to Nav link
+        // Active detection (including default route)
         if (path === href || (path === "/" && href === "/home/index")) {
-        $(this).addClass('active text-gold').removeClass('text-muted');
+        $(this).addClass('active');
         } else {
-        $(this).removeClass('active text-gold').addClass('text-muted');
+        $(this).removeClass('active');
         }
         });
         });

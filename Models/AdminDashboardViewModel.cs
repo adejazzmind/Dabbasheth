@@ -1,33 +1,40 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Dabbasheth.Models
 {
-    /// <summary>
-    /// The Executive ViewModel for the MD/CEO Command Center.
-    /// Consolidated data for real-time system liquidity and user management.
-    /// </summary>
     public class AdminDashboardViewModel
     {
-        // --- 1. FIRM IDENTITY ---
-        public string OrganizationName => "IES Life Hub (Dabbasheth)";
-        public string OrganizationType => "General Merchandise & Business Services";
-
-        // --- 2. KPI METRICS ---
+        // ==========================================
+        // 📊 1. CEO HIGH-LEVEL STATS
+        // ==========================================
         public int TotalUsers { get; set; }
-
-        /// <summary>
-        /// The Grand Total Liquidity (Wallets + Thrift Plans combined)
-        /// </summary>
         public decimal TotalSystemBalance { get; set; }
 
-        // --- 3. DATA REPOSITORIES ---
-        // Required for the Customer Ledger table
-        public List<User> AllUsers { get; set; } = new();
+        // ==========================================
+        // 🛡️ 2. THE CEO HANDSHAKE (Approval Queues)
+        // ==========================================
+        public List<TransactionRecord> PendingTransactions { get; set; } = new();
 
-        // Required for the 'Wallets' breakdown badge
+        // ==========================================
+        // 👥 3. AJO & THRIFT MANAGEMENT
+        // ==========================================
+        // Added to support Ogba Market and other Group Cycles
+        public List<ThriftGroup> AllThriftGroups { get; set; } = new();
+        public List<ThriftPlan> AllThriftPlans { get; set; } = new();
+
+        // ==========================================
+        // 📋 4. SYSTEM ACCOUNT LEDGERS
+        // ==========================================
+        public List<User> AllUsers { get; set; } = new();
         public List<Wallet> AllWallets { get; set; } = new();
 
-        // Required for the 'Thrift' breakdown badge
-        public List<ThriftPlan> AllThriftPlans { get; set; } = new();
+        // ==========================================
+        // 📈 5. ANALYTICS HELPERS
+        // ==========================================
+        // Automatically calculates goals created in the last 24 hours
+        public int NewThriftGoalsCount => AllThriftPlans
+            .Count(p => p.StartDate >= DateTime.UtcNow.AddDays(-1));
     }
 }

@@ -4,9 +4,8 @@
     var userName = TempData.Peek("UserName")?.ToString() ?? "User";
 }
 
-@* --- 📱 MOBILE-FIRST CSS OVERRIDES --- *@
+@* --- 📱 MOBILE-FIRST CSS --- *@
 <style>
-    /* Prevent over-scroll bounce on mobile */
     html, body {
         overflow-x: hidden;
         overscroll-behavior-y: contain;
@@ -29,17 +28,13 @@
         border-bottom: 1px solid rgba(212, 175, 55, 0.1);
     }
 
-    /* Safe Content Area (to prevent overlap with header/footer) */
+    /* Safe Content Area */
     .app-content {
         padding-top: 85px;
         padding-bottom: 100px;
     }
 
     /* High-End Card Styling */
-    .urban-card-wrap {
-        perspective: 1000px;
-    }
-
     .premium-card {
         border: none;
         background: linear-gradient(135deg, #014134 0%, #001f1a 100%);
@@ -49,7 +44,7 @@
         box-shadow: 0 20px 30px rgba(1, 65, 52, 0.2);
     }
 
-    /* Floating Navigation (Modern Mobile Style) */
+    /* Floating Navigation (Apple/Fintech Style) */
     .mobile-nav {
         position: fixed;
         bottom: 20px;
@@ -73,9 +68,7 @@
         transition: all 0.3s ease;
     }
 
-        .nav-item.active {
-            color: #D4AF37;
-        }
+    .nav-item.active { color: #D4AF37; }
 
     .icon-box {
         width: 48px;
@@ -84,7 +77,13 @@
         background: #fff;
         box-shadow: 0 4px 10px rgba(0,0,0,0.04);
         margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
+    .action-link { text-decoration: none; transition: transform 0.2s; }
+    .action-link:active { transform: scale(0.9); }
 </style>
 
 @* --- 1. THE APP HEADER --- *@
@@ -113,60 +112,63 @@
 <div class="app-content container">
 
     @* Balance Card *@
-    <div class="urban-card-wrap">
-        <div class="premium-card">
-            <div class="d-flex justify-content-between align-items-start text-white">
-                <div>
-                    <p class="mb-0 opacity-75 small text-uppercase">Wallet Balance</p>
-                    <h2 class="fw-bold mb-0">₦@ViewBag.Balance.ToString("N2")</h2>
-                </div>
-                <i class="bi bi-eye-fill opacity-50 h4"></i>
+    <div class="premium-card mb-4">
+        <div class="d-flex justify-content-between align-items-start text-white">
+            <div>
+                <p class="mb-0 opacity-75 small text-uppercase">Wallet Balance</p>
+                <h2 class="fw-bold mb-0">₦@ViewBag.Balance.ToString("N2")</h2>
             </div>
-
-            <div class="mt-4 d-flex gap-2">
-                <form asp-controller="Payment" asp-action="InitializePayment" method="post" class="flex-grow-1">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="email" value="@ViewBag.UserEmail" />
-                    <input type="hidden" name="amount" value="5000" />
-                    <button type="submit" class="btn btn-light w-100 rounded-pill fw-bold py-2 shadow-sm" style="color: #014134;">
-                        <i class="bi bi-plus-circle me-1"></i> Add Money
-                    </button>
-                </form>
-                <button class="btn btn-outline-light rounded-pill px-4 fw-bold py-2 border-0" style="background: rgba(255,255,255,0.1);">
-                    Send
-                </button>
-            </div>
-            
-            @* Gold Accent Detail *@
-            <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #D4AF37;"></div>
+            <i class="bi bi-eye-fill opacity-50 h4"></i>
         </div>
+
+        @* Integrated Money Operations *@
+        <div class="mt-4 d-flex gap-2">
+            <form asp-controller="Payment" asp-action="InitializePayment" method="post" class="flex-grow-1">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="email" value="@ViewBag.UserEmail" />
+                <input type="hidden" name="amount" value="5000" />
+                <button type="submit" class="btn btn-light w-100 rounded-pill fw-bold py-2 shadow-sm" style="color: #014134;">
+                    <i class="bi bi-plus-circle me-1"></i> Add Money
+                </button>
+            </form>
+            <a href="@Url.Action("Withdraw", "Home")" class="btn btn-outline-light rounded-pill px-4 fw-bold py-2 border-0 d-flex align-items-center" style="background: rgba(255,255,255,0.1);">
+                Withdraw
+            </a>
+        </div>
+        
+        @* Gold Accent Detail *@
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: #D4AF37; border-radius: 0 0 28px 28px;"></div>
     </div>
 
-    @* Features Grid *@
+    @* Features Grid - Fixed Redirect Logic *@
     <div class="row mt-4 g-3 text-center px-1">
-        @foreach (var feature in new[] {
-            new { Name = "Transfer", Icon = "bi-bank", Color = "text-success" },
-            new { Name = "Airtime", Icon = "bi-phone", Color = "text-info" },
-            new { Name = "Data", Icon = "bi-wifi", Color = "text-primary" },
-            new { Name = "Betting", Icon = "bi-controller", Color = "text-danger" },
-            new { Name = "Savings", Icon = "bi-piggy-bank", Color = "text-gold" },
-            new { Name = "TV", Icon = "bi-display", Color = "text-warning" },
-            new { Name = "Electric", Icon = "bi-lightning-charge", Color = "text-warning" },
-            new { Name = "Withdraw", Icon = "bi-wallet2", Color = "text-secondary" }
-        })
+        @{
+            var services = new[] {
+                new { Name = "Transfer", Icon = "bi-bank", Color = "text-success", Action = "Withdraw" },
+                new { Name = "Airtime", Icon = "bi-phone", Color = "text-info", Action = "PayBills" },
+                new { Name = "Data", Icon = "bi-wifi", Color = "text-primary", Action = "PayBills" },
+                new { Name = "Betting", Icon = "bi-controller", Color = "text-danger", Action = "PayBills" },
+                new { Name = "Savings", Icon = "bi-piggy-bank", Color = "text-gold", Action = "Thrift" },
+                new { Name = "TV", Icon = "bi-display", Color = "text-warning", Action = "PayBills" },
+                new { Name = "Electric", Icon = "bi-lightning-charge", Color = "text-warning", Action = "PayBills" },
+                new { Name = "Withdraw", Icon = "bi-wallet2", Color = "text-secondary", Action = "Withdraw" }
+            };
+        }
+
+        @foreach (var s in services)
         {
             <div class="col-3">
-                <a href="#" class="nav-link p-0">
-                    <div class="icon-box d-flex align-items-center justify-content-center mx-auto">
-                        <i class="bi @feature.Icon @feature.Color h4 mb-0"></i>
+                <a href="@Url.Action(s.Action, "Home")" class="action-link">
+                    <div class="icon-box mx-auto">
+                        <i class="bi @s.Icon @s.Color h4 mb-0"></i>
                     </div>
-                    <p class="small fw-bold text-dark mt-1 mb-0" style="font-size: 0.65rem;">@feature.Name</p>
+                    <p class="small fw-bold text-dark mt-1 mb-0" style="font-size: 0.65rem;">@s.Name</p>
                 </a>
             </div>
         }
     </div>
 
-    @* Recent Transactions *@
+    @* Recent Activity *@
     <div class="mt-5 mb-3 d-flex justify-content-between align-items-center px-1">
         <h6 class="fw-bold mb-0">Urban Activity</h6>
         <small class="text-gold fw-bold">See All</small>
@@ -179,12 +181,12 @@
             {
                 <div class="p-3 d-flex justify-content-between align-items-center border-bottom border-light">
                     <div class="d-flex align-items-center">
-                        <div class="bg-soft-gold p-2 rounded-3 me-3">
+                        <div class="bg-soft-gold p-2 rounded-3 me-3" style="background: #fff9e6;">
                             <i class="bi bi-arrow-left-right text-gold"></i>
                         </div>
                         <div>
                             <p class="mb-0 fw-bold small text-dark">@tx.Description</p>
-                            <small class="text-muted" style="font-size: 0.6rem;">@tx.Date.ToString("dd MMM")</small>
+                            <small class="text-muted" style="font-size: 0.6rem;">@tx.Date.ToString("dd MMM") • <span class="text-uppercase fw-bold text-gold" style="font-size: 0.55rem;">@tx.Status</span></small>
                         </div>
                     </div>
                     <p class="mb-0 fw-bold small text-dark">₦@tx.Amount.ToString("N0")</p>
@@ -201,7 +203,7 @@
     </div>
 </div>
 
-@* --- 3. FLOATING MOBILE NAV BAR --- *@
+@* --- 3. FLOATING NAV --- *@
 <div class="mobile-nav">
     <a href="@Url.Action("Index", "Home")" class="nav-item active">
         <i class="bi bi-house-door-fill h4 mb-0"></i>

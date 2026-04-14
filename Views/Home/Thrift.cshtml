@@ -1,131 +1,116 @@
-﻿@model List<Dabbasheth.Models.ThriftPlan>
-@{
+﻿@{
     Layout = "_Layout";
-    ViewData["Title"] = "Target Savings";
+    var plans = ViewBag.ThriftPlans as List<Dabbasheth.Models.ThriftPlan>;
 }
 
-<div class="p-3">
-    <h4 class="fw-bold">Target Savings</h4>
+<div class="app-header justify-content-between">
+    <div class="d-flex align-items-center">
+        <a href="/Home/Index" class="text-dark me-3"><i class="bi bi-chevron-left h4 mb-0"></i></a>
+        <h6 class="mb-0 fw-bold">Target Savings</h6>
+    </div>
 </div>
 
-<div class="mx-3 p-4 rounded-4 mb-4 shadow-sm" style="background: linear-gradient(135deg, #012E24 0%, #00D09C 100%); color: white;">
-    <h6 class="fw-bold opacity-75">Saving Challenge 2026</h6>
-    <h3 class="fw-bold mt-2">Special Target</h3>
-    <p class="small opacity-75">Choose your own amount and frequency to reach your goals faster.</p>
-</div>
-
-<div class="mx-3 bg-white rounded-4 shadow-sm p-4 mb-5">
-    <h6 class="fw-bold mb-4 text-uppercase small text-muted">Set Your Savings Goal</h6>
+<div class="app-content container animate__animated animate__fadeIn">
     
-    <form asp-action="CreateThriftPlan" method="post">
-        @Html.AntiForgeryToken()
-        
-        <div class="mb-3">
-            <label class="form-label small fw-bold">What are you saving for?</label>
-            <input type="text" name="title" class="form-control form-control-lg bg-light border-0"
-                   placeholder="e.g. New Laptop, Rent, School Fees" required style="border-radius: 15px;" />
-        </div>
+    @* --- 🟢 THRIFT BANNER --- *@
+    <div class="premium-card p-4 mb-4 text-white">
+        <small class="opacity-75 text-uppercase fw-bold" style="font-size: 0.6rem;">Saving Challenge 2026</small>
+        <h3 class="fw-bold">Special Target</h3>
+        <p class="small mb-0 opacity-75">Secure your future by setting smart goals today.</p>
+    </div>
 
-        <div class="mb-3">
-            <label class="form-label small fw-bold">Target Amount (₦)</label>
-            <input type="number" name="targetAmount" class="form-control form-control-lg bg-light border-0"
-                   placeholder="Enter any amount" min="1000" required style="border-radius: 15px;" />
-            <div class="form-text small">Minimum target is ₦1,000</div>
-        </div>
+    @* --- 📝 CREATE GOAL FORM --- *@
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+        <form asp-action="CreateThriftPlan" method="post">
+            @Html.AntiForgeryToken()
+            
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">WHAT ARE YOU SAVING FOR?</label>
+                <input type="text" name="title" class="form-control border-0 bg-light py-2" placeholder="e.g. New Laptop, Rent" required />
+            </div>
 
-        <div class="mb-4">
-            <label class="form-label small fw-bold d-block mb-3">How often do you want to save?</label>
-            <div class="row g-2">
-                <div class="col-3">
-                    <input type="radio" class="btn-check" name="frequency" id="freqDaily" value="Daily" checked>
-                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqDaily">Daily</label>
-                </div>
-                <div class="col-3">
-                    <input type="radio" class="btn-check" name="frequency" id="freqWeekly" value="Weekly">
-                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqWeekly">Weekly</label>
-                </div>
-                <div class="col-3">
-                    <input type="radio" class="btn-check" name="frequency" id="freqMonthly" value="Monthly">
-                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqMonthly">Monthly</label>
-                </div>
-                <div class="col-3">
-                    <input type="radio" class="btn-check" name="frequency" id="freqYearly" value="Yearly">
-                    <label class="btn btn-outline-success w-100 py-2 rounded-3" for="freqYearly">Yearly</label>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">TARGET AMOUNT (₦)</label>
+                <input type="number" name="targetAmount" class="form-control border-0 bg-light py-2" placeholder="Enter amount" required min="1000" />
+            </div>
+
+            <div class="mb-4">
+                <label class="small fw-bold text-muted mb-1">HOW OFTEN DO YOU WANT TO SAVE?</label>
+                
+                @* This hidden input holds the actual value for the server *@
+                <input type="hidden" name="frequency" id="selectedFrequency" value="Daily" />
+                
+                <div class="row g-2">
+                    <div class="col-3">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 small fw-bold freq-btn active" onclick="setFreq('Daily', this)">Daily</button>
+                    </div>
+                    <div class="col-3">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 small fw-bold freq-btn" onclick="setFreq('Weekly', this)">Weekly</button>
+                    </div>
+                    <div class="col-3">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 small fw-bold freq-btn" onclick="setFreq('Monthly', this)">Monthly</button>
+                    </div>
+                    <div class="col-3">
+                        <button type="button" class="btn btn-outline-success w-100 py-2 small fw-bold freq-btn" onclick="setFreq('Yearly', this)">Yearly</button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill py-3 fw-bold shadow-sm">
-            Start Savings Goal
-        </button>
-    </form>
-</div>
+            <button type="submit" class="btn btn-success w-100 rounded-pill py-3 fw-bold shadow">
+                Start Savings Goal
+            </button>
+        </form>
+    </div>
 
-<div class="px-3">
-    <h6 class="fw-bold mb-3">Your Active Goals</h6>
-    
-    @if (Model != null && Model.Any())
+    @* --- 📊 ACTIVE GOALS LIST --- *@
+    <h6 class="fw-bold mb-3 px-1">Your Active Goals</h6>
+    @if (plans != null && plans.Any())
     {
-        @foreach (var plan in Model)
+        foreach (var plan in plans)
         {
-            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <span class="badge bg-soft-success text-success mb-1">@plan.Frequency Plan</span>
-                        <h6 class="fw-bold mb-0">@plan.Title</h6>
-                        <small class="text-muted">Matures: @plan.MaturityDate.ToString("MMM dd, yyyy")</small>
-                    </div>
-                    <div class="text-end">
-                        <div class="text-success fw-bold">₦@plan.CurrentSavings.ToString("N2")</div>
-                        <small class="text-muted">Target: ₦@plan.TargetAmount.ToString("N2")</small>
-                    </div>
+            var progress = (plan.CurrentSavings / plan.TargetAmount) * 100;
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold mb-0">@plan.Title</h6>
+                    <span class="badge bg-soft-success text-success">@plan.Status</span>
                 </div>
-
-                @* ✅ LIVE CALCULATION ENGINE *@
-                @{
-                    double current = (double)plan.CurrentSavings;
-                    double target = (double)plan.TargetAmount;
-                    double progress = (target > 0) ? (current / target) * 100 : 0;
-                    
-                    // Cap at 100% to keep the bar inside the container
-                    if (progress > 100) progress = 100;
-                }
-                
-                <div class="progress mb-3" style="height: 12px; border-radius: 10px; background-color: #f0f0f0;">
-                    <div class="progress-bar bg-success" role="progressbar"
-                         style="width: @progress.ToString("0")%"
-                         aria-valuenow="@progress" aria-valuemin="0" aria-valuemax="100">
-                        @if (progress > 10)
-                        {
-                            <small class="fw-bold">@progress.ToString("0")%</small>
-                        }
-                    </div>
+                <div class="progress mb-2" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: @progress%"></div>
                 </div>
-
-                <form asp-action="DepositToThrift" method="post" class="d-flex gap-2">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="planId" value="@plan.Id" />
-                    
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text border-0 bg-light rounded-start-pill ps-3">₦</span>
-                        <input type="number" name="amount" class="form-control border-0 bg-light"
-                               placeholder="Amt to save" required />
-                    </div>
-                    
-                    <button type="submit" class="btn btn-success btn-sm px-4 rounded-pill fw-bold shadow-sm">
-                        Save Now
-                    </button>
-                </form>
+                <div class="d-flex justify-content-between small text-muted">
+                    <span>₦@plan.CurrentSavings.ToString("N0") saved</span>
+                    <span class="fw-bold">₦@plan.TargetAmount.ToString("N0")</span>
+                </div>
             </div>
         }
     }
     else
     {
-        <div class="text-center py-5">
-            <div class="bg-soft-secondary d-inline-block p-4 rounded-circle mb-3">
-                <i class="bi bi-piggy-bank text-muted h1"></i>
-            </div>
-            <p class="text-muted">You haven't set any savings goals yet.<br>Start your first challenge above!</p>
+        <div class="text-center py-4 opacity-50">
+            <i class="bi bi-piggy-bank h1"></i>
+            <p class="small">No active goals yet. Start one above!</p>
         </div>
     }
 </div>
+
+@* --- 🧠 FREQUENCY LOGIC --- *@
+<script>
+    function setFreq(val, btn) {
+        // Update hidden input
+        document.getElementById('selectedFrequency').value = val;
+        
+        // UI Visual Switch
+        document.querySelectorAll('.freq-btn').forEach(b => {
+            b.classList.remove('btn-success', 'text-white', 'active');
+            b.classList.add('btn-outline-success');
+        });
+        
+        btn.classList.add('btn-success', 'text-white', 'active');
+        btn.classList.remove('btn-outline-success');
+    }
+</script>
+
+<style>
+    .bg-soft-success { background: #e8f5e9; }
+    .btn-success.active { background-color: #014134 !important; border-color: #014134 !important; }
+</style>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dabbasheth.Models
 {
@@ -15,6 +16,7 @@ namespace Dabbasheth.Models
         [StringLength(100)]
         public string Title { get; set; }
 
+        // --- 💰 FINANCIALS ---
         [DataType(DataType.Currency)]
         public decimal TargetAmount { get; set; }
 
@@ -24,13 +26,27 @@ namespace Dabbasheth.Models
         [Required]
         public string Frequency { get; set; } // Daily, Weekly, Monthly, Yearly
 
+        // --- 📅 TIMELINE & STATUS ---
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
-
         public DateTime MaturityDate { get; set; }
-
         public string Status { get; set; } = "Active"; // Active, Completed
 
-        // Logic to calculate maturity based on a standard 12-cycle savings goal
+        // --- 👥 AJO GROUP LOGIC (NEW) ---
+        // Links the individual to a specific Ajo Cycle (Ogba Market, etc.)
+        public int? ThriftGroupId { get; set; }
+
+        // Defines the "Packing Month" (1 = Jan, 2 = Feb, etc.)
+        public int PayoutOrder { get; set; }
+
+        // Security check: Has this member packed their bulk amount yet?
+        public bool HasCollected { get; set; } = false;
+
+        [ForeignKey("ThriftGroupId")]
+        public ThriftGroup? ThriftGroup { get; set; }
+
+        // ==========================================
+        // 🚀 BUSINESS LOGIC ENGINE
+        // ==========================================
         public void CalculateMaturity()
         {
             this.MaturityDate = this.Frequency switch
