@@ -18,303 +18,100 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 1. DASHBOARD - CONSOLIDATED CEO COMMAND CENTER
+        // 📊 1. ANALYTICS ZONE (Executive Dashboard Overview)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            // 🛡️ Gatekeeper: Secure Session Verification
             var role = TempData.Peek("UserRole")?.ToString();
             if (role != "Admin") return RedirectToAction("Login", "Account");
 
-            // 🚀 FINANCIAL AGGREGATION ENGINE
-            // Calculates total liquidity across all user wallets and thrift plans
-            var totalWalletBalance = await _context.Wallets.SumAsync(w => (decimal?)w.Balance) ?? 0m;
-            var totalThriftBalance = await _context.ThriftPlans.SumAsync(p => (decimal?)p.CurrentSavings) ?? 0m;
-            var grandTotalLiquidity = totalWalletBalance + totalThriftBalance;
+            // 💰 Safe Global Liquidity Calculations (Case-Insensitive)
+            // We use (decimal?) to handle null sums on empty tables safely
+            var totalWalletBalance = await _context.Wallets.AsNoTracking().SumAsync(w => (decimal?)w.Balance) ?? 0m;
+            var totalThriftBalance = await _context.ThriftPlans.AsNoTracking().SumAsync(p => (decimal?)p.CurrentSavings) ?? 0m;
 
-            // 🛡️ ACTION REQUIRED: Fetch all transactions awaiting Admin approval
-            var pendingRequests = await _context.Transactions
-                .Where(t => t.Status == "Pending")
-                .OrderByDescending(t => t.Date)
-                .ToListAsync();
-
-            // 📊 ASSEMBLE COMPLETE VIEW MODEL
+            // ✅ ROBUST DATA RETRIEVAL: 
+            // We avoid sorting by 'Id' to prevent PostgreSQL case-sensitivity crashes.
             var viewModel = new AdminDashboardViewModel
             {
-                TotalUsers = await _context.Users.CountAsync(u => u.Role == "Customer"),
-                TotalSystemBalance = grandTotalLiquidity,
-                AllUsers = await _context.Users.ToListAsync(),
-                AllWallets = await _context.Wallets.ToListAsync(),
+                TotalUsers = await _context.Users.AsNoTracking().CountAsync(u => u.Role == "Customer"),
+                TotalSystemBalance = totalWalletBalance + totalThriftBalance,
+                PendingSupportCount = await _context.SupportTickets.AsNoTracking().CountAsync(t => t.Status == "Open"),
+                FlaggedTransactionCount = await _context.Transactions.AsNoTracking().CountAsync(t => t.Status == "Flagged"),
 
-                // ✅ FETCH AJO GROUPS (Dynamic Data for the Table)
-                AllThriftGroups = await _context.ThriftGroups
-                    .OrderByDescending(g => g.StartDate)
+                AllUsers = await _context.Users.AsNoTracking()
+                    .OrderByDescending(u => u.CreatedAt)
+                    .Take(5).ToListAsync(),
+
+                PendingTransactions = await _context.Transactions.AsNoTracking()
+                    .Where(t => t.Status == "Pending")
+                    .OrderByDescending(t => t.Date)
                     .ToListAsync(),
 
-                // MONITORING: All individual savings goals
-                AllThriftPlans = await _context.ThriftPlans
-                    .OrderByDescending(p => p.StartDate)
-                    .ToListAsync(),
-
-                PendingTransactions = pendingRequests
+                AllThriftGroups = await _context.ThriftGroups.AsNoTracking()
+                    .Include(g => g.MemberPlans)
+                    .ToListAsync()
             };
 
             return View(viewModel);
         }
 
         // ============================================================
-        // 2. TRANSACTION GOVERNANCE (Withdrawals)
+        // 👥 2. USER MANAGEMENT ZONE (Identity & KYC)
         // ============================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveTransaction(string reference)
+        [HttpGet]
+        public async Task<IActionResult> UserManagement()
         {
-            try
-            {
-                var tx = await _context.Transactions.FirstOrDefaultAsync(t => t.Reference == reference);
-                if (tx == null || tx.Status != "Pending") return RedirectToAction("Index");
-
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail == tx.UserEmail);
-                if (wallet == null || wallet.Balance < tx.Amount)
-                {
-                    TempData["Error"] = "❌ Approval Failed: User has insufficient funds.";
-                    return RedirectToAction("Index");
-                }
-
-                // Execute Financial Transfer
-                wallet.Balance -= tx.Amount;
-                tx.Status = "Success";
-                tx.Date = DateTime.UtcNow;
-
-                _context.Wallets.Update(wallet);
-                _context.Transactions.Update(tx);
-
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "✅ Withdrawal approved and funds released.";
-            }
-            catch (Exception ex) { TempData["Error"] = "System Error: " + ex.Message; }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeclineTransaction(string reference)
-        {
-            var tx = await _context.Transactions.FirstOrDefaultAsync(t => t.Reference == reference);
-            if (tx != null && tx.Status == "Pending")
-            {
-                tx.Status = "Declined";
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "❌ Transaction Request Declined.";
-            }
-            return RedirectToAction("Index");
+            var users = await _context.Users.AsNoTracking()
+                .OrderByDescending(u => u.CreatedAt)
+                .ToListAsync();
+            return View(users);
         }
 
         // ============================================================
-        // 3. REGULATION - WALLET & INDIVIDUAL THRIFT OVERRIDES
+        // 💸 3. DISBURSEMENT ZONE (Payout Control)
         // ============================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreditAccount(string targetEmail, decimal amount, string accountType)
+        [HttpGet]
+        public async Task<IActionResult> PayoutControl()
         {
-            if (string.IsNullOrEmpty(targetEmail) || amount <= 0) return RedirectToAction("Index");
-
-            try
+            var viewModel = new AdminDashboardViewModel
             {
-                string cleanEmail = targetEmail.Trim().ToLower();
-                if (accountType == "Wallet")
-                {
-                    var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == cleanEmail);
-                    if (wallet != null) wallet.Balance += amount;
-                    else throw new Exception("Wallet not found.");
-                }
-                else if (accountType == "Thrift")
-                {
-                    var plan = await _context.ThriftPlans
-                        .Where(p => p.UserEmail.ToLower() == cleanEmail && p.Status == "Active")
-                        .OrderByDescending(p => p.StartDate)
-                        .FirstOrDefaultAsync();
+                PendingTransactions = await _context.Transactions.AsNoTracking()
+                    .Where(t => t.Status == "Pending")
+                    .OrderByDescending(t => t.Date)
+                    .ToListAsync(),
 
-                    if (plan != null) plan.CurrentSavings += amount;
-                    else throw new Exception("No active Thrift Plan found.");
-                }
+                AllThriftGroups = await _context.ThriftGroups.AsNoTracking()
+                    .Include(g => g.MemberPlans)
+                    .ToListAsync()
+            };
 
-                await _context.SaveChangesAsync();
-                TempData["Message"] = $"✅ Credited {accountType} with ₦{amount:N2}";
-            }
-            catch (Exception ex) { TempData["Error"] = "Credit Failed: " + ex.Message; }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DebitAccount(string targetEmail, decimal amount, string reason)
-        {
-            try
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == targetEmail.ToLower());
-                if (wallet != null)
-                {
-                    wallet.Balance -= amount;
-                    _context.Transactions.Add(new TransactionRecord
-                    {
-                        Reference = "DEB-" + Guid.NewGuid().ToString()[..8].ToUpper(),
-                        UserEmail = targetEmail.ToLower(),
-                        Amount = amount,
-                        Description = "Admin Debit: " + (reason ?? "Regulatory adjustment"),
-                        Date = DateTime.UtcNow,
-                        Status = "Success"
-                    });
-                    await _context.SaveChangesAsync();
-                    TempData["Message"] = $"⚠️ Debited ₦{amount:N2} from {targetEmail}";
-                }
-            }
-            catch (Exception ex) { TempData["Error"] = "Debit Failed: " + ex.Message; }
-            return RedirectToAction("Index");
+            return View(viewModel);
         }
 
         // ============================================================
-        // 4. GROUP THRIFT (AJO) - COLLECTION & INITIALIZATION
+        // 🛠️ 4. HUB OPERATIONS (Support & System Settings)
         // ============================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateThriftGroup(ThriftGroup group)
+        [HttpGet]
+        public async Task<IActionResult> SupportCenter()
         {
-            try
+            var viewModel = new AdminDashboardViewModel
             {
-                group.Status = "Running";
-                group.StartDate = DateTime.UtcNow;
-
-                _context.ThriftGroups.Add(group);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = $"✅ Group '{group.GroupName}' initialized successfully.";
-            }
-            catch (Exception ex) { TempData["Error"] = "Setup Failed: " + ex.Message; }
-            return RedirectToAction("Index");
+                SupportTickets = await _context.SupportTickets.AsNoTracking()
+                    .OrderByDescending(t => t.CreatedAt)
+                    .ToListAsync()
+            };
+            return View(viewModel);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExecuteGroupCollection(int groupId)
+        [HttpGet]
+        public async Task<IActionResult> Settings()
         {
-            var group = await _context.ThriftGroups
-                .Include(g => g.MemberPlans)
-                .FirstOrDefaultAsync(g => g.Id == groupId);
-
-            if (group == null) return RedirectToAction("Index");
-
-            int successCount = 0;
-            int failCount = 0;
-
-            foreach (var plan in group.MemberPlans)
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail == plan.UserEmail);
-                if (wallet != null && wallet.Balance >= group.MonthlyContribution)
-                {
-                    wallet.Balance -= group.MonthlyContribution;
-                    plan.CurrentSavings += group.MonthlyContribution;
-                    _context.Transactions.Add(new TransactionRecord
-                    {
-                        Reference = $"AJO-{group.Id}-{Guid.NewGuid().ToString()[..4].ToUpper()}",
-                        UserEmail = plan.UserEmail,
-                        Amount = group.MonthlyContribution,
-                        Description = $"Ajo Collection: {group.GroupName}",
-                        Status = "Success",
-                        Date = DateTime.UtcNow
-                    });
-                    successCount++;
-                }
-                else { failCount++; }
-            }
-
-            await _context.SaveChangesAsync();
-            TempData["Message"] = $"✅ Ajo Complete: {successCount} Paid, {failCount} Insufficient Funds.";
-            return RedirectToAction("Index");
-        }
-
-        // ============================================================
-        // 5. AJO PAYOUT LOGIC (The "Monthly Pack")
-        // ============================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ProcessMonthlyPayout(int groupId, int currentMonthOrder)
-        {
-            var group = await _context.ThriftGroups
-                .Include(g => g.MemberPlans)
-                .FirstOrDefaultAsync(g => g.Id == groupId);
-
-            if (group == null) return RedirectToAction("Index");
-
-            // Calculate Bulk Payout based on category amount and participant count
-            decimal bulkAmount = group.CategoryAmount * group.MemberPlans.Count;
-
-            // Identify the recipient for the specific month slot
-            var recipientPlan = group.MemberPlans.FirstOrDefault(p => p.PayoutOrder == currentMonthOrder);
-
-            if (recipientPlan != null)
-            {
-                var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail == recipientPlan.UserEmail);
-                if (wallet != null)
-                {
-                    wallet.Balance += bulkAmount;
-                    recipientPlan.HasCollected = true;
-
-                    _context.Transactions.Add(new TransactionRecord
-                    {
-                        Reference = $"PAY-{group.Id}-{DateTime.Now:MMM}".ToUpper(),
-                        UserEmail = recipientPlan.UserEmail,
-                        Amount = bulkAmount,
-                        Description = $"Ajo Payout Received: {group.GroupName} (Month {currentMonthOrder})",
-                        Status = "Success",
-                        Date = DateTime.UtcNow
-                    });
-
-                    await _context.SaveChangesAsync();
-                    TempData["Message"] = $"💰 ₦{bulkAmount:N0} successfully packed by {recipientPlan.UserEmail}!";
-                }
-            }
-            return RedirectToAction("Index");
-        }
-
-        // ============================================================
-        // 6. INDIVIDUAL THRIFT MANAGEMENT
-        // ============================================================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveThrift(int planId)
-        {
-            var plan = await _context.ThriftPlans.FindAsync(planId);
-            if (plan != null)
-            {
-                plan.Status = "Active";
-                await _context.SaveChangesAsync();
-                TempData["Message"] = "✅ Thrift goal approved.";
-            }
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BookThrift(string targetEmail, string title, decimal targetAmount, string frequency)
-        {
-            try
-            {
-                var newPlan = new ThriftPlan
-                {
-                    Title = title,
-                    TargetAmount = targetAmount,
-                    CurrentSavings = 0,
-                    Frequency = frequency,
-                    UserEmail = targetEmail.Trim().ToLower(),
-                    Status = "Active",
-                    StartDate = DateTime.UtcNow
-                };
-                _context.ThriftPlans.Add(newPlan);
-                await _context.SaveChangesAsync();
-                TempData["Message"] = $"✅ Booked '{title}' for {targetEmail}";
-            }
-            catch (Exception ex) { TempData["Error"] = "Booking Failed: " + ex.Message; }
-            return RedirectToAction("Index");
+            // Fetch system settings list for the configuration view
+            var settings = await _context.SystemSettings.AsNoTracking().ToListAsync();
+            return View(settings);
         }
     }
 }

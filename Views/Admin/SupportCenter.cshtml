@@ -1,0 +1,62 @@
+﻿@model Dabbasheth.Models.AdminDashboardViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4 bg-light min-vh-100 px-lg-4">
+    <div class="mb-4 px-2">
+        <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-headset me-2 text-primary"></i>Customer Support Center</h4>
+        <p class="text-muted small">Manage and resolve member complaints (Point 12)</p>
+    </div>
+
+    <div class="row g-3">
+        @if (Model.SupportTickets != null && Model.SupportTickets.Any())
+        {
+            @foreach (var ticket in Model.SupportTickets)
+            {
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 @(ticket.Priority == "High" ? "border-danger" : "border-primary")">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="badge @(ticket.Status == "Open" ? "bg-soft-warning text-warning" : "bg-soft-success text-success") rounded-pill">
+                                @ticket.Status
+                            </span>
+                            <small class="text-muted">@ticket.CreatedAt.ToString("dd MMM, HH:mm")</small>
+                        </div>
+                        
+                        <h6 class="fw-bold mb-1">@ticket.Subject</h6>
+                        <p class="text-muted small mb-3">User: <strong>@ticket.UserEmail</strong></p>
+                        
+                        <div class="bg-light rounded-3 p-3 mb-3 small italic">
+                            "@ticket.Message"
+                        </div>
+
+                        @if (ticket.Status == "Open")
+                        {
+                            <form asp-action="ResolveTicket" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ticketId" value="@ticket.Id" />
+                                <div class="input-group input-group-sm">
+                                    <input type="text" name="response" class="form-control border-0 bg-light" placeholder="Type resolution message..." required>
+                                    <button type="submit" class="btn btn-primary px-3 fw-bold">Resolve</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="small text-success fw-bold">
+                                <i class="bi bi-check2-circle me-1"></i> Resolved: @ticket.AdminResponse
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center py-5">
+                <i class="bi bi-emoji-smile h1 text-muted opacity-25"></i>
+                <p class="text-muted">No pending complaints. All customers are happy!</p>
+            </div>
+        }
+    </div>
+</div>

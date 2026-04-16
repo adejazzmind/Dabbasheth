@@ -18,29 +18,39 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // --- 0. IDENTITY HELPER ---
-        private string GetLoggedInUserEmail() => TempData.Peek("UserEmail") as string;
+        // --- 🛡️ IDENTITY HELPER ---
+        private string GetLoggedInUserEmail() => TempData.Peek("UserEmail")?.ToString();
 
-        // ==========================================
-        // 1. CORE HUB VIEWS
-        // ==========================================
-
+        // ============================================================
+        // 1. PREMIUM HUB VIEWS (Customer Dashboard)
+        // ============================================================
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             string email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
-            var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
-            var transactions = await _context.Transactions
-                .Where(t => t.UserEmail.ToLower() == email.ToLower())
-                .OrderByDescending(t => t.Date)
-                .ToListAsync();
+            // ✅ Consolidated Data Fetching into the ViewModel
+            var viewModel = new UserDashboardViewModel
+            {
+                Wallet = await _context.Wallets
+                    .FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower()),
 
-            ViewBag.Balance = wallet?.Balance ?? 0m;
-            ViewBag.UserEmail = email;
-            ViewBag.WalletNumber = wallet?.WalletNumber ?? "N/A";
+                ThriftPlans = await _context.ThriftPlans
+                    .Where(p => p.UserEmail.ToLower() == email.ToLower()).ToListAsync(),
 
-            return View(transactions);
+                RecentTransactions = await _context.Transactions
+                    .Where(t => t.UserEmail.ToLower() == email.ToLower())
+                    .OrderByDescending(t => t.Date)
+                    .Take(5).ToListAsync(),
+
+                ThriftGroups = await _context.ThriftGroups
+                    .Include(g => g.MemberPlans)
+                    .Where(g => g.MemberPlans.Any(m => m.UserEmail.ToLower() == email.ToLower()))
+                    .ToListAsync()
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Profile()
@@ -51,10 +61,10 @@ namespace Dabbasheth.Controllers
             return View();
         }
 
-        // ==========================================
-        // 2. WITHDRAWAL OPERATIONS (CEO APPROVAL FLOW)
-        // ==========================================
-
+        // ============================================================
+        // 2. WITHDRAWAL OPERATIONS (Requires Admin Approval)
+        // ============================================================
+        [HttpGet]
         public async Task<IActionResult> Withdraw()
         {
             string email = GetLoggedInUserEmail();
@@ -76,39 +86,39 @@ namespace Dabbasheth.Controllers
 
             if (wallet == null || wallet.Balance < amount || amount <= 0)
             {
-                TempData["Error"] = "❌ Invalid withdrawal request or insufficient funds.";
+                TempData["Error"] = "❌ Invalid request or insufficient funds.";
                 return RedirectToAction("Withdraw");
             }
 
+            // Create a record that appears in Admin/PayoutControl
             var request = new TransactionRecord
             {
                 Reference = "WTH-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                 UserEmail = email,
                 Amount = amount,
-                Description = $"Withdrawal to {bankName} ({accountNumber})",
+                Description = $"Withdrawal: {bankName} ({accountNumber})",
                 Date = DateTime.UtcNow,
-                Status = "Pending" // 🔒 CEO Approval required
+                Status = "Pending" // CEO approval required
             };
 
             _context.Transactions.Add(request);
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "🚀 Request sent! Awaiting CEO Approval.";
+            TempData["Message"] = "🚀 Withdrawal request logged! Awaiting Hub processing.";
             return RedirectToAction("Index");
         }
 
-        // ==========================================
-        // 3. THRIFT ENGINE (SAVINGS GOALS)
-        // ==========================================
-
+        // ============================================================
+        // 3. THRIFT & SAVINGS ENGINE
+        // ============================================================
+        [HttpGet]
         public async Task<IActionResult> Thrift()
         {
             string email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
             var plans = await _context.ThriftPlans
-                .Where(p => p.UserEmail.ToLower() == email.ToLower())
-                .ToListAsync();
+                .Where(p => p.UserEmail.ToLower() == email.ToLower()).ToListAsync();
 
             ViewBag.ThriftPlans = plans;
             ViewBag.TotalSavings = plans.Sum(p => (decimal?)p.CurrentSavings) ?? 0m;
@@ -120,11 +130,7 @@ namespace Dabbasheth.Controllers
         public async Task<IActionResult> CreateThriftPlan(string title, decimal targetAmount, string frequency)
         {
             string email = GetLoggedInUserEmail();
-            if (string.IsNullOrEmpty(email) || targetAmount <= 0)
-            {
-                TempData["Error"] = "Invalid goal parameters.";
-                return RedirectToAction("Thrift");
-            }
+            if (string.IsNullOrEmpty(email) || targetAmount <= 0) return RedirectToAction("Thrift");
 
             try
             {
@@ -137,21 +143,14 @@ namespace Dabbasheth.Controllers
                     UserEmail = email,
                     Status = "Active",
                     StartDate = DateTime.UtcNow,
-                    // MaturityDate is calculated inside the model's CalculateMaturity method
                     MaturityDate = DateTime.UtcNow.AddMonths(6)
                 };
 
-                // Use the internal model logic if available
-                newPlan.CalculateMaturity();
-
                 _context.ThriftPlans.Add(newPlan);
                 await _context.SaveChangesAsync();
-                TempData["Message"] = "✅ Savings goal created successfully!";
+                TempData["Message"] = "✅ Savings goal successfully initialized!";
             }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "System Error: " + ex.Message;
-            }
+            catch (Exception ex) { TempData["Error"] = "Setup error: " + ex.Message; }
 
             return RedirectToAction("Thrift");
         }
@@ -168,48 +167,40 @@ namespace Dabbasheth.Controllers
                 var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
                 var plan = await _context.ThriftPlans.FindAsync(planId);
 
-                if (wallet == null || plan == null || amount <= 0)
+                if (wallet == null || plan == null || amount <= 0 || wallet.Balance < amount)
                 {
-                    TempData["Error"] = "Account synchronization error.";
+                    TempData["Error"] = "❌ Fund synchronization failed or insufficient balance.";
                     return RedirectToAction("Thrift");
                 }
 
-                if (wallet.Balance < amount)
-                {
-                    TempData["Error"] = $"❌ Insufficient Funds. Your balance is ₦{wallet.Balance:N2}";
-                    return RedirectToAction("Thrift");
-                }
-
-                // 🏦 ATOMIC SWAP: Money moves from Wallet to Thrift
+                // 🏦 ATOMIC TRANSACTION: Wallet to Savings
                 wallet.Balance -= amount;
                 plan.CurrentSavings += amount;
-
-                _context.Wallets.Update(wallet);
-                _context.ThriftPlans.Update(plan);
 
                 _context.Transactions.Add(new TransactionRecord
                 {
                     Reference = "SAV-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                     UserEmail = email,
                     Amount = amount,
-                    Description = $"Thrift Savings: {plan.Title}",
+                    Description = $"Savings Deposit: {plan.Title}",
                     Date = DateTime.UtcNow,
+                    Type = "Debit", // User wallet is debited
                     Status = "Success"
                 });
 
                 if (plan.CurrentSavings >= plan.TargetAmount) plan.Status = "Completed";
 
                 await _context.SaveChangesAsync();
-                TempData["Message"] = $"✅ ₦{amount:N2} moved to your savings goal!";
+                TempData["Message"] = $"✅ ₦{amount:N2} added to your goal!";
             }
-            catch (Exception ex) { TempData["Error"] = "Database Error: " + ex.Message; }
+            catch (Exception ex) { TempData["Error"] = "Processing error: " + ex.Message; }
 
             return RedirectToAction("Thrift");
         }
 
-        // ==========================================
+        // ============================================================
         // 4. UTILITIES
-        // ==========================================
+        // ============================================================
         public IActionResult PayBills() => View();
         public IActionResult Rewards() { ViewBag.Cashback = 36.00m; return View(); }
     }

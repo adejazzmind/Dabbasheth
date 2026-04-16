@@ -1,0 +1,155 @@
+﻿@model Dabbasheth.Models.AdminDashboardViewModel
+@{
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4 bg-light min-vh-100 px-lg-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
+        <div>
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="bi bi-diagram-3-fill me-2 text-success"></i>Ajo Group Engine
+            </h4>
+            <p class="text-muted small">Manage rotational cycles, member slots, and pool health</p>
+        </div>
+        <button class="btn btn-dark rounded-pill px-4 shadow-sm fw-bold" onclick="openNewGroupModal()">
+            <i class="bi bi-plus-lg me-2"></i>New Cycle
+        </button>
+    </div>
+
+    <div class="row g-4">
+        @foreach (var group in Model.AllThriftGroups)
+        {
+            <div class="col-12 col-xl-6">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100">
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="fw-bold mb-0">@group.GroupName</h5>
+                                <span class="badge bg-soft-success text-success rounded-pill px-3 mt-1">@group.Status</span>
+                            </div>
+                            <div class="text-end">
+                                <h4 class="fw-bold text-primary mb-0">₦@((group.CategoryAmount * group.MemberPlans.Count).ToString("N0"))</h4>
+                                <small class="text-muted">Total Group Pool</small>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-4">
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-2 text-center border">
+                                    <small class="text-muted d-block small">Monthly Pay</small>
+                                    <span class="fw-bold text-success">₦@group.MonthlyContribution.ToString("N0")</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-2 text-center border">
+                                    <small class="text-muted d-block small">Members</small>
+                                    <span class="fw-bold">@group.MemberPlans.Count</span>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-light rounded-3 p-2 text-center border">
+                                    <small class="text-muted d-block small">Duration</small>
+                                    <span class="fw-bold">@group.DurationMonths Mo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold small mb-3">Rotational Queue & Status</h6>
+                        <div class="list-group list-group-flush border rounded-4 overflow-hidden mb-4">
+                            @foreach (var member in group.MemberPlans.OrderBy(m => m.PayoutOrder))
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                                    <div class="small">
+                                        <span class="fw-bold text-primary me-2">Slot #@member.PayoutOrder</span>
+                                        <span class="text-muted">@member.UserEmail</span>
+                                    </div>
+                                    @if (member.HasCollected)
+                                    {
+                                        <span class="badge bg-success rounded-pill px-2 small">
+                                            <i class="bi bi-check-lg me-1"></i> Paid
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border rounded-pill px-2 small">
+                                            Waiting
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <form asp-action="CloseGroup" method="post" class="flex-grow-1">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="groupId" value="@group.Id" />
+                                <button type="submit" class="btn btn-outline-danger btn-sm w-100 rounded-pill fw-bold">
+                                    Close Cycle
+                                </button>
+                            </form>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" title="Add Member">
+                                <i class="bi bi-person-plus-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="newGroupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered mx-3">
+        <div class="modal-content border-0 rounded-4 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h6 class="fw-bold mb-0">Initialize New Ajo Cycle</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form asp-action="CreateThriftGroup" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="small fw-bold">Group Name</label>
+                        <input type="text" name="GroupName" class="form-control bg-light border-0" placeholder="e.g. Ogba Market Group A" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="small fw-bold">Category Amount (Target per Member)</label>
+                        <select name="CategoryAmount" class="form-select bg-light border-0" required>
+                            <option value="100000">₦100,000</option>
+                            <option value="500000">₦500,000</option>
+                            <option value="1000000">₦1,000,000</option>
+                        </select>
+                    </div>
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <label class="small fw-bold">Duration</label>
+                            <select name="DurationMonths" class="form-select bg-light border-0">
+                                <option value="10">10 Months</option>
+                                <option value="12">12 Months</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="small fw-bold">Monthly Pay</label>
+                            <input type="number" name="MonthlyContribution" class="form-control bg-light border-0" placeholder="₦10,000" required />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow">
+                        Initialize Group
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openNewGroupModal() {
+        new bootstrap.Modal(document.getElementById('newGroupModal')).show();
+    }
+</script>
+
+<style>
+    .bg-soft-success {
+        background: rgba(25, 135, 84, 0.1);
+    }
+</style>

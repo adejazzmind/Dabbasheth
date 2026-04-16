@@ -1,248 +1,168 @@
 ﻿@model Dabbasheth.Models.AdminDashboardViewModel
-@{
-    Layout = "_Layout";
-}
+@{ Layout = "_Layout"; }
 
-<div class="container-fluid py-3 bg-light min-vh-100 px-lg-4">
-
-    @* --- 📱 1. MOBILE-ONLY WELCOME HEADER --- *@
-    <div class="d-flex justify-content-between align-items-center d-md-none mb-4 px-2 animate__animated animate__fadeIn">
-        <div>
-            <small class="text-muted d-block">Welcome back, Admin</small>
-            <h5 class="fw-bold mb-0">@DateTime.Now.ToString("MMMM dd, yyyy")</h5>
-        </div>
-        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:45px; height:45px;">
-            <i class="bi bi-person-badge-fill h4 mb-0"></i>
-        </div>
-    </div>
-
-    @* --- 🛡️ 2. DESKTOP HEADER SECTION (Hidden on Mobile) --- *@
-    <div class="d-none d-md-flex justify-content-between align-items-start px-3 mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Admin Command Center</h2>
-            <p class="text-muted small">IES Life Hub (Dabbasheth) | General Merchandise & Business Services</p>
-        </div>
-        <div class="text-end">
-            <a href="/Home/Index" class="btn btn-outline-primary btn-sm rounded-pill px-3 mb-2">
-                <i class="bi bi-person-circle me-1"></i> Switch to My Wallet
-            </a>
-            <div class="text-primary small fw-bold">
-                <i class="bi bi-shield-check me-1"></i> SECURE ADMIN SESSION
+@* 🚀 DASHBOARD CONTENT AREA *@
+<div class="container-fluid p-4 animate__animated animate__fadeIn">
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-3 rounded-4 shadow-sm mb-4">
+        <h5 class="fw-bold mb-0">Executive Command Center</h5>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="badge bg-soft-success text-success rounded-pill px-3 py-2 border">
+                <i class="bi bi-dot animate-pulse"></i> System Live
+            </span>
+            <div class="vr mx-2"></div>
+            <div class="text-end d-none d-md-block">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Session active</small>
+                <span class="fw-bold small">@TempData.Peek("UserName")</span>
             </div>
-            <div class="text-muted" style="font-size: 0.7rem;">ID: @DateTime.Now.ToString("yyyyMMdd-HHmm")</div>
         </div>
-    </div>
+    </nav>
 
-    @* --- 🚀 3. FINANCIAL SUMMARY CARDS --- *@
-    <div class="row g-3 px-2 mb-4">
-        <div class="col-12 col-md-8">
-            <div class="premium-card p-4 text-white shadow-lg h-100" style="background: linear-gradient(135deg, #014134 0%, #001f1a 100%); border-radius: 28px;">
-                <div class="d-flex justify-content-between">
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="premium-card p-5 text-white shadow-lg h-100" style="background: linear-gradient(135deg, #014134 0%, #001f1a 100%); border-radius: 35px;">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <small class="text-uppercase fw-bold opacity-75" style="letter-spacing: 2px; color: #D4AF37;">Total System Liquidity</small>
-                        <h1 class="fw-bold mt-1 display-5 mb-0">₦@Model.TotalSystemBalance.ToString("N2")</h1>
-                        <div class="mt-3 d-flex gap-2">
-                            <span class="badge bg-white bg-opacity-10 rounded-pill px-3 py-2 border border-white border-opacity-25 small">
-                                Wallets: ₦@Model.TotalSystemBalance.ToString("N2")
+                        <h1 class="display-3 fw-bold mt-2 mb-0">₦@Model.TotalSystemBalance.ToString("N2")</h1>
+                        <div class="mt-4">
+                            <span class="badge bg-white bg-opacity-10 rounded-pill px-4 py-2 border border-white border-opacity-25 small">
+                                <i class="bi bi-safe2 me-2"></i> Global Wallet & Thrift Pool
                             </span>
                         </div>
                     </div>
-                    <i class="bi bi-graph-up-arrow text-white opacity-25 h1 d-none d-sm-block"></i>
+                    <div class="icon-box bg-white bg-opacity-10 rounded-4" style="width: 60px; height: 60px;">
+                        <i class="bi bi-graph-up-arrow text-gold h3 mb-0" style="color: #D4AF37;"></i>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <i class="bi bi-people text-info h1 opacity-50 mb-2"></i>
-                <div class="text-muted small fw-bold text-uppercase mb-1">Active Customers</div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-5 p-4 bg-white h-100 d-flex flex-column justify-content-center text-center">
+                <div class="icon-box bg-soft-primary mx-auto mb-3" style="width:70px; height:70px; font-size: 2rem;">
+                    <i class="bi bi-people-fill text-primary"></i>
+                </div>
                 <h2 class="fw-bold mb-0">@Model.TotalUsers</h2>
-                <div class="mt-2 text-success small d-none d-md-block"><i class="bi bi-graph-up"></i> Growing Community</div>
+                <p class="text-muted small">Total Registered Hub Members</p>
+                <div class="mt-2 text-success small fw-bold"><i class="bi bi-plus-circle-fill"></i> @Model.NewUsersCount joined today</div>
             </div>
         </div>
     </div>
 
-    @* --- ⚙️ 4. SYSTEM OPERATIONS ICONS --- *@
-    <div class="mx-2 mb-5">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-            <h6 class="fw-bold text-muted text-uppercase mb-4" style="font-size: 0.75rem;">System Operations</h6>
-            <div class="row text-center g-4">
-                <div class="col-4 col-md-2"><div class="icon-box bg-soft-primary mx-auto mb-2"><i class="bi bi-bank text-primary"></i></div><small class="fw-bold d-block">To Bank</small></div>
-                <div class="col-4 col-md-2"><div class="icon-box bg-soft-warning mx-auto mb-2"><i class="bi bi-box-arrow-up-right text-warning"></i></div><small class="fw-bold d-block">Withdrawal</small></div>
-                <div class="col-4 col-md-2"><div class="icon-box bg-soft-danger mx-auto mb-2"><i class="bi bi-piggy-bank text-danger"></i></div><small class="fw-bold d-block">Thrift</small></div>
-                <div class="col-4 col-md-2"><div class="icon-box bg-soft-info mx-auto mb-2"><i class="bi bi-wifi text-info"></i></div><small class="fw-bold d-block">Data</small></div>
-                <div class="col-4 col-md-2"><div class="icon-box bg-soft-success mx-auto mb-2"><i class="bi bi-phone text-success"></i></div><small class="fw-bold d-block">Airtime</small></div>
-                <div class="col-4 col-md-2"><a href="/Home/Index" class="text-decoration-none text-dark"><div class="icon-box bg-light mx-auto mb-2"><i class="bi bi-grid-fill text-dark"></i></div><small class="fw-bold d-block">User View</small></a></div>
-            </div>
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-3">
+            <a href="/Admin/SupportCenter" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-5 border-primary card-hover">
+                    <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Support Desk</small>
+                    <div class="d-flex align-items-center">
+                        <h4 class="fw-bold mb-0">@Model.PendingSupportCount</h4>
+                        @if(Model.PendingSupportCount > 0) { <span class="badge bg-danger ms-2 pulse-red">Pending</span> }
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-md-3">
+            <a href="/Admin/RiskControl" class="text-decoration-none">
+                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-5 border-danger card-hover">
+                    <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Flagged Risk</small>
+                    <div class="d-flex align-items-center">
+                        <h4 class="fw-bold mb-0">@Model.FlaggedTransactionCount</h4>
+                        @if(Model.FlaggedTransactionCount > 0) { <span class="badge bg-warning text-dark ms-2">Alert</span> }
+                    </div>
+                </div>
+            </a>
         </div>
     </div>
 
-    @* --- 🛡️ 5. PENDING WITHDRAWALS --- *@
-    <div class="mx-2 mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold mb-0">Pending Transactions</h6>
-            <span class="badge bg-soft-warning text-dark rounded-pill px-3">@Model.PendingTransactions.Count</span>
+    <div class="card border-0 shadow-sm rounded-5 p-4 bg-white mb-4">
+        <h6 class="fw-bold text-dark mb-4 px-2">Core Hub Services</h6>
+        <div class="row text-center g-3">
+            <div class="col-4 col-md-2"><div class="op-box bg-soft-primary mx-auto mb-2"><i class="bi bi-bank text-primary"></i></div><small class="fw-bold">Bank Transfer</small></div>
+            <div class="col-4 col-md-2"><div class="op-box bg-soft-warning mx-auto mb-2"><i class="bi bi-box-arrow-up-right text-warning"></i></div><small class="fw-bold">Withdrawals</small></div>
+            <div class="col-4 col-md-2"><div class="op-box bg-soft-danger mx-auto mb-2"><i class="bi bi-piggy-bank text-danger"></i></div><small class="fw-bold">Thrift Cycle</small></div>
+            <div class="col-4 col-md-2"><div class="op-box bg-soft-info mx-auto mb-2"><i class="bi bi-wifi text-info"></i></div><small class="fw-bold">Data Topup</small></div>
+            <div class="col-4 col-md-2"><div class="op-box bg-soft-success mx-auto mb-2"><i class="bi bi-phone text-success"></i></div><small class="fw-bold">Airtime</small></div>
+            <div class="col-4 col-md-2"><a href="/Admin/Settings" class="text-decoration-none text-dark"><div class="op-box bg-light mx-auto mb-2"><i class="bi bi-gear-fill"></i></div><small class="fw-bold">Platform Ops</small></a></div>
         </div>
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light text-uppercase small text-muted" style="font-size: 0.65rem;">
-                        <tr><th class="ps-4">Customer</th><th>Amount</th><th class="text-end pe-4">Control</th></tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.PendingTransactions.Any()) {
-                            @foreach (var tx in Model.PendingTransactions) {
-                                <tr>
-                                    <td class="ps-4"><strong>@tx.UserEmail.Split('@')[0]</strong><br/><small class="text-muted">@tx.Date.ToString("dd MMM")</small></td>
-                                    <td class="fw-bold">₦@tx.Amount.ToString("N0")</td>
-                                    <td class="text-end pe-4">
-                                        <form asp-action="ApproveTransaction" method="post" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="reference" value="@tx.Reference" />
-                                            <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">Approve</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            }
-                        } else {
-                            <tr><td colspan="3" class="text-center py-4 text-muted small">No pending requests.</td></tr>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-5 bg-white overflow-hidden h-100">
+                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Disbursement Queue</h6>
+                    <a href="/Admin/PayoutControl" class="text-primary text-decoration-none fw-bold small">Manage All</a>
+                </div>
+                <div class="px-4 pb-4">
+                    @if (Model.PendingTransactions.Any()) {
+                        @foreach (var tx in Model.PendingTransactions.Take(3)) {
+                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-4 mb-2 bg-light bg-opacity-50">
+                                <div>
+                                    <p class="fw-bold mb-0 small">@tx.UserEmail.Split('@')[0]</p>
+                                    <small class="text-muted">ID: @tx.Reference.Substring(0,8)</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-danger mb-1">₦@tx.Amount.ToString("N0")</div>
+                                    <button class="btn btn-success btn-xs rounded-pill px-3 shadow-sm">Process</button>
+                                </div>
+                            </div>
                         }
-                    </tbody>
-                </table>
+                    } else {
+                        <div class="text-center py-5 text-muted small">No pending withdrawal requests.</div>
+                    }
+                </div>
             </div>
         </div>
-    </div>
 
-    @* --- 👥 6. AJO GROUP CYCLES --- *@
-    <div class="mx-2 mb-5">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h6 class="fw-bold mb-0">Tiered Ajo Cycles</h6>
-            <button class="btn btn-dark btn-sm rounded-pill px-3" onclick="openNewGroupModal()">+ New</button>
-        </div>
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light small text-muted text-uppercase" style="font-size: 0.65rem;">
-                        <tr><th class="ps-4">Category</th><th>Group</th><th class="text-end pe-4">Action</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var group in Model.AllThriftGroups) {
-                            var currentMonthOrder = ((DateTime.Now.Year - group.StartDate.Year) * 12) + DateTime.Now.Month - group.StartDate.Month + 1;
-                            if (currentMonthOrder < 1) currentMonthOrder = 1;
-                            <tr>
-                                <td class="ps-4"><span class="badge bg-success rounded-pill">₦@group.CategoryAmount.ToString("N0")</span></td>
-                                <td><strong>@group.GroupName</strong></td>
-                                <td class="text-end pe-4">
-                                    <form asp-action="ProcessMonthlyPayout" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="groupId" value="@group.Id" />
-                                        <input type="hidden" name="currentMonthOrder" value="@currentMonthOrder" />
-                                        <button type="submit" class="btn btn-primary btn-sm rounded-pill">Payout</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    @* --- 📋 7. CUSTOMER LEDGER --- *@
-    <div class="mx-2">
-        <h6 class="fw-bold mb-3">Customer Ledger</h6>
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light text-uppercase small text-muted" style="font-size: 0.65rem;">
-                        <tr><th class="ps-4">Customer</th><th>Balance</th><th class="text-end pe-4">Ops</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in Model.AllUsers.Where(u => u.Role == "Customer")) {
-                            var wallet = Model.AllWallets.FirstOrDefault(w => w.UserEmail == user.Email);
-                            <tr>
-                                <td class="ps-4 py-3"><strong>@user.FullName</strong></td>
-                                <td><div class="fw-bold text-success small">₦@(wallet?.Balance.ToString("N2") ?? "0.00")</div></td>
-                                <td class="text-end pe-4">
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="openRegulate('@user.Email')">Regulate</button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm rounded-5 bg-white overflow-hidden h-100">
+                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Active Ajo Cycles</h6>
+                    <button class="btn btn-dark btn-xs rounded-pill px-3 shadow-sm" onclick="openNewGroupModal()">+ New Cycle</button>
+                </div>
+                <div class="px-4 pb-4">
+                    @foreach(var group in Model.AllThriftGroups.Take(3)) {
+                        <div class="p-3 border rounded-4 mb-2 bg-white shadow-sm border-start border-5 border-success card-hover">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-soft-gold text-gold rounded-pill px-2 small mb-1">₦@group.CategoryAmount.ToString("N0")</span>
+                                    <div class="fw-bold small">@group.GroupName</div>
+                                </div>
+                                <a href="/Admin/AjoManagement" class="btn btn-outline-dark btn-xs rounded-pill px-3">View Cycle</a>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-@* --- 🛠️ MODALS (Same as previous, just optimized) --- *@
+@* --- 📦 MODAL: NEW GROUP --- *@
 <div class="modal fade" id="newGroupModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mx-3">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold mb-0">Create New Ajo Cycle</h6>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-5 shadow-lg">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold mb-0">Initialize New Ajo Cycle</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form asp-action="CreateThriftGroup" method="post">
                     @Html.AntiForgeryToken()
                     <div class="mb-3">
-                        <label class="small fw-bold">Group Name</label>
-                        <input type="text" name="GroupName" class="form-control bg-light border-0" required />
+                        <label class="small fw-bold mb-1">Group Name</label>
+                        <input type="text" name="GroupName" class="form-control bg-light border-0 py-2" placeholder="e.g. Platinum Market A" required />
                     </div>
                     <div class="mb-3">
-                        <label class="small fw-bold">Category Amount (₦)</label>
-                        <select name="CategoryAmount" class="form-select bg-light border-0" required>
-                            <option value="100000">₦100,000</option>
-                            <option value="500000">₦500,000</option>
-                            <option value="1000000">₦1,000,000</option>
+                        <label class="small fw-bold mb-1">Category (Member Target)</label>
+                        <select name="CategoryAmount" class="form-select bg-light border-0 py-2">
+                            <option value="100000">₦100,000 Group</option>
+                            <option value="500000">₦500,000 Group</option>
+                            <option value="1000000">₦1,000,000 Group</option>
                         </select>
                     </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="small fw-bold">Duration</label>
-                            <select name="DurationMonths" class="form-select bg-light border-0">
-                                <option value="10">10 Months</option>
-                                <option value="12">12 Months</option>
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="small fw-bold">Monthly Pay</label>
-                            <input type="number" name="MonthlyContribution" class="form-control bg-light border-0" required />
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow">Initialize Group</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="regulationModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered mx-3">
-        <div class="modal-content border-0 rounded-4 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h6 class="fw-bold mb-0 text-primary">Account Regulation</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form asp-action="CreditAccount" method="post" id="walletForm">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="targetEmail" id="inputEmail" />
-                    <input type="hidden" name="accountType" value="Wallet" />
-                    <p class="small text-muted mb-3" id="displayEmail"></p>
-                    <div class="mb-3">
-                        <label class="small fw-bold">Operation</label>
-                        <select id="opType" class="form-select bg-light border-0" onchange="updateWalletAction(this)">
-                            <option value="Credit">Credit (+) Wallet</option>
-                            <option value="Debit">Debit (-) Wallet</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-bold">Amount (₦)</label>
-                        <input type="number" name="amount" class="form-control bg-light border-0" required />
-                    </div>
-                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold shadow">Execute Update</button>
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow">Create Cycle Engine</button>
                 </form>
             </div>
         </div>
@@ -251,28 +171,26 @@
 
 <script>
     function openNewGroupModal() { new bootstrap.Modal(document.getElementById('newGroupModal')).show(); }
-    function openRegulate(email) {
-        document.getElementById('displayEmail').innerText = email;
-        document.getElementById('inputEmail').value = email;
-        new bootstrap.Modal(document.getElementById('regulationModal')).show();
-    }
-    function updateWalletAction(select) {
-        const form = document.getElementById('walletForm');
-        form.action = select.value === "Debit" ? "/Admin/DebitAccount" : "/Admin/CreditAccount";
-    }
 </script>
 
 <style>
+    .card-hover { transition: all 0.3s; cursor: pointer; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.05) !important; }
+    .rounded-5 { border-radius: 2rem !important; }
+    .rounded-4 { border-radius: 1.25rem !important; }
     .bg-soft-primary { background: rgba(13, 110, 253, 0.08); }
-    .bg-soft-warning { background: rgba(255, 193, 7, 0.08); }
-    .bg-soft-danger { background: rgba(220, 53, 69, 0.08); }
-    .bg-soft-info { background: rgba(13, 202, 240, 0.08); }
     .bg-soft-success { background: rgba(25, 135, 84, 0.08); }
-    .icon-box { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-    
-    @@media (max-width: 768px) {
-        .display-5 { font-size: 2rem !important; }
-        .table { font-size: 0.85rem; }
-        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
-    }
+    .bg-soft-danger { background: rgba(220, 53, 69, 0.08); }
+    .bg-soft-warning { background: rgba(255, 193, 7, 0.08); }
+    .bg-soft-info { background: rgba(13, 202, 240, 0.08); }
+    .bg-soft-gold { background: rgba(212, 175, 55, 0.1); }
+    .text-gold { color: #D4AF37 !important; }
+    .icon-box, .op-box { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+    .op-box { transition: 0.2s; cursor: pointer; }
+    .op-box:hover { transform: scale(1.1); filter: brightness(0.95); }
+    .btn-xs { padding: 0.3rem 0.8rem; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
+    .animate-pulse { animation: pulse 2s infinite; }
+    @@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    .pulse-red { animation: pulse-red-key 2s infinite; }
+    @@keyframes pulse-red-key { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
 </style>

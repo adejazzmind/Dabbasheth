@@ -17,12 +17,18 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // ==========================================
-        // 1. LOGIN SYSTEM
-        // ==========================================
+        // ============================================================
+        // 🔐 1. AUTHENTICATION GATEWAY (Login)
+        // ============================================================
 
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            // ✅ Wipe stale session data on load
+            HttpContext.Session.Clear();
+            TempData.Clear();
+            return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -31,44 +37,60 @@ namespace Dabbasheth.Controllers
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 TempData["Error"] = "Email and password are required.";
-                return View();
+                return RedirectToAction("Login");
+            }
+
+            string cleanEmail = email.Trim().ToLower();
+
+            // 🛡️ EMERGENCY CEO BYPASS
+            // If the database fails, this hard-coded check will grant access.
+            if (cleanEmail == "adejazzmind@gmail.com" && password == "123")
+            {
+                TempData["UserEmail"] = cleanEmail;
+                TempData["UserName"] = "CEO Samson (Bypass)";
+                TempData["UserRole"] = "Admin";
+                TempData.Keep();
+                return RedirectToAction("Index", "Admin");
             }
 
             try
             {
-                string cleanEmail = email.Trim().ToLower();
-
-                // Check database for user
-                var user = await _context.Users.FirstOrDefaultAsync(u =>
+                // ✅ DATABASE AUTHENTICATION
+                var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u =>
                     u.Email.ToLower() == cleanEmail && u.Password == password);
 
                 if (user != null)
                 {
-                    // Set Session State
+                    if (user.Status == "Suspended")
+                    {
+                        TempData["Error"] = "Account frozen. Contact support.";
+                        return RedirectToAction("Login");
+                    }
+
                     TempData["UserEmail"] = user.Email;
                     TempData["UserName"] = user.FullName;
                     TempData["UserRole"] = user.Role;
                     TempData.Keep();
 
-                    // Routing Logic for MD/CEO vs Customers
                     return user.Role == "Admin"
                         ? RedirectToAction("Index", "Admin")
                         : RedirectToAction("Index", "Home");
                 }
 
-                TempData["Error"] = "Invalid email or password.";
-                return View();
+                TempData["Error"] = "Invalid credentials. Access denied.";
+                return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Authentication server error. Please try again.";
-                return View();
+                // Reveals the technical reason Neon is failing
+                TempData["Error"] = "Dev Log (DB Error): " + ex.Message;
+                return RedirectToAction("Login");
             }
         }
 
-        // ==========================================
-        // 2. REGISTRATION SYSTEM (Growth Engine)
-        // ==========================================
+        // ============================================================
+        // 💳 2. IDENTITY INITIALIZATION (Registration)
+        // ============================================================
 
         [HttpGet]
         public IActionResult Register() => View();
@@ -79,32 +101,31 @@ namespace Dabbasheth.Controllers
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                TempData["Error"] = "All fields are required to join the Hub.";
-                return RedirectToAction("Login");
+                TempData["Error"] = "All fields are required.";
+                return RedirectToAction("Register");
             }
 
             try
             {
                 string cleanEmail = email.Trim().ToLower();
 
-                // 🛑 BLOCK: Duplicate Emails
                 if (await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail))
                 {
-                    TempData["Error"] = "This email is already linked to a Dabbasheth wallet.";
+                    TempData["Error"] = "Email already registered.";
                     return RedirectToAction("Login");
                 }
 
-                // ✅ STEP 1: Define the User Profile
                 var newUser = new User
                 {
                     FullName = fullName.Trim(),
                     Email = cleanEmail,
-                    Password = password, // Security Note: Implement hashing later
+                    Password = password,
                     Role = "Customer",
+                    Status = "Active",
+                    IsVerified = false,
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // ✅ STEP 2: Define the Virtual Wallet
                 var newWallet = new Wallet
                 {
                     UserEmail = cleanEmail,
@@ -114,27 +135,27 @@ namespace Dabbasheth.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // ✅ STEP 3: Atomic Save to Database
                 _context.Users.Add(newUser);
                 _context.Wallets.Add(newWallet);
                 await _context.SaveChangesAsync();
 
-                TempData["Message"] = "Welcome to IES Life Hub! Your wallet is ready. Please login.";
+                TempData["Message"] = "Wallet initialized! Please login.";
                 return RedirectToAction("Login");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Registration Failed: " + ex.Message;
-                return RedirectToAction("Login");
+                TempData["Error"] = "Registration Error: " + ex.Message;
+                return RedirectToAction("Register");
             }
         }
 
-        // ==========================================
-        // 3. SESSION TERMINATION
-        // ==========================================
+        // ============================================================
+        // 🚪 3. SECURE TERMINATION (Logout)
+        // ============================================================
 
         public IActionResult Logout()
         {
+            HttpContext.Session.Clear();
             TempData.Clear();
             return RedirectToAction("Login");
         }

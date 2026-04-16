@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    @* ✅ NATIVE APP VIEWPORT - Prevents zooming, handles phone notches, and enables app-like scaling *@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#014134">
     <title>@ViewData["Title"] - IES Urban Hub</title>
@@ -11,148 +10,187 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Dabbasheth.styles.css" asp-append-version="true" />
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <style>
         :root {
-        --urban-emerald: #014134;
-        --urban-gold: #D4AF37;
+            --urban-emerald: #014134;
+            --urban-dark: #001f1a;
+            --urban-gold: #D4AF37;
         }
 
-        /* 📱 NATIVE APP STRUCTURE */
-        body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        margin: 0;
-        background-color: #fbfbfb;
-        -webkit-tap-highlight-color: transparent; /* Removes blue flash on mobile taps */
+        body { 
+            background-color: #f8f9fa; 
+            font-family: 'Inter', sans-serif; 
+            min-height: 100vh;
+            margin: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        main {
-        flex: 1 0 auto;
+        /* 🖥️ DESKTOP SIDEBAR */
+        #sidebar-wrapper { 
+            width: 280px; 
+            background: var(--urban-dark) !important; 
+            min-height: 100vh; 
+            position: sticky; 
+            top: 0; 
+            transition: all 0.3s;
+            z-index: 1000;
         }
 
-        /* Hide Scrollbar for App-like Feel */
-        ::-webkit-scrollbar {
-        display: none;
+        .text-gold { color: var(--urban-gold) !important; }
+        
+        .active-nav { 
+            background: rgba(212, 175, 55, 0.1) !important; 
+            border-left: 5px solid var(--urban-gold) !important; 
+            color: var(--urban-gold) !important; 
+            font-weight: bold; 
         }
 
-        /* 📱 MOBILE BOTTOM NAV STYLING */
+        #page-content-wrapper { flex: 1; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* 📱 MOBILE NAVIGATION */
         .mobile-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 70px;
-        background: #ffffff;
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        border-top: 1px solid rgba(0,0,0,0.05);
-        z-index: 1050;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.03);
-        padding-bottom: env(safe-area-inset-bottom); /* Fix for iPhone Notch */
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            height: 75px;
+            background: #ffffff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            z-index: 1050;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.04);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .mobile-nav .nav-item {
-        text-decoration: none;
-        color: #8e8e93;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 11px;
-        font-weight: 500;
-        transition: 0.2s;
+            text-decoration: none;
+            color: #8e8e93;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
         }
 
-        .mobile-nav .nav-item i {
-        font-size: 22px;
-        margin-bottom: 2px;
-        }
-
-        /* Active State Logic */
-        .mobile-nav .nav-item.active {
-        color: var(--urban-emerald) !important;
-        }
-        
-        .mobile-nav .nav-item.active i {
-        color: var(--urban-emerald);
-        transform: translateY(-2px);
-        }
+        .mobile-nav .nav-item i { font-size: 24px; margin-bottom: 2px; }
+        .mobile-nav .nav-item.active { color: var(--urban-emerald) !important; }
 
         .main-footer {
-        flex-shrink: 0;
-        background-color: #ffffff;
-        border-top: 1px solid rgba(0,0,0,0.05);
-        padding: 40px 0;
-        margin-bottom: 80px; /* Space for the floating bottom nav */
+            background-color: #ffffff;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 40px 0;
+            margin-top: auto; /* Pushes footer to bottom of content */
         }
-
-        .text-gold {
-        color: var(--urban-gold) !important;
-        }
+        
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
+    @* 🛡️ SESSION GATEKEEPER LOGIC *@
+    @{
+        var userRole = TempData.Peek("UserRole")?.ToString();
+        var isLoggedIn = !string.IsNullOrEmpty(userRole);
+        // Only use the flex wrapper if logged in to avoid layout shifting on login page
+        var wrapperClass = isLoggedIn ? "d-flex" : "";
+    }
 
-    <main role="main">
-        @RenderBody()
-        @* Prevents content from being hidden behind the bottom nav *@
-        <div class="footer-spacer d-md-none" style="height: 90px;"></div>
-    </main>
+    <div class="@wrapperClass" id="wrapper">
+        
+        @* --- 🖥️ SIDEBAR: Only visible if LOGGED IN as ADMIN --- *@
+        @if (isLoggedIn && userRole == "Admin")
+        {
+            <div class="text-white shadow-lg d-none d-lg-block" id="sidebar-wrapper">
+                <div class="p-4 text-center">
+                    <h4 class="fw-bold mb-0 text-gold">IES HUB</h4>
+                    <small class="opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Executive Command</small>
+                </div>
+                <div class="list-group list-group-flush px-3 mt-3">
+                    <a href="/Admin/Index" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 rounded-4 mb-1">
+                        <i class="bi bi-grid-1x2-fill me-3"></i> Dashboard
+                    </a>
+                    <a href="/Admin/UserManagement" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 rounded-4 mb-1">
+                        <i class="bi bi-people-fill me-3"></i> Customers
+                    </a>
+                    <a href="/Admin/PayoutControl" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 rounded-4 mb-1">
+                        <i class="bi bi-wallet2 me-3"></i> Payouts
+                    </a>
+                    <a href="/Admin/AjoManagement" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 rounded-4 mb-1">
+                        <i class="bi bi-diagram-3-fill me-3"></i> Ajo Engine
+                    </a>
+                    <a href="/Admin/SupportCenter" class="list-group-item list-group-item-action bg-transparent text-white border-0 py-3 rounded-4 mb-1">
+                        <i class="bi bi-headset me-3"></i> Help Desk
+                    </a>
+                    <a href="/Account/Logout" class="list-group-item list-group-item-action bg-transparent text-danger border-0 py-3 rounded-4 mt-5">
+                        <i class="bi bi-box-arrow-left me-3"></i> Secure Logout
+                    </a>
+                </div>
+            </div>
+        }
 
-    @* --- 📱 NATIVE MOBILE BOTTOM NAV --- *@
-    <div class="mobile-nav d-md-none">
-        <a href="/Home/Index" class="nav-item">
-            <i class="bi bi-house-door"></i>
-            <span>Home</span>
-        </a>
-        <a href="/Thrift/Index" class="nav-item">
-            <i class="bi bi-piggy-bank"></i>
-            <span>Ajo</span>
-        </a>
-        <a href="/Wallet/Transactions" class="nav-item">
-            <i class="bi bi-arrow-left-right"></i>
-            <span>History</span>
-        </a>
-        <a href="/Admin/Index" class="nav-item">
-            <i class="bi bi-shield-lock"></i>
-            <span>Admin</span>
-        </a>
+        @* 🚀 MAIN CONTENT AREA *@
+        <div id="page-content-wrapper">
+            <main role="main">
+                @RenderBody()
+            </main>
+
+            @* FOOTER: Only show if logged in *@
+            @if (isLoggedIn)
+            {
+                <footer class="main-footer">
+                    <div class="container text-center">
+                        <p class="mb-1 fw-bold text-dark">IES URBAN HUB</p>
+                        <p class="mb-0 small text-muted">Powered by Dabbasheth &copy; 2026</p>
+                        <div class="mt-2 text-gold fw-bold" style="font-size: 0.65rem;">PREMIUM SECURE BANKING</div>
+                    </div>
+                </footer>
+            }
+        </div>
     </div>
 
-    <footer class="main-footer">
-        <div class="container text-center">
-            <p class="mb-1 fw-bold text-dark" style="letter-spacing: 1px;">IES URBAN HUB</p>
-            <p class="mb-0 small text-muted">Powered by Dabbasheth &copy; 2026</p>
-            <div class="mt-2">
-                <small class="text-gold fw-bold" style="font-size: 0.65rem;">PREMIUM SECURE BANKING</small>
-            </div>
+    @* --- 📱 MOBILE NAV: Only visible if LOGGED IN --- *@
+    @if (isLoggedIn)
+    {
+        <div class="mobile-nav d-lg-none">
+            @if (userRole == "Admin")
+            {
+                <a href="/Admin/Index" class="nav-item"><i class="bi bi-speedometer2"></i><span>Stats</span></a>
+                <a href="/Admin/UserManagement" class="nav-item"><i class="bi bi-people-fill"></i><span>Users</span></a>
+                <a href="/Admin/PayoutControl" class="nav-item"><i class="bi bi-cash-stack"></i><span>Payouts</span></a>
+                <a href="/Admin/SupportCenter" class="nav-item"><i class="bi bi-headset"></i><span>Help</span></a>
+            }
+            else
+            {
+                <a href="/Home/Index" class="nav-item"><i class="bi bi-house-door"></i><span>Home</span></a>
+                <a href="/Home/Thrift" class="nav-item"><i class="bi bi-piggy-bank"></i><span>Savings</span></a>
+                <a href="/Home/Rewards" class="nav-item"><i class="bi bi-gift"></i><span>Rewards</span></a>
+                <a href="/Home/Profile" class="nav-item"><i class="bi bi-person-circle"></i><span>Account</span></a>
+            }
         </div>
-    </footer>
+    }
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-
+    
     <script>
         $(document).ready(function() {
-        // Intelligent Active Tab Highlighter for the Bottom Nav
-        const path = window.location.pathname.toLowerCase();
+            const path = window.location.pathname.toLowerCase();
             
-        $('.mobile-nav .nav-item').each(function() {
-        const href = $(this).attr('href').toLowerCase();
-                
-        // Active detection (including default route)
-        if (path === href || (path === "/" && href === "/home/index")) {
-        $(this).addClass('active');
-        } else {
-        $(this).removeClass('active');
-        }
-        });
+            // Auto-Highlight Sidebar
+            $('#sidebar-wrapper .list-group-item').each(function() {
+                const href = $(this).attr('href').toLowerCase();
+                if (path === href || (href !== "/" && path.startsWith(href))) {
+                    $(this).addClass('active-nav');
+                }
+            });
+
+            // Auto-Highlight Mobile Nav
+            $('.mobile-nav .nav-item').each(function() {
+                const href = $(this).attr('href').toLowerCase();
+                if (path === href || (href !== "/" && path.startsWith(href))) {
+                    $(this).addClass('active');
+                }
+            });
         });
     </script>
 

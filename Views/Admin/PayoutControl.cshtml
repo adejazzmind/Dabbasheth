@@ -1,0 +1,109 @@
+﻿@model Dabbasheth.Models.AdminDashboardViewModel
+@{ Layout = "_Layout"; }
+
+<div class="container-fluid py-4 bg-light min-vh-100 px-lg-4">
+    <div class="mb-4 px-2">
+        <h4 class="fw-bold mb-0 text-dark">Disbursement Control</h4>
+        <p class="text-muted small">Manage system exits and automated Ajo payouts</p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
+        <div class="card-header bg-white py-3 border-0">
+            <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-bank me-2"></i>Withdrawal Requests</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light small text-muted text-uppercase">
+                    <tr>
+                        <th class="ps-4">Member</th>
+                        <th>Amount</th>
+                        <th>Reference</th>
+                        <th class="text-end pe-4">Decision</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.PendingTransactions.Any())
+                    {
+                        @foreach (var tx in Model.PendingTransactions)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@tx.UserEmail.Split('@')[0]</div>
+                                    <small class="text-muted">@tx.Date.ToString("dd MMM, HH:mm")</small>
+                                </td>
+                                <td class="fw-bold text-danger">₦@tx.Amount.ToString("N2")</td>
+                                <td><code class="small bg-light px-2 rounded">@tx.Reference</code></td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
+                                        <form asp-action="ApproveTransaction" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="reference" value="@tx.Reference" />
+                                            <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">Pay</button>
+                                        </form>
+                                        <form asp-action="DeclineTransaction" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="reference" value="@tx.Reference" />
+                                            <button type="submit" class="btn btn-light btn-sm px-3 fw-bold border-start">Block</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    } else {
+                        <tr><td colspan="4" class="text-center py-5 text-muted small">No pending withdrawals in the queue.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between">
+            <h6 class="fw-bold mb-0 text-success"><i class="bi bi-calendar-check me-2"></i>Ajo Payout Queue</h6>
+            <span class="badge bg-soft-success text-success rounded-pill px-3">April Rotation</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light small text-muted text-uppercase">
+                    <tr>
+                        <th class="ps-4">Group Name</th>
+                        <th>Category</th>
+                        <th>Active Slot</th>
+                        <th class="text-end pe-4">Disbursement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var group in Model.AllThriftGroups)
+                    {
+                        var currentMonthOrder = ((DateTime.Now.Year - group.StartDate.Year) * 12) + DateTime.Now.Month - group.StartDate.Month + 1;
+                        if (currentMonthOrder < 1) currentMonthOrder = 1;
+                        
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">@group.GroupName</div>
+                                <small class="text-muted">@group.MemberPlans.Count Members Active</small>
+                            </td>
+                            <td><span class="badge bg-soft-gold text-gold rounded-pill px-3">₦@group.CategoryAmount.ToString("N0")</span></td>
+                            <td class="fw-bold text-primary">Slot @currentMonthOrder</td>
+                            <td class="text-end pe-4">
+                                <form asp-action="ProcessMonthlyPayout" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="groupId" value="@group.Id" />
+                                    <input type="hidden" name="currentMonthOrder" value="@currentMonthOrder" />
+                                    <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold shadow-sm">
+                                        Release Pack ₦@(group.CategoryAmount * group.MemberPlans.Count)
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-gold { background: rgba(212, 175, 55, 0.1); }
+    .text-gold { color: #D4AF37; }
+</style>
