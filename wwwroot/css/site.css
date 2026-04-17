@@ -1,174 +1,156 @@
 /* ======================================================
-   IES URBAN HUB x DABBASHETH THEME v5.0
-   THEME: Urban Emerald | Metallic Gold | Crisp White
+   IES URBAN HUB x DABBASHETH THEME v10.2 (PLATINUM)
+   THEME: Deep Navy & Sky Blue Professional Fintech
+   GOAL: Total Consistency from Login to Dashboard
    ====================================================== */
 
 :root {
-    /* --- 1. URBAN COLOR PALETTE --- */
-    --urban-emerald: #014134; /* Deep Professional Green */
-    --urban-gold: #D4AF37; /* Metallic Gold */
-    --urban-white: #FFFFFF;
-    --urban-bg: #F8F9FA;
-    --urban-card: #FFFFFF;
-    --urban-text: #1A1A1A;
-    --urban-muted: #8E8E93;
-    /* Semantic Tints */
-    --bg-soft-gold: rgba(212, 175, 55, 0.1);
-    --bg-soft-emerald: rgba(1, 65, 52, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.95);
-}
-
-[data-bs-theme="dark"] {
-    --urban-bg: #010101;
-    --urban-card: #1C1C1E;
-    --urban-text: #FFFFFF;
+    /* --- 1. BRAND IDENTITY VARIABLES --- */
+    --brand-navy: #0D2149;
+    --brand-blue: #1A73E8;
+    --brand-sky: #00B4DB;
+    --brand-gold: #FFB800;
+    --app-bg: #F8FAFC;
+    --card-shadow: 0 10px 30px rgba(13, 33, 73, 0.07);
 }
 
 /* --- 2. GLOBAL BASE STYLES --- */
 body {
-    background-color: var(--urban-bg) !important;
-    color: var(--urban-text) !important;
+    background-color: var(--app-bg) !important;
     font-family: 'Poppins', sans-serif;
-    padding-bottom: 90px; /* Space for Bottom Nav */
-    transition: background-color 0.3s ease;
-    -webkit-tap-highlight-color: transparent;
+    color: var(--brand-navy);
 }
 
-/* Typography & Tints */
-.text-gold {
-    color: var(--urban-gold) !important;
+::-webkit-scrollbar {
+    display: none; /* Clean native app look */
 }
 
-.bg-soft-gold {
-    background-color: var(--bg-soft-gold) !important;
-}
-
-.bg-soft-success {
-    background-color: var(--bg-soft-emerald) !important;
-}
-
-.border-gold {
-    border-color: var(--urban-gold) !important;
-}
-
-/* --- 3. PREMIUM COMPONENTS (CEO & USER) --- */
-
-/* The Signature Green Card */
-.premium-card, .balance-card {
-    background: linear-gradient(135deg, var(--urban-emerald) 0%, #001f1a 100%) !important;
-    border-bottom: 4px solid var(--urban-gold) !important;
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(1, 65, 52, 0.25);
-    color: white;
-}
-
-.card-dab {
-    background-color: var(--urban-card) !important;
-    border-radius: 20px;
-    border: 1px solid rgba(212, 175, 55, 0.2) !important;
-}
-
-/* Feature Icon Boxes */
-.icon-box {
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
+/* --- 3. PLATINUM GATEWAY (LOGIN PAGE) --- */
+.login-bg, .auth-container {
+    background: radial-gradient(circle at top right, var(--brand-blue) 0%, var(--brand-navy) 60%) !important;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 8px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(212, 175, 55, 0.05);
-    background-color: var(--urban-bg);
 }
 
-    .icon-box i {
-        font-size: 1.5rem;
+.login-card {
+    background: #FFFFFF !important;
+    border-radius: 35px !important;
+    padding: 40px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+    .login-card h4 {
+        color: var(--brand-navy) !important;
+        font-weight: 800;
     }
 
-/* --- 4. BUTTONS & ACTIONS --- */
-.btn-gold {
-    background-color: var(--urban-gold) !important;
-    color: var(--urban-emerald) !important;
-    border: none;
+    .login-card .text-muted {
+        color: var(--brand-blue) !important;
+        font-weight: 500;
+    }
+
+.login-btn, .btn-authorize {
+    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-sky) 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 15px !important;
+    height: 55px;
     font-weight: 700;
-    transition: all 0.3s;
-    border-radius: 50px;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(26, 115, 232, 0.3) !important;
 }
 
-    .btn-gold:hover {
-        background-color: #c4a02d !important;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(26, 115, 232, 0.4) !important;
     }
 
-/* --- 5. MOBILE APP UI TRANSFORMATIONS --- */
-@media (max-width: 768px) {
-    /* Force Native App Feel */
-    .card {
-        border-radius: 20px !important;
-        margin-bottom: 15px;
-        border: none !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+/* --- 4. THE SIDEBAR (PLATINUM NAVIGATION) --- */
+aside, .sidebar, #sidebar-wrapper {
+    background: var(--brand-navy) !important;
+    border-right: none !important;
+    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
+}
+
+    .sidebar .nav-link {
+        margin: 4px 15px;
+        border-radius: 12px !important;
+        padding: 12px 20px !important;
+        color: rgba(255, 255, 255, 0.7) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .desktop-header {
-        display: none;
-    }
-
-    /* The Bottom Navigation Bar (IES Hub Native) */
-    .mobile-nav, .opay-bottom-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 70px;
-        background: var(--urban-card);
-        display: flex;
-        justify-content: space-around;
-        align-items: center;
-        border-top: 1px solid rgba(212, 175, 55, 0.1);
-        z-index: 1050;
-        box-shadow: 0 -10px 25px rgba(0,0,0,0.05);
-        padding-bottom: env(safe-area-inset-bottom);
-    }
-
-        .mobile-nav .nav-item, .opay-bottom-nav a {
-            text-decoration: none;
-            color: var(--urban-muted);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 11px;
-            font-weight: 600;
-            transition: 0.2s;
+        .sidebar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+            transform: translateX(5px);
+            color: white !important;
         }
 
-            .mobile-nav .nav-item i, .opay-bottom-nav i {
-                font-size: 22px;
-                margin-bottom: 2px;
-            }
+        .sidebar .nav-link.active {
+            background: rgba(26, 115, 232, 0.15) !important;
+            color: white !important;
+            box-shadow: inset 4px 0 0 var(--brand-blue);
+        }
 
-            /* Active Tab State */
-            .mobile-nav .nav-item.active,
-            .opay-bottom-nav a.active,
-            .opay-bottom-nav a.text-success {
-                color: var(--urban-gold) !important;
-                transform: translateY(-2px);
-            }
+/* --- 5. PREMIUM DASHBOARD COMPONENTS --- */
+.premium-card, .balance-card {
+    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-sky) 100%) !important;
+    border-radius: 30px !important;
+    border: none !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(26, 115, 232, 0.25);
 }
 
-/* --- 6. UTILITIES --- */
-::-webkit-scrollbar {
-    display: none;
-}
-/* Hide scrollbar for clean app look */
+    .premium-card::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+        pointer-events: none;
+    }
 
-.avatar-sm {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+.card-dab, .card {
+    background: #FFFFFF !important;
+    border: 1px solid rgba(225, 230, 239, 0.8) !important;
+    border-radius: 24px !important;
+    box-shadow: var(--card-shadow) !important;
+    transition: transform 0.3s ease;
+}
+
+    .card-dab:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 45px rgba(13, 33, 73, 0.12) !important;
+    }
+
+/* --- 6. FEATURE ICONS --- */
+.icon-box {
+    width: 55px;
+    height: 55px;
+    border-radius: 18px;
+    background: #F1F5F9;
+    color: var(--brand-blue);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
+}
+
+    .icon-box:hover {
+        background: var(--brand-blue);
+        color: white;
+        transform: rotate(10deg);
+    }
+
+/* --- 7. FOOTER & SPECIAL BUTTONS --- */
+.sidebar .nav-link.text-danger {
+    margin-top: auto;
+    color: #ff6b6b !important;
+    border-top: 1px solid rgba(255,255,255,0.05);
 }

@@ -18,90 +18,114 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 📊 1. ANALYTICS ZONE (Executive Dashboard Overview)
+        // 📊 1. ANALYTICS ZONE
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // 🛡️ Gatekeeper: Secure Session Verification
             var role = TempData.Peek("UserRole")?.ToString();
             if (role != "Admin") return RedirectToAction("Login", "Account");
 
-            // 💰 Safe Global Liquidity Calculations (Case-Insensitive)
-            // We use (decimal?) to handle null sums on empty tables safely
             var totalWalletBalance = await _context.Wallets.AsNoTracking().SumAsync(w => (decimal?)w.Balance) ?? 0m;
             var totalThriftBalance = await _context.ThriftPlans.AsNoTracking().SumAsync(p => (decimal?)p.CurrentSavings) ?? 0m;
 
-            // ✅ ROBUST DATA RETRIEVAL: 
-            // We avoid sorting by 'Id' to prevent PostgreSQL case-sensitivity crashes.
             var viewModel = new AdminDashboardViewModel
             {
                 TotalUsers = await _context.Users.AsNoTracking().CountAsync(u => u.Role == "Customer"),
                 TotalSystemBalance = totalWalletBalance + totalThriftBalance,
                 PendingSupportCount = await _context.SupportTickets.AsNoTracking().CountAsync(t => t.Status == "Open"),
                 FlaggedTransactionCount = await _context.Transactions.AsNoTracking().CountAsync(t => t.Status == "Flagged"),
-
-                AllUsers = await _context.Users.AsNoTracking()
-                    .OrderByDescending(u => u.CreatedAt)
-                    .Take(5).ToListAsync(),
-
-                PendingTransactions = await _context.Transactions.AsNoTracking()
-                    .Where(t => t.Status == "Pending")
-                    .OrderByDescending(t => t.Date)
-                    .ToListAsync(),
-
-                AllThriftGroups = await _context.ThriftGroups.AsNoTracking()
-                    .Include(g => g.MemberPlans)
-                    .ToListAsync()
+                AllUsers = await _context.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt).Take(5).ToListAsync(),
+                PendingTransactions = await _context.Transactions.AsNoTracking().Where(t => t.Status == "Pending").OrderByDescending(t => t.Date).ToListAsync(),
+                AllThriftGroups = await _context.ThriftGroups.AsNoTracking().Include(g => g.MemberPlans).ToListAsync()
             };
 
             return View(viewModel);
         }
 
         // ============================================================
-        // 👥 2. USER MANAGEMENT ZONE (Identity & KYC)
+        // 👥 2. IDENTITY ZONE (KYC & Toggle Status)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> UserManagement()
         {
-            var users = await _context.Users.AsNoTracking()
-                .OrderByDescending(u => u.CreatedAt)
-                .ToListAsync();
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var users = await _context.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt).ToListAsync();
             return View(users);
         }
 
+        // ❄️ USER FREEZE/UNFREEZE LOGIC (Route Fix applied)
+        [HttpPost]
+        [Route("Admin/ToggleUserStatus/{id}")]
+        public async Task<IActionResult> ToggleUserStatus(int id)
+        {
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return Unauthorized();
+
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            // World-Class Toggle Logic
+            user.Status = (user.Status == "Active") ? "Frozen" : "Active";
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"User {user.FullName} status updated to: {user.Status}";
+
+            return RedirectToAction(nameof(UserManagement));
+        }
+
         // ============================================================
-        // 💸 3. DISBURSEMENT ZONE (Payout Control)
+        // 🛡️ 3. SECURITY & RISK ZONE
         // ============================================================
         [HttpGet]
-        public async Task<IActionResult> PayoutControl()
+        public async Task<IActionResult> RiskControl()
         {
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
             var viewModel = new AdminDashboardViewModel
             {
                 PendingTransactions = await _context.Transactions.AsNoTracking()
-                    .Where(t => t.Status == "Pending")
+                    .Where(t => t.Status == "Pending" || t.Status == "Flagged")
                     .OrderByDescending(t => t.Date)
                     .ToListAsync(),
-
-                AllThriftGroups = await _context.ThriftGroups.AsNoTracking()
-                    .Include(g => g.MemberPlans)
-                    .ToListAsync()
+                AllUsers = await _context.Users.AsNoTracking().ToListAsync()
             };
 
             return View(viewModel);
         }
 
         // ============================================================
-        // 🛠️ 4. HUB OPERATIONS (Support & System Settings)
+        // 💸 4. DISBURSEMENT ZONE
+        // ============================================================
+        [HttpGet]
+        public async Task<IActionResult> PayoutControl()
+        {
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
+            var viewModel = new AdminDashboardViewModel
+            {
+                PendingTransactions = await _context.Transactions.AsNoTracking().Where(t => t.Status == "Pending").OrderByDescending(t => t.Date).ToListAsync(),
+                AllThriftGroups = await _context.ThriftGroups.AsNoTracking().Include(g => g.MemberPlans).ToListAsync()
+            };
+            return View(viewModel);
+        }
+
+        // ============================================================
+        // 🛠️ 5. OPERATIONS ZONE
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> SupportCenter()
         {
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
             var viewModel = new AdminDashboardViewModel
             {
-                SupportTickets = await _context.SupportTickets.AsNoTracking()
-                    .OrderByDescending(t => t.CreatedAt)
-                    .ToListAsync()
+                SupportTickets = await _context.SupportTickets.AsNoTracking().OrderByDescending(t => t.CreatedAt).ToListAsync()
             };
             return View(viewModel);
         }
@@ -109,7 +133,9 @@ namespace Dabbasheth.Controllers
         [HttpGet]
         public async Task<IActionResult> Settings()
         {
-            // Fetch system settings list for the configuration view
+            var role = TempData.Peek("UserRole")?.ToString();
+            if (role != "Admin") return RedirectToAction("Login", "Account");
+
             var settings = await _context.SystemSettings.AsNoTracking().ToListAsync();
             return View(settings);
         }
