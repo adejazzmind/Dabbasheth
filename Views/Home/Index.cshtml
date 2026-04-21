@@ -1,116 +1,243 @@
 ﻿@model Dabbasheth.Models.UserDashboardViewModel
-@{ 
-    Layout = "_Layout"; 
+@{
+    Layout = "_Layout";
 }
 
-<div class="container py-4 animate__animated animate__fadeIn">
-    @* --- Header Section --- *@
-    <div class="d-flex justify-content-between align-items-center mb-4 px-2">
-        <div>
-            <small class="text-muted d-block">Welcome back,</small>
-            <h4 class="fw-bold mb-0" style="color: var(--brand-navy);">@TempData.Peek("UserName")</h4>
+<style>
+    :root {
+        --navy-bg: #050B18;       /* Navy Base */
+        --navy-card: #0A192F;     /* Navy Card Surface */
+        --blue-main: #0047AB;     /* Blue */
+        --blue-light: #00B4D8;    /* Light Blue Glow */
+        --gold: #D4AF37;          /* Premium Gold */
+        --white: #FFFFFF;         /* Pure White */
+    }
+
+    /* Standardizes the full page to Navy */
+    html, body {
+        background-color: var(--navy-bg) !important;
+        margin: 0;
+        padding: 0;
+        color: var(--white);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .premium-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: var(--navy-bg);
+        min-height: 100vh;
+    }
+
+    /* Typography Accents */
+    .text-gold { color: var(--gold) !important; }
+    .text-light-blue { color: var(--blue-light) !important; }
+    .text-gradient-gold {
+        background: linear-gradient(135deg, var(--white) 0%, var(--gold) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* ✅ FIXED: Escaped @@media for Razor syntax */
+    @@media (max-width: 576px) {
+        .premium-container { 
+            max-width: 100% !important; 
+            border-radius: 0 !important; 
+        }
+        .service-box-lux { 
+            width: 65px; 
+            height: 65px; 
+        }
+    }
+
+    /* 💳 Wallet Card: Navy & Blue Gradient */
+    .wallet-card-lux {
+        position: relative;
+        background: linear-gradient(135deg, var(--navy-card) 0%, var(--blue-main) 100%);
+        border-radius: 28px;
+        border: 1px solid rgba(0, 180, 216, 0.2);
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .pattern-overlay {
+        position: absolute;
+        width: 100%; height: 100%;
+        opacity: 0.15;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.828-1.415 1.415L51.8 0h2.827zM5.373 0l-.83.828L5.96 2.243 8.2 0H5.374z' fill='%2300B4D8' fill-opacity='0.4'/%3E%3C/svg%3E");
+    }
+
+    /* Gold Buttons */
+    .btn-lux {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.05));
+        border: 1.5px solid var(--gold);
+        color: var(--gold);
+        padding: 14px;
+        border-radius: 16px;
+        font-weight: bold;
+        transition: 0.3s;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+    .btn-lux:hover { background: var(--gold); color: var(--navy-bg); box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); transform: translateY(-2px); }
+
+    /* Service Icons: Light Blue Accent */
+    .service-box-lux {
+        width: 60px; height: 60px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid rgba(0, 180, 216, 0.15);
+        transition: 0.3s;
+    }
+    .service-box-lux:hover { border-color: var(--blue-light); background: rgba(0, 180, 216, 0.08); transform: translateY(-3px); }
+
+    /* Glass Panels */
+    .glass-card { background: rgba(255, 255, 255, 0.02); border-radius: 22px; border: 1px solid rgba(0, 180, 216, 0.1); backdrop-filter: blur(10px); }
+    .glass-card-gold { background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(5, 11, 24, 0.4) 100%); border-radius: 22px; border: 1px solid var(--gold); color: var(--gold); }
+
+    /* Progress Slot: Light Blue Pulse */
+    .slot { width: 100%; height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; }
+    .slot.active { background: var(--blue-light); box-shadow: 0 0 10px var(--blue-light); }
+    .slot.pulse { animation: glow-pulse-blue 2s infinite; }
+    @@keyframes glow-pulse-blue { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+</style>
+
+<div class="premium-container">
+    @* --- 🌟 NAVY TOP BAR --- *@
+    <div class="nav-glass d-flex justify-content-between align-items-center px-4 py-3 mb-4">
+        <div class="logo-area">
+            <p class="mb-0 x-small text-gold fw-bold">IES Urban Hub</p>
+            <p class="mb-0 x-small text-light-blue opacity-50">(Dabbasheth)</p>
         </div>
-        <div class="avatar-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style="width:45px; height:45px; border-radius: 50%; border: 2px solid var(--brand-sky);">
-             <i class="bi bi-person-fill" style="color: var(--brand-blue);"></i>
+        <div class="profile-frame">
+            <img src="https://ui-avatars.com/api/?name=@(TempData.Peek("UserName") ?? "User")&background=0A192F&color=D4AF37" 
+                 class="rounded-circle" style="border: 2px solid var(--blue-light); box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);" width="42" height="42" />
         </div>
     </div>
 
-    @* --- Premium Wallet Card (The Big Blue Card) --- *@
-    <div class="row g-3 mb-4">
-        <div class="col-12">
-            <div class="card premium-card p-4"> @* Using the premium-card class from site.css *@
-                <div class="d-flex justify-content-between align-items-start mb-4">
-                    <div>
-                        <p class="text-uppercase small opacity-75 mb-1" style="letter-spacing: 1px; font-weight: 600;">Wallet Balance</p>
-                        <h1 class="display-5 fw-bold mb-0">₦@Model.Wallet.Balance.ToString("N2")</h1>
+    @* --- 👋 GREETING --- *@
+    <div class="px-4 mb-4">
+        <h6 class="text-light-blue small mb-1 tracking-widest opacity-75">DASHBOARD</h6>
+        <h3 class="fw-bold text-white mb-0">Welcome Back,</h3>
+        <h3 class="fw-bold text-gradient-gold">@TempData.Peek("UserName")</h3>
+    </div>
+
+    @* --- 💳 BALANCE CARD --- *@
+    <div class="px-3 mb-4">
+        <div class="wallet-card-lux">
+            <div class="pattern-overlay"></div>
+            <div class="card-content p-4" style="position: relative; z-index: 2;">
+                <p class="text-uppercase x-small mb-1 text-light-blue fw-bold opacity-75">Wallet Balance</p>
+                <h1 class="display-5 fw-bold mb-4 text-white">₦@(Model.Wallet?.Balance.ToString("N2") ?? "0.00")</h1>
+                <div class="d-flex">
+                    <a href="@Url.Action("FundWallet", "Wallet")" class="btn-lux flex-grow-1">
+                        <i class="bi bi-plus-circle-fill me-2"></i> Fund Wallet
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- 📱 SERVICES HUB --- *@
+    <div class="px-4 mb-4">
+        <h6 class="text-gold small mb-3 tracking-widest fw-bold">CORE HUB SERVICES</h6>
+        <div class="row g-3 text-center">
+            @{
+                var services = new[] { 
+                    new { Icon = "bi-grid-1x2", Label = "Alttanti", Color = "text-light-blue", Action = "Index" },
+                    new { Icon = "bi-phone", Label = "Airtime", Color = "text-white", Action = "Airtime" },
+                    new { Icon = "bi-wifi", Label = "Data Hub", Color = "text-light-blue", Action = "Data" },
+                    new { Icon = "bi-lightbulb", Label = "Bills", Color = "text-gold", Action = "PayBills" },
+                    new { Icon = "bi-people", Label = "Join Cycle", Color = "text-white", Action = "Thrift" }
+                };
+            }
+            @foreach (var s in services)
+            {
+                <div class="col-4 col-md-2 mb-2">
+                    <a href="@Url.Action(s.Action, "Home")" class="text-decoration-none">
+                        <div class="service-box-lux mx-auto mb-2">
+                            <i class="bi @s.Icon @s.Color fs-4"></i>
+                        </div>
+                        <p class="x-small text-white opacity-75 fw-bold">@s.Label</p>
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* --- 💰 SAVINGS GOALS --- *@
+    <div class="px-4 mb-3">
+        <h6 class="text-gold small mb-0 tracking-widest fw-bold">SAVINGS GOALS</h6>
+    </div>
+
+    <div class="px-3 mb-4">
+        <div class="row g-3">
+            <div class="col-8">
+                <div class="glass-card p-3 h-100">
+                    <p class="x-small opacity-50 mb-1 text-white">Total Savings Pool</p>
+                    <h4 class="fw-bold text-light-blue">₦@(Model.ThriftPlans?.Sum(p => p.CurrentSavings).ToString("N0") ?? "0")</h4>
+                    <div class="slot-tracker d-flex gap-1 my-2">
+                        <div class="slot active"></div>
+                        <div class="slot active pulse"></div>
+                        <div class="slot"></div>
+                        <div class="slot"></div>
+                        <div class="slot"></div>
                     </div>
-                    <i class="bi bi-sim-fill h1 opacity-25"></i>
+                    <p class="x-small text-gold mb-0 fw-bold">Next Slot: #2 Active</p>
                 </div>
-                <div class="d-flex gap-2">
-                    @* Updated Fund Wallet Button to use Sky Blue/Navy contrast *@
-                    <button class="btn btn-white bg-white text-primary flex-grow-1 rounded-pill fw-bold border-0 shadow-sm">
-                        <i class="bi bi-plus-lg me-1"></i> Fund Wallet
-                    </button>
-                    <button class="btn bg-white bg-opacity-10 text-white flex-grow-1 rounded-pill fw-bold border-1 border-white border-opacity-25">
-                        <i class="bi bi-arrow-up-right me-1"></i> Withdraw
-                    </button>
-                </div>
+            </div>
+            <div class="col-4">
+                <a href="@Url.Action("Thrift", "Home")" class="text-decoration-none h-100">
+                    <div class="glass-card-gold p-3 h-100 text-center d-flex flex-column justify-content-center">
+                        <i class="bi bi-piggy-bank h3 mb-2"></i>
+                        <p class="x-small fw-bold mb-0">New Goal</p>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 
-    @* --- Savings Stats --- *@
-    <h6 class="fw-bold mb-3 px-2" style="color: var(--brand-navy);">My Savings Plans</h6>
-    <div class="row g-3 mb-4">
-        <div class="col-6">
-            <div class="card card-dab p-3 h-100"> @* Using card-dab for the lifting effect *@
-                <small class="text-muted d-block mb-1">Total Savings</small>
-                <h5 class="fw-bold mb-2" style="color: var(--brand-blue);">₦@Model.ThriftPlans.Sum(p => p.CurrentSavings).ToString("N0")</h5>
-                <div class="progress mb-2" style="height: 6px; border-radius: 10px; background: #eee;">
-                    <div class="progress-bar" style="width: 65%; background: var(--brand-sky);"></div>
-                </div>
-                <small class="small fw-bold" style="color: var(--brand-sky);">Active Goals</small>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card card-dab p-3 h-100">
-                <small class="text-muted d-block mb-1">Active Ajo</small>
-                <h5 class="fw-bold mb-2" style="color: var(--brand-blue);">@Model.ThriftGroups.Count Groups</h5>
-                <span class="badge rounded-pill small" style="background: rgba(0, 180, 219, 0.1); color: var(--brand-sky);">In Rotation</span>
-            </div>
-        </div>
+    @* --- 📑 ACTIVITY FEED --- *@
+    <div class="px-4 mb-3 d-flex justify-content-between align-items-center">
+        <h6 class="text-light-blue small mb-0 tracking-widest fw-bold">ACTIVITY LOG</h6>
+        <a href="/Wallet/History" class="x-small text-gold text-decoration-none fw-bold">View All</a>
     </div>
 
-    @* --- Transaction History --- *@
-    <div class="d-flex justify-content-between align-items-center mb-3 px-2">
-        <h6 class="fw-bold mb-0" style="color: var(--brand-navy);">Recent Transactions</h6>
-        <a href="/Wallet/History" class="text-decoration-none small fw-bold" style="color: var(--brand-blue);">View All</a>
-    </div>
-
-    <div class="card card-dab bg-white overflow-hidden mb-5">
-        <div class="list-group list-group-flush">
+    <div class="px-3 pb-5">
+        <div class="glass-card overflow-hidden">
             @if(Model.RecentTransactions != null && Model.RecentTransactions.Any())
             {
                 @foreach(var tx in Model.RecentTransactions)
                 {
-                    string txType = tx.Type ?? "Credit";
-                    string iconClass = txType == "Credit" ? "bg-soft-success" : "bg-soft-danger";
-                    string iconType = txType == "Credit" ? "bi-arrow-down-left text-success" : "bi-arrow-up-right text-danger";
-                    string textClass = txType == "Credit" ? "text-success" : "text-danger";
-                    string prefix = txType == "Credit" ? "+" : "-";
-
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 border-bottom mx-2 bg-transparent">
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom border-white border-opacity-5">
                         <div class="d-flex align-items-center">
-                            <div class="icon-box @iconClass rounded-circle me-3" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; margin-bottom:0;">
-                                <i class="bi @iconType"></i>
+                            <div class="service-box-lux me-3" style="width: 40px; height: 40px; background: rgba(255,255,255,0.02);">
+                                <i class="bi @(tx.Type == "Credit" ? "bi-arrow-down-left text-light-blue" : "bi-arrow-up-right text-gold") x-small"></i>
                             </div>
                             <div>
-                                <p class="mb-0 fw-bold small">@tx.Description</p>
-                                <small class="text-muted">@tx.Date.ToString("dd MMM")</small>
+                                <p class="mb-0 small fw-bold text-white">@tx.Description</p>
+                                <p class="mb-0 x-small text-light-blue opacity-50">@tx.Date.ToString("dd MMM")</p>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <p class="mb-0 fw-bold @textClass">
-                                @prefix₦@tx.Amount.ToString("N0")
-                            </p>
-                        </div>
+                        <p class="mb-0 small fw-bold @(tx.Type == "Credit" ? "text-light-blue" : "text-gold")">
+                            @(tx.Type == "Credit" ? "+" : "-")₦@tx.Amount.ToString("N0")
+                        </p>
                     </div>
                 }
             }
-            else 
+            else
             {
-                <div class="p-5 text-center text-muted">
-                    <i class="bi bi-receipt-cutoff d-block h1 opacity-25"></i>
-                    No recent activity found
+                <div class="py-5 text-center">
+                    <i class="bi bi-clock-history d-block h1 opacity-10 text-light-blue mb-3"></i>
+                    <p class="small text-white opacity-40 mb-0 font-italic">No transactions recorded</p>
                 </div>
             }
         </div>
     </div>
 </div>
-
-@* --- Visual Overrides to ensure Platinum look --- *@
-<style>
-    .bg-soft-success { background: #E8F5E9 !important; }
-    .bg-soft-danger { background: #FFEBEE !important; }
-    .premium-card { border-radius: 30px !important; }
-</style>

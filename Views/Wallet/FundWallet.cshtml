@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<style>
+    :root {
+        --navy-deep: #050B18;
+        --blue-light: #00B4D8;
+        --gold: #D4AF37;
+        --white: #FFFFFF;
+    }
+
+    html, body {
+        background-color: var(--navy-deep) !important;
+        color: var(--white);
+    }
+
+    .premium-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: var(--navy-deep);
+        min-height: 100vh;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 25px;
+        border: 1px solid rgba(0, 180, 216, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control-lux {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 180, 216, 0.2);
+        color: white;
+        border-radius: 15px;
+        padding: 15px;
+    }
+
+        .form-control-lux:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold);
+            color: white;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+    .btn-gold {
+        background: var(--gold);
+        color: var(--navy-deep);
+        border-radius: 15px;
+        padding: 15px;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+            background: #f1c40f;
+        }
+</style>
+
+<div class="premium-container py-4 px-3">
+    @* --- Header --- *@
+    <div class="d-flex align-items-center mb-4">
+        <a href="javascript:history.back()" class="text-white me-3 fs-4"><i class="bi bi-arrow-left"></i></a>
+        <h4 class="fw-bold mb-0 text-gradient-gold">Fund Wallet</h4>
+    </div>
+
+    @* --- Instruction Card --- *@
+    <div class="glass-card p-4 mb-4 text-center">
+        <i class="bi bi-bank2 h1 text-light-blue mb-3"></i>
+        <h5 class="fw-bold">Instant Top-up</h5>
+        <p class="small opacity-75">Enter the amount you wish to add to your IES Urban Hub wallet.</p>
+    </div>
+
+    @* --- Funding Form --- *@
+    <div class="glass-card p-4">
+        <form>
+            <div class="mb-4">
+                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Amount (₦)</label>
+                <input type="number" class="form-control form-control-lux" placeholder="Enter amount (e.g. 5000)" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Payment Method</label>
+                <div class="glass-card p-3 d-flex align-items-center mb-2 border-gold" style="border: 1px solid var(--gold) !important;">
+                    <i class="bi bi-credit-card-2-front text-gold me-3 fs-4"></i>
+                    <div class="flex-grow-1">
+                        <p class="mb-0 fw-bold small">Paystack / Flutterwave</p>
+                        <small class="opacity-50 x-small">Cards, Transfer, USSD</small>
+                    </div>
+                    <i class="bi bi-check-circle-fill text-gold"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-gold w-100 shadow-glow">
+                Initialize Secure Payment
+            </button>
+        </form>
+    </div>
+
+    @* --- Security Footer --- *@
+    <div class="text-center mt-5 opacity-50">
+        <i class="bi bi-shield-check text-light-blue me-1"></i>
+        <small class="x-small">Secure 256-bit Encrypted Transaction</small>
+    </div>
+</div>

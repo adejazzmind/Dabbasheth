@@ -39,7 +39,6 @@ namespace Dabbasheth.Controllers
                     .Where(p => p.UserEmail.ToLower() == email.ToLower())
                     .ToListAsync(),
 
-                // ✅ SYNCHRONIZED: Using 'Transaction' class and 'Date' property
                 RecentTransactions = await _context.Transactions
                     .Where(t => t.UserEmail.ToLower() == email.ToLower())
                     .OrderByDescending(t => t.Date)
@@ -93,7 +92,6 @@ namespace Dabbasheth.Controllers
                 return RedirectToAction("Withdraw");
             }
 
-            // ✅ SYNCHRONIZED: Creating a standard 'Transaction' record
             var request = new Transaction
             {
                 UserEmail = email,
@@ -101,7 +99,7 @@ namespace Dabbasheth.Controllers
                 Description = $"Withdrawal: {bankName} ({accountNumber})",
                 Date = DateTime.UtcNow,
                 Type = "Debit",
-                Status = "Pending" // CEO/Admin approval required
+                Status = "Pending"
             };
 
             _context.Transactions.Add(request);
@@ -112,7 +110,7 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 💰 3. SAVINGS ENGINE (Individual Thrift)
+        // 💰 3. SAVINGS ENGINE (Individual Thrift & Ajo)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Thrift()
@@ -176,11 +174,9 @@ namespace Dabbasheth.Controllers
                     return RedirectToAction("Thrift");
                 }
 
-                // 🏦 ATOMIC TRANSACTION: Wallet to Savings
                 wallet.Balance -= amount;
                 plan.CurrentSavings += amount;
 
-                // ✅ SYNCHRONIZED: Creating a standard 'Transaction' record
                 _context.Transactions.Add(new Transaction
                 {
                     UserEmail = email,
@@ -202,10 +198,35 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 🛠️ 4. UTILITIES
+        // 🛠️ 4. HUB UTILITIES (Airtime, Data, Bills)
         // ============================================================
-        public IActionResult PayBills() => View();
 
+        [HttpGet]
+        public IActionResult Airtime()
+        {
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Data()
+        {
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
+            // Reuse the Airtime logic or point to a dedicated Data view
+            return View("Airtime");
+        }
+
+        [HttpGet]
+        public IActionResult PayBills()
+        {
+            string email = GetLoggedInUserEmail();
+            if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult Rewards()
         {
             ViewBag.Cashback = 36.00m;

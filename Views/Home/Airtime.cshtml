@@ -1,0 +1,152 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<style>
+    :root {
+        --navy-deep: #050B18;
+        --blue-light: #00B4D8;
+        --gold: #D4AF37;
+        --white: #FFFFFF;
+    }
+
+    html, body {
+        background-color: var(--navy-deep) !important;
+        color: var(--white);
+        font-family: 'Inter', sans-serif;
+    }
+
+    .premium-container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: var(--navy-deep);
+        min-height: 100vh;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 25px;
+        border: 1px solid rgba(0, 180, 216, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .network-pill {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        background: rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+        .network-pill.active {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+    .form-control-lux {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 180, 216, 0.15);
+        color: white;
+        border-radius: 15px;
+        padding: 14px;
+    }
+
+        .form-control-lux:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold);
+            color: white;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+    .btn-gold {
+        background: var(--gold);
+        color: var(--navy-deep);
+        border-radius: 16px;
+        padding: 15px;
+        font-weight: bold;
+        border: none;
+        transition: 0.3s;
+    }
+
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+</style>
+
+<div class="premium-container py-4 px-3">
+    @* --- Header --- *@
+    <div class="d-flex align-items-center mb-4">
+        <a href="@Url.Action("Index", "Home")" class="text-white me-3 fs-4 text-decoration-none">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        <h4 class="fw-bold mb-0 text-gradient-gold">Buy Airtime</h4>
+    </div>
+
+    @* --- Network Selection --- *@
+    <div class="glass-card p-4 mb-4">
+        <label class="small text-gold fw-bold mb-3 tracking-widest text-uppercase d-block">Select Network</label>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="network-pill active">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/MTN_Logo.svg" width="30" />
+            </div>
+            <div class="network-pill">
+                <img src="https://upload.wikimedia.org/wikipedia/en/9/91/Airtel_logo.svg" width="30" />
+            </div>
+            <div class="network-pill">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Glo_Limited_logo.svg/1200px-Glo_Limited_logo.svg.png" width="30" />
+            </div>
+            <div class="network-pill">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/07/9mobile_logo.svg/1200px-9mobile_logo.svg.png" width="30" />
+            </div>
+        </div>
+    </div>
+
+    @* --- Form Area --- *@
+    <div class="glass-card p-4">
+        <form>
+            <div class="mb-4">
+                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-white border-opacity-10 text-white" style="border-radius: 15px 0 0 15px;">+234</span>
+                    <input type="tel" class="form-control form-control-lux border-start-0" placeholder="8123456789" style="border-radius: 0 15px 15px 0;">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Amount</label>
+                <input type="number" class="form-control form-control-lux" placeholder="₦ 0.00">
+                <div class="d-flex gap-2 mt-2">
+                    <span class="badge rounded-pill bg-soft-primary px-3 py-2 border border-white border-opacity-10 cursor-pointer">₦100</span>
+                    <span class="badge rounded-pill bg-soft-primary px-3 py-2 border border-white border-opacity-10 cursor-pointer">₦200</span>
+                    <span class="badge rounded-pill bg-soft-primary px-3 py-2 border border-white border-opacity-10 cursor-pointer">₦500</span>
+                    <span class="badge rounded-pill bg-soft-primary px-3 py-2 border border-white border-opacity-10 cursor-pointer">₦1000</span>
+                </div>
+            </div>
+
+            <div class="glass-card p-3 mb-4 d-flex justify-content-between align-items-center" style="background: rgba(0, 180, 216, 0.05);">
+                <small class="opacity-75">Payable Amount</small>
+                <h5 class="fw-bold text-gold mb-0">₦ 0.00</h5>
+            </div>
+
+            <button type="submit" class="btn-gold w-100">
+                Purchase Airtime
+            </button>
+        </form>
+    </div>
+
+    @* --- Recent History Preview --- *@
+    <div class="mt-5 px-2">
+        <h6 class="small text-gold fw-bold tracking-widest mb-3">RECENT TOP-UPS</h6>
+        <div class="glass-card p-3 text-center opacity-50 py-5">
+            <i class="bi bi-clock-history d-block h1 mb-2"></i>
+            <p class="small mb-0">No recent airtime history</p>
+        </div>
+    </div>
+</div>
