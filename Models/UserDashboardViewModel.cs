@@ -6,7 +6,7 @@ namespace Dabbasheth.Models
     {
         public Wallet Wallet { get; set; }
         public List<ThriftPlan> ThriftPlans { get; set; }
-        public List<TransactionRecord> RecentTransactions { get; set; }
+        public List<Transaction> RecentTransactions { get; set; }
         public List<ThriftGroup> ThriftGroups { get; set; }
     }
 }

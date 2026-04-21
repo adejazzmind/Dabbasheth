@@ -1,18 +1,19 @@
-﻿@{ Layout = "_Layout"; }
+﻿@model Dabbasheth.Models.UserDashboardViewModel
+@{
+    Layout = "_Layout";
+}
 
-<div class="min-vh-100 d-flex align-items-center justify-content-center p-3" 
-     style="background: linear-gradient(135deg, #014134 0%, #001f1a 100%);">
-    
-    <div class="card border-0 shadow-lg animate__animated animate__fadeInDown" 
-         style="width: 100%; max-width: 420px; border-radius: 35px; background: rgba(255, 255, 255, 0.98);">
+<div class="login-bg animate__animated animate__fadeIn">
+    <div class="card login-card animate__animated animate__fadeInDown"
+         style="width: 100%; max-width: 420px; border: none;">
         
         <div class="card-body p-5">
             <div class="text-center mb-4">
-                @* 🟡 GOLD LOGO ICON *@
-                <div class="icon-box mx-auto mb-3" style="width: 70px; height: 70px; background: #014134; border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid #D4AF37;">
-                    <i class="bi bi-shield-lock-fill h2 mb-0" style="color: #D4AF37;"></i>
+                @* 🔵 PLATINUM NAVY ICON BOX *@
+                <div class="icon-box mx-auto mb-3" style="width: 70px; height: 70px; background: var(--brand-navy); border-radius: 20px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--brand-sky);">
+                    <i class="bi bi-shield-lock-fill h2 mb-0" style="color: var(--brand-sky);"></i>
                 </div>
-                <h3 class="fw-bold" style="color: #014134; letter-spacing: -1px;">IES URBAN HUB</h3>
+                <h3 class="fw-bold" style="color: var(--brand-navy); letter-spacing: -1px;">IES URBAN HUB</h3>
                 <p class="text-muted small text-uppercase fw-bold" style="letter-spacing: 1px;">Executive Terminal</p>
             </div>
 
@@ -27,42 +28,41 @@
             <form asp-action="Login" method="post">
                 @Html.AntiForgeryToken()
 
-                @* 📧 EMAIL INPUT SPACE *@
+                @* 📧 EMAIL INPUT *@
                 <div class="mb-3">
                     <label class="small fw-bold text-muted ms-1 mb-1">Corporate Email</label>
                     <div class="input-group">
                         <span class="input-group-text border-0 bg-light rounded-start-4 ps-3">
                             <i class="bi bi-envelope text-muted"></i>
                         </span>
-                        <input type="email" name="email" class="form-control border-0 bg-light py-3 pe-4 rounded-end-4 shadow-none" 
+                        <input type="email" name="email" class="form-control border-0 bg-light py-3 pe-4 rounded-end-4 shadow-none"
                                placeholder="admin@ieshub.com" required />
                     </div>
                 </div>
 
-                @* 🔑 PASSWORD INPUT SPACE *@
+                @* 🔑 PASSWORD INPUT *@
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <label class="small fw-bold text-muted ms-1">Security Key</label>
-                        <a href="#" class="text-decoration-none small fw-bold" style="color: #014134; font-size: 0.7rem;">Forgot?</a>
+                        <a href="#" class="text-decoration-none small fw-bold" style="color: var(--brand-blue); font-size: 0.7rem;">Forgot?</a>
                     </div>
                     <div class="input-group">
                         <span class="input-group-text border-0 bg-light rounded-start-4 ps-3">
                             <i class="bi bi-key text-muted"></i>
                         </span>
-                        <input type="password" name="password" class="form-control border-0 bg-light py-3 pe-4 rounded-end-4 shadow-none" 
+                        <input type="password" name="password" class="form-control border-0 bg-light py-3 pe-4 rounded-end-4 shadow-none"
                                placeholder="••••••••" required />
                     </div>
                 </div>
 
-                @* 🟢 AUTHORIZE SESSION BUTTON *@
-                <button type="submit" class="btn btn-gold w-100 py-3 rounded-pill fw-bold shadow-lg mb-4 text-uppercase" 
-                        style="background: #D4AF37 !important; color: #014134 !important; border: none; letter-spacing: 1px;">
+                @* 🔵 AUTHORIZE SESSION BUTTON (SKY BLUE GRADIENT) *@
+                <button type="submit" class="btn login-btn w-100 py-3 rounded-pill fw-bold shadow-lg mb-4 text-uppercase">
                     Authorize Session
                 </button>
                 
                 <div class="text-center">
-                    <p class="small text-muted mb-0">Secure Gateway Powered by <span class="fw-bold" style="color: #014134;">Dabbasheth v5.0</span></p>
-                    <a href="/Account/Register" class="text-decoration-none small fw-bold mt-2 d-inline-block" style="color: #014134;">Create New Identity</a>
+                    <p class="small text-muted mb-0">Secure Gateway Powered by <span class="fw-bold" style="color: var(--brand-navy);">Dabbasheth v6.0</span></p>
+                    <a href="/Account/Register" class="text-decoration-none small fw-bold mt-2 d-inline-block" style="color: var(--brand-blue);">Create New Identity</a>
                 </div>
             </form>
         </div>
@@ -70,16 +70,22 @@
 </div>
 
 <style>
-    .btn-gold:hover {
-        background: #014134 !important;
-        color: #D4AF37 !important;
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+    /* --- Clean Overrides for Platinum Look --- */
+    .login-bg {
+        background: radial-gradient(circle at top right, var(--brand-blue) 0%, var(--brand-navy) 60%) !important;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
+
     .form-control:focus {
-        background-color: #f0f7f4 !important; /* Slight emerald tint on focus */
+        background-color: #f0f4f8 !important; /* Soft blue tint instead of green */
+        border: 1px solid var(--brand-sky) !important;
     }
-    .input-group-text {
-        font-size: 1.1rem;
+
+    .login-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
     }
 </style>

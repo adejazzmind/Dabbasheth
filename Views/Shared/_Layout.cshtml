@@ -3,17 +3,20 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    @* --- Updated Theme Color for Mobile Browser Bars --- *@
+    
+    @* --- KILL THE GREEN: Platinum Navy Browser Theme --- *@
     <meta name="theme-color" content="#0D2149">
+    
     <title>@ViewData["Title"] - IES Urban Hub</title>
     
+    @* --- Stylesheets --- *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
     <style>
-        /* --- CORE LAYOUT OVERRIDES (Matching v9.0) --- */
+        /* --- PLATINUM GLOBAL VARIABLES --- */
         :root {
             --brand-navy: #0D2149;
             --brand-sky: #1A73E8;
@@ -27,9 +30,10 @@
             min-height: 100vh;
             margin: 0;
             overflow-x: hidden;
+            color: var(--brand-navy);
         }
 
-        /* 🖥️ SIDEBAR RE-TRANSFORMATION (KILL THE GREEN) */
+        /* --- SIDEBAR: NAVY TRANSFORMATION --- */
         #sidebar-wrapper { 
             width: 280px; 
             background: var(--brand-navy) !important; 
@@ -39,6 +43,7 @@
             transition: all 0.3s;
             z-index: 1000;
             border-right: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.1);
         }
 
         #page-content-wrapper { 
@@ -49,7 +54,7 @@
             flex-direction: column; 
         }
 
-        /* 📱 MOBILE NAVIGATION POLISH */
+        /* --- MOBILE NAVIGATION: CLEAN FINTECH STYLE --- */
         .mobile-nav {
             position: fixed;
             bottom: 0; left: 0; right: 0;
@@ -71,11 +76,13 @@
             align-items: center;
             font-size: 10px;
             font-weight: 600;
+            transition: 0.3s ease;
         }
 
         .mobile-nav .nav-item i { font-size: 24px; margin-bottom: 2px; }
         .mobile-nav .nav-item.active { color: var(--brand-sky) !important; }
 
+        /* Performance: Hide scrollbars */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -88,13 +95,13 @@
 
     <div class="@wrapperClass" id="wrapper">
         
-        @* --- 🖥️ SIDEBAR: Only visible if LOGGED IN as ADMIN --- *@
+        @* --- 🖥️ SIDEBAR: ADMIN COMMAND CENTER --- *@
         @if (isLoggedIn && userRole == "Admin")
         {
-            <aside class="text-white shadow-lg d-none d-lg-block sidebar" id="sidebar-wrapper">
+            <aside class="text-white sidebar" id="sidebar-wrapper">
                 <div class="p-4 text-center">
-                    <h4 class="fw-bold mb-0" style="color: var(--brand-gold);">IES HUB</h4>
-                    <small class="opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 1px;">Executive Command</small>
+                    <h4 class="fw-bold mb-0" style="color: var(--brand-gold); letter-spacing: 1px;">IES HUB</h4>
+                    <small class="opacity-50 text-uppercase" style="font-size: 0.6rem; letter-spacing: 2px;">Executive Command</small>
                 </div>
                 
                 <div class="list-group list-group-flush px-3 mt-3">
@@ -114,14 +121,16 @@
                         <i class="bi bi-headset me-3"></i> Help Desk
                     </a>
                     
-                    <a href="/Account/Logout" class="nav-link text-danger mt-5">
-                        <i class="bi bi-box-arrow-left me-3"></i> Secure Logout
-                    </a>
+                    <div class="mt-auto">
+                        <a href="/Account/Logout" class="nav-link text-danger mb-4">
+                            <i class="bi bi-box-arrow-left me-3"></i> Secure Logout
+                        </a>
+                    </div>
                 </div>
             </aside>
         }
 
-        @* 🚀 MAIN CONTENT AREA *@
+        @* 🚀 MAIN VIEWPORT *@
         <div id="page-content-wrapper">
             <main role="main">
                 @RenderBody()
@@ -131,7 +140,7 @@
             {
                 <footer class="py-4 mt-auto border-top bg-white">
                     <div class="container text-center">
-                        <p class="mb-1 fw-bold text-dark">IES URBAN HUB</p>
+                        <p class="mb-1 fw-bold" style="color: var(--brand-navy);">IES URBAN HUB</p>
                         <p class="mb-0 small text-muted">Powered by Dabbasheth &copy; 2026</p>
                         <div class="mt-2 fw-bold" style="font-size: 0.65rem; color: var(--brand-gold);">PREMIUM SECURE BANKING</div>
                     </div>
@@ -140,7 +149,7 @@
         </div>
     </div>
 
-    @* --- 📱 MOBILE NAV --- *@
+    @* --- 📱 MOBILE BOTTOM BAR --- *@
     @if (isLoggedIn)
     {
         <div class="mobile-nav d-lg-none">
@@ -161,6 +170,7 @@
         </div>
     }
 
+    @* --- Scripts --- *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -168,7 +178,7 @@
         $(document).ready(function() {
             const path = window.location.pathname.toLowerCase();
             
-            // Auto-Highlight Active State
+            // Intelligent Active-State Highlighting
             $('.nav-link, .nav-item').each(function() {
                 const href = $(this).attr('href')?.toLowerCase();
                 if (href && (path === href || (href !== "/" && path.startsWith(href)))) {

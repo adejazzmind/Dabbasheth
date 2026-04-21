@@ -17,7 +17,6 @@ namespace Dabbasheth.Controllers
             _context = context;
         }
 
-        // --- STEP 1: BYPASSED INITIALIZE PAYMENT ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> InitializePayment(string email, decimal amount)
@@ -33,47 +32,36 @@ namespace Dabbasheth.Controllers
                 var cleanEmail = email.Trim().ToLower();
                 var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == cleanEmail);
 
-                // 1. Update or Create Wallet
                 if (wallet != null)
                 {
                     wallet.Balance += amount;
                 }
                 else
                 {
-                    _context.Wallets.Add(new Wallet
-                    {
-                        UserEmail = cleanEmail,
-                        Balance = amount,
-                        Currency = "NGN",
-                        CreatedAt = DateTime.UtcNow
-                    });
+                    _context.Wallets.Add(new Wallet { UserEmail = cleanEmail, Balance = amount, Currency = "NGN", CreatedAt = DateTime.UtcNow });
                 }
 
-                // 2. Log Transaction
-                string reference = "DB-BYPASS-" + Guid.NewGuid().ToString()[..8].ToUpper();
-                _context.Transactions.Add(new TransactionRecord
+                // ✅ FIXED: Changed TransactionRecord to Transaction (Lines 54-62)
+                _context.Transactions.Add(new Transaction
                 {
-                    Reference = reference,
                     UserEmail = cleanEmail,
                     Amount = amount,
+                    Type = "Credit",
                     Description = "Wallet Top-up (Development Bypass)",
                     Date = DateTime.UtcNow,
                     Status = "Success"
                 });
 
                 await _context.SaveChangesAsync();
-
-                ViewBag.Message = $"₦{amount:N2} has been successfully added to your wallet via Secure Bypass.";
                 return View("Success");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Internal system error during bypass: " + ex.Message;
+                TempData["Error"] = "Internal system error: " + ex.Message;
                 return RedirectToAction("Index", "Home");
             }
         }
 
-        // Keep for routing compatibility
         [HttpGet]
         public IActionResult Verify(string reference) => RedirectToAction("Index", "Home");
     }

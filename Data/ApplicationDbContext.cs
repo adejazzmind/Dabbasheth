@@ -12,7 +12,10 @@ namespace Dabbasheth.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Wallet> Wallets { get; set; }
-        public DbSet<TransactionRecord> Transactions { get; set; }
+
+        // ✅ CHANGED: Match the class name 'Transaction' exactly
+        public DbSet<Transaction> Transactions { get; set; }
+
         public DbSet<ThriftPlan> ThriftPlans { get; set; }
         public DbSet<ThriftGroup> ThriftGroups { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
@@ -22,6 +25,7 @@ namespace Dabbasheth.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // This block handles your Neon PostgreSQL lowercase requirements
             foreach (var entity in modelBuilder.Model.GetEntityTypes())
             {
                 var tableName = entity.GetTableName();
@@ -30,18 +34,6 @@ namespace Dabbasheth.Data
                 foreach (var property in entity.GetProperties())
                 {
                     property.SetColumnName(property.Name.ToLower());
-                }
-
-                foreach (var key in entity.GetKeys())
-                {
-                    var keyName = key.GetName();
-                    if (!string.IsNullOrEmpty(keyName)) key.SetName(keyName.ToLower());
-                }
-
-                foreach (var foreignKey in entity.GetForeignKeys())
-                {
-                    var fkName = foreignKey.GetConstraintName();
-                    if (!string.IsNullOrEmpty(fkName)) foreignKey.SetConstraintName(fkName.ToLower());
                 }
             }
         }

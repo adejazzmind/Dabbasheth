@@ -8,26 +8,23 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         // --- 🏷️ GROUP IDENTITY ---
-        public string GroupName { get; set; } // e.g., "AACSL 100K Group A"
-        public string Status { get; set; } // Pending, Running, Completed
-        public DateTime StartDate { get; set; }
+        public string GroupName { get; set; } // e.g., "Ogba Market Hub"
+        public string Status { get; set; } = "Active"; // Active, Running, Completed, Closed
 
-        // --- 💰 CATEGORY & FINANCIALS ---
-        // This handles your 5k, 10k, 50k, 100k, to 1M tiers
+        // --- 💰 FINANCIALS ---
         public decimal CategoryAmount { get; set; }
-
-        // The monthly contribution from each member
         public decimal MonthlyContribution { get; set; }
 
-        // --- 📅 CYCLE CONFIGURATION ---
-        // Supports your choice of 5, 6, or minimum 10 months
+        // --- 📅 CONFIGURATION ---
         public int DurationMonths { get; set; }
-        public string Frequency { get; set; } // Default: "Monthly"
-
-        // --- 👥 MEMBERSHIP ---
+        public string Frequency { get; set; } = "Monthly";
         public int TotalMembers { get; set; }
 
-        // Navigation Property: Links the individual payout slots/members to this group
+        // --- ⏱️ TIMESTAMPS ---
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow; // ✅ Added this back
+        public DateTime StartDate { get; set; } = DateTime.UtcNow;
+
+        // --- 👥 MEMBERSHIP ---
         public List<ThriftPlan> MemberPlans { get; set; } = new();
     }
 }

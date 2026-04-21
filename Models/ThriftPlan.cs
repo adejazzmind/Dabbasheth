@@ -24,22 +24,25 @@ namespace Dabbasheth.Models
         public decimal CurrentSavings { get; set; }
 
         [Required]
-        public string Frequency { get; set; } // Daily, Weekly, Monthly, Yearly
+        public string Frequency { get; set; } // Daily, Weekly, Monthly
 
         // --- 📅 TIMELINE & STATUS ---
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
         public DateTime MaturityDate { get; set; }
         public string Status { get; set; } = "Active"; // Active, Completed
 
-        // --- 👥 AJO GROUP LOGIC (NEW) ---
-        // Links the individual to a specific Ajo Cycle (Ogba Market, etc.)
+        // --- 👥 AJO GROUP LOGIC ---
+        // Links the individual to a specific Ajo Cycle (e.g., Ogba Market Hub)
         public int? ThriftGroupId { get; set; }
 
-        // Defines the "Packing Month" (1 = Jan, 2 = Feb, etc.)
+        // Defines the "Packing Order" in the rotation
         public int PayoutOrder { get; set; }
 
         // Security check: Has this member packed their bulk amount yet?
         public bool HasCollected { get; set; } = false;
+
+        // ✅ FIXED: Track exactly when the payout occurred
+        public DateTime? PayoutDate { get; set; }
 
         [ForeignKey("ThriftGroupId")]
         public ThriftGroup? ThriftGroup { get; set; }

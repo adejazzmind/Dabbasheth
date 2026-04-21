@@ -22,7 +22,7 @@ namespace Dabbasheth.Controllers
         private string GetLoggedInUserEmail() => TempData.Peek("UserEmail")?.ToString();
 
         // ============================================================
-        // 1. PREMIUM HUB VIEWS (Customer Dashboard)
+        // 📊 1. HUB DASHBOARD (Customer Experience)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -30,19 +30,21 @@ namespace Dabbasheth.Controllers
             string email = GetLoggedInUserEmail();
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
 
-            // ✅ Consolidated Data Fetching into the ViewModel
             var viewModel = new UserDashboardViewModel
             {
                 Wallet = await _context.Wallets
                     .FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower()),
 
                 ThriftPlans = await _context.ThriftPlans
-                    .Where(p => p.UserEmail.ToLower() == email.ToLower()).ToListAsync(),
+                    .Where(p => p.UserEmail.ToLower() == email.ToLower())
+                    .ToListAsync(),
 
+                // ✅ SYNCHRONIZED: Using 'Transaction' class and 'Date' property
                 RecentTransactions = await _context.Transactions
                     .Where(t => t.UserEmail.ToLower() == email.ToLower())
                     .OrderByDescending(t => t.Date)
-                    .Take(5).ToListAsync(),
+                    .Take(5)
+                    .ToListAsync(),
 
                 ThriftGroups = await _context.ThriftGroups
                     .Include(g => g.MemberPlans)
@@ -53,6 +55,7 @@ namespace Dabbasheth.Controllers
             return View(viewModel);
         }
 
+        [HttpGet]
         public IActionResult Profile()
         {
             string email = GetLoggedInUserEmail();
@@ -62,7 +65,7 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 2. WITHDRAWAL OPERATIONS (Requires Admin Approval)
+        // 💸 2. TREASURY OPERATIONS (Withdrawals)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Withdraw()
@@ -90,15 +93,15 @@ namespace Dabbasheth.Controllers
                 return RedirectToAction("Withdraw");
             }
 
-            // Create a record that appears in Admin/PayoutControl
-            var request = new TransactionRecord
+            // ✅ SYNCHRONIZED: Creating a standard 'Transaction' record
+            var request = new Transaction
             {
-                Reference = "WTH-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                 UserEmail = email,
                 Amount = amount,
                 Description = $"Withdrawal: {bankName} ({accountNumber})",
                 Date = DateTime.UtcNow,
-                Status = "Pending" // CEO approval required
+                Type = "Debit",
+                Status = "Pending" // CEO/Admin approval required
             };
 
             _context.Transactions.Add(request);
@@ -109,7 +112,7 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 3. THRIFT & SAVINGS ENGINE
+        // 💰 3. SAVINGS ENGINE (Individual Thrift)
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> Thrift()
@@ -177,14 +180,14 @@ namespace Dabbasheth.Controllers
                 wallet.Balance -= amount;
                 plan.CurrentSavings += amount;
 
-                _context.Transactions.Add(new TransactionRecord
+                // ✅ SYNCHRONIZED: Creating a standard 'Transaction' record
+                _context.Transactions.Add(new Transaction
                 {
-                    Reference = "SAV-" + Guid.NewGuid().ToString()[..8].ToUpper(),
                     UserEmail = email,
                     Amount = amount,
                     Description = $"Savings Deposit: {plan.Title}",
                     Date = DateTime.UtcNow,
-                    Type = "Debit", // User wallet is debited
+                    Type = "Debit",
                     Status = "Success"
                 });
 
@@ -199,9 +202,14 @@ namespace Dabbasheth.Controllers
         }
 
         // ============================================================
-        // 4. UTILITIES
+        // 🛠️ 4. UTILITIES
         // ============================================================
         public IActionResult PayBills() => View();
-        public IActionResult Rewards() { ViewBag.Cashback = 36.00m; return View(); }
+
+        public IActionResult Rewards()
+        {
+            ViewBag.Cashback = 36.00m;
+            return View();
+        }
     }
 }

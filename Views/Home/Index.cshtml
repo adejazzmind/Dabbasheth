@@ -1,32 +1,37 @@
 ﻿@model Dabbasheth.Models.UserDashboardViewModel
-@{ Layout = "_Layout"; }
+@{ 
+    Layout = "_Layout"; 
+}
 
 <div class="container py-4 animate__animated animate__fadeIn">
+    @* --- Header Section --- *@
     <div class="d-flex justify-content-between align-items-center mb-4 px-2">
         <div>
             <small class="text-muted d-block">Welcome back,</small>
-            <h4 class="fw-bold mb-0">@TempData.Peek("UserName")</h4>
+            <h4 class="fw-bold mb-0" style="color: var(--brand-navy);">@TempData.Peek("UserName")</h4>
         </div>
-        <div class="avatar-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style="width:45px; height:45px; border-radius: 50%;">
-             <i class="bi bi-person-fill text-primary"></i>
+        <div class="avatar-circle bg-white shadow-sm d-flex align-items-center justify-content-center" style="width:45px; height:45px; border-radius: 50%; border: 2px solid var(--brand-sky);">
+             <i class="bi bi-person-fill" style="color: var(--brand-blue);"></i>
         </div>
     </div>
 
+    @* --- Premium Wallet Card (The Big Blue Card) --- *@
     <div class="row g-3 mb-4">
         <div class="col-12">
-            <div class="card border-0 shadow-lg rounded-5 text-white p-4" style="background: linear-gradient(135deg, #014134 0%, #001f1a 100%);">
+            <div class="card premium-card p-4"> @* Using the premium-card class from site.css *@
                 <div class="d-flex justify-content-between align-items-start mb-4">
                     <div>
-                        <p class="text-uppercase small opacity-75 mb-1" style="letter-spacing: 1px;">Wallet Balance</p>
+                        <p class="text-uppercase small opacity-75 mb-1" style="letter-spacing: 1px; font-weight: 600;">Wallet Balance</p>
                         <h1 class="display-5 fw-bold mb-0">₦@Model.Wallet.Balance.ToString("N2")</h1>
                     </div>
                     <i class="bi bi-sim-fill h1 opacity-25"></i>
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-gold flex-grow-1 rounded-pill fw-bold text-dark" style="background: #D4AF37;">
+                    @* Updated Fund Wallet Button to use Sky Blue/Navy contrast *@
+                    <button class="btn btn-white bg-white text-primary flex-grow-1 rounded-pill fw-bold border-0 shadow-sm">
                         <i class="bi bi-plus-lg me-1"></i> Fund Wallet
                     </button>
-                    <button class="btn btn-white bg-white bg-opacity-10 text-white flex-grow-1 rounded-pill fw-bold border-0">
+                    <button class="btn bg-white bg-opacity-10 text-white flex-grow-1 rounded-pill fw-bold border-1 border-white border-opacity-25">
                         <i class="bi bi-arrow-up-right me-1"></i> Withdraw
                     </button>
                 </div>
@@ -34,48 +39,49 @@
         </div>
     </div>
 
-    <h6 class="fw-bold mb-3 px-2">My Savings Plans</h6>
+    @* --- Savings Stats --- *@
+    <h6 class="fw-bold mb-3 px-2" style="color: var(--brand-navy);">My Savings Plans</h6>
     <div class="row g-3 mb-4">
         <div class="col-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+            <div class="card card-dab p-3 h-100"> @* Using card-dab for the lifting effect *@
                 <small class="text-muted d-block mb-1">Total Savings</small>
-                <h5 class="fw-bold mb-2">₦@Model.ThriftPlans.Sum(p => p.CurrentSavings).ToString("N0")</h5>
-                <div class="progress mb-2" style="height: 4px;">
-                    <div class="progress-bar bg-success" style="width: 65%"></div>
+                <h5 class="fw-bold mb-2" style="color: var(--brand-blue);">₦@Model.ThriftPlans.Sum(p => p.CurrentSavings).ToString("N0")</h5>
+                <div class="progress mb-2" style="height: 6px; border-radius: 10px; background: #eee;">
+                    <div class="progress-bar" style="width: 65%; background: var(--brand-sky);"></div>
                 </div>
-                <small class="text-success small fw-bold">Active Goals</small>
+                <small class="small fw-bold" style="color: var(--brand-sky);">Active Goals</small>
             </div>
         </div>
         <div class="col-6">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100">
+            <div class="card card-dab p-3 h-100">
                 <small class="text-muted d-block mb-1">Active Ajo</small>
-                <h5 class="fw-bold mb-2">@Model.ThriftGroups.Count Groups</h5>
-                <span class="badge bg-soft-primary text-primary rounded-pill small">In Rotation</span>
+                <h5 class="fw-bold mb-2" style="color: var(--brand-blue);">@Model.ThriftGroups.Count Groups</h5>
+                <span class="badge rounded-pill small" style="background: rgba(0, 180, 219, 0.1); color: var(--brand-sky);">In Rotation</span>
             </div>
         </div>
     </div>
 
+    @* --- Transaction History --- *@
     <div class="d-flex justify-content-between align-items-center mb-3 px-2">
-        <h6 class="fw-bold mb-0">Recent Transactions</h6>
-        <a href="/Wallet/History" class="text-primary text-decoration-none small fw-bold">View All</a>
+        <h6 class="fw-bold mb-0" style="color: var(--brand-navy);">Recent Transactions</h6>
+        <a href="/Wallet/History" class="text-decoration-none small fw-bold" style="color: var(--brand-blue);">View All</a>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-5 bg-white overflow-hidden mb-5">
+    <div class="card card-dab bg-white overflow-hidden mb-5">
         <div class="list-group list-group-flush">
             @if(Model.RecentTransactions != null && Model.RecentTransactions.Any())
             {
                 @foreach(var tx in Model.RecentTransactions)
                 {
-                    // ✅ FIXED: Moved logic inside the loop properly to avoid line 68 error
                     string txType = tx.Type ?? "Credit";
                     string iconClass = txType == "Credit" ? "bg-soft-success" : "bg-soft-danger";
                     string iconType = txType == "Credit" ? "bi-arrow-down-left text-success" : "bi-arrow-up-right text-danger";
                     string textClass = txType == "Credit" ? "text-success" : "text-danger";
                     string prefix = txType == "Credit" ? "+" : "-";
 
-                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 border-bottom mx-2">
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-3 border-0 border-bottom mx-2 bg-transparent">
                         <div class="d-flex align-items-center">
-                            <div class="icon-box @iconClass rounded-circle me-3" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
+                            <div class="icon-box @iconClass rounded-circle me-3" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center; margin-bottom:0;">
                                 <i class="bi @iconType"></i>
                             </div>
                             <div>
@@ -102,11 +108,9 @@
     </div>
 </div>
 
+@* --- Visual Overrides to ensure Platinum look --- *@
 <style>
-    .rounded-5 { border-radius: 2rem !important; }
-    .rounded-4 { border-radius: 1.25rem !important; }
-    .bg-soft-success { background: #e6fcf5; }
-    .bg-soft-danger { background: #fff5f5; }
-    .bg-soft-primary { background: #e7f1ff; }
-    .btn-gold:hover { filter: brightness(0.9); }
+    .bg-soft-success { background: #E8F5E9 !important; }
+    .bg-soft-danger { background: #FFEBEE !important; }
+    .premium-card { border-radius: 30px !important; }
 </style>
