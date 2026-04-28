@@ -8,11 +8,11 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         [Required]
-        public string SettingKey { get; set; } // e.g., "WithdrawalFee"
+        public string SettingKey { get; set; } = string.Empty;
 
         [Required]
-        public decimal SettingValue { get; set; } // e.g., 100.00
+        public decimal SettingValue { get; set; }
 
-        public string Description { get; set; } // e.g., "Platform charge for withdrawals"
+        public string Description { get; set; } = string.Empty;
     }
 }

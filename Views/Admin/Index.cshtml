@@ -1,206 +1,172 @@
 ﻿@model Dabbasheth.Models.AdminDashboardViewModel
-@{ Layout = "_Layout"; }
-
-@* 🚀 DASHBOARD CONTENT AREA *@
-<div class="container-fluid p-4 animate__animated animate__fadeIn">
-    
-    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom px-4 py-3 rounded-4 shadow-sm mb-4">
-        <h5 class="fw-bold mb-0 text-dark">Executive Command Center</h5>
-        <div class="ms-auto d-flex align-items-center gap-3">
-            <span class="badge bg-soft-success text-success rounded-pill px-3 py-2 border">
-                <i class="bi bi-dot animate-pulse"></i> System Live
-            </span>
-            <div class="vr mx-2"></div>
-            <div class="text-end d-none d-md-block">
-                <small class="text-muted d-block" style="font-size: 0.7rem;">Administrator</small>
-                <span class="fw-bold small">@TempData.Peek("UserName")</span>
-            </div>
-        </div>
-    </nav>
-
-    <div class="row g-4 mb-4">
-        @* --- PRIMARY LIQUIDITY PANEL --- *@
-        <div class="col-lg-8">
-            <div class="premium-card p-5 text-white shadow-lg h-100" style="background: linear-gradient(135deg, #014134 0%, #001f1a 100%); border-radius: 35px;">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <small class="text-uppercase fw-bold opacity-75" style="letter-spacing: 2px; color: #D4AF37;">Total System Liquidity</small>
-                        <h1 class="display-3 fw-bold mt-2 mb-0">₦@Model.TotalSystemBalance.ToString("N2")</h1>
-                        <div class="mt-4">
-                            <span class="badge bg-white bg-opacity-10 rounded-pill px-4 py-2 border border-white border-opacity-25 small">
-                                <i class="bi bi-safe2 me-2"></i> Global Wallet & Thrift Pool
-                            </span>
-                        </div>
-                    </div>
-                    <div class="icon-box bg-white bg-opacity-10 rounded-4" style="width: 60px; height: 60px;">
-                        <i class="bi bi-graph-up-arrow h3 mb-0" style="color: #D4AF37;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        @* --- USER ANALYTICS PANEL --- *@
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-5 p-4 bg-white h-100 d-flex flex-column justify-content-center text-center">
-                <div class="icon-box bg-soft-primary mx-auto mb-3" style="width:70px; height:70px; font-size: 2rem;">
-                    <i class="bi bi-people-fill text-primary"></i>
-                </div>
-                <h2 class="fw-bold mb-0">@Model.TotalUsers</h2>
-                <p class="text-muted small">Total Registered Members</p>
-                <div class="mt-2 text-success small fw-bold">
-                    <i class="bi bi-plus-circle-fill me-1"></i> @Model.NewUsersCount joined today
-                </div>
-            </div>
-        </div>
-    </div>
-
-    @* --- STATUS TRACKERS --- *@
-    <div class="row g-4 mb-4">
-        <div class="col-6 col-md-3">
-            <a href="/Admin/SupportCenter" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-5 border-primary card-hover">
-                    <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Support Desk</small>
-                    <div class="d-flex align-items-center">
-                        <h4 class="fw-bold mb-0">@Model.PendingSupportCount</h4>
-                        @if(Model.PendingSupportCount > 0) { <span class="badge bg-danger ms-2 pulse-red">Pending</span> }
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-md-3">
-            <a href="/Admin/RiskControl" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 p-3 bg-white h-100 border-start border-5 border-danger card-hover">
-                    <small class="text-muted d-block mb-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Flagged Risk</small>
-                    <div class="d-flex align-items-center">
-                        <h4 class="fw-bold mb-0">@Model.FlaggedTransactionCount</h4>
-                        @if(Model.FlaggedTransactionCount > 0) { <span class="badge bg-warning text-dark ms-2">Alert</span> }
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-
-    @* --- CORE SERVICES SHORTCUTS --- *@
-    <div class="card border-0 shadow-sm rounded-5 p-4 bg-white mb-4">
-        <h6 class="fw-bold text-dark mb-4 px-2">Operational Controls</h6>
-        <div class="row text-center g-3">
-            <div class="col-4 col-md-2"><div class="op-box bg-soft-primary mx-auto mb-2"><i class="bi bi-bank text-primary"></i></div><small class="fw-bold">Bank</small></div>
-            <div class="col-4 col-md-2"><a href="/Admin/PayoutControl" class="text-decoration-none text-dark"><div class="op-box bg-soft-warning mx-auto mb-2"><i class="bi bi-box-arrow-up-right text-warning"></i></div><small class="fw-bold">Payouts</small></a></div>
-            <div class="col-4 col-md-2"><a href="/Admin/AjoManagement" class="text-decoration-none text-dark"><div class="op-box bg-soft-danger mx-auto mb-2"><i class="bi bi-piggy-bank text-danger"></i></div><small class="fw-bold">Thrift</small></a></div>
-            <div class="col-4 col-md-2"><div class="op-box bg-soft-info mx-auto mb-2"><i class="bi bi-wifi text-info"></i></div><small class="fw-bold">Data</small></div>
-            <div class="col-4 col-md-2"><div class="op-box bg-soft-success mx-auto mb-2"><i class="bi bi-phone text-success"></i></div><small class="fw-bold">Airtime</small></div>
-            <div class="col-4 col-md-2"><a href="/Admin/Settings" class="text-decoration-none text-dark"><div class="op-box bg-light mx-auto mb-2"><i class="bi bi-gear-fill"></i></div><small class="fw-bold">Platform</small></a></div>
-        </div>
-    </div>
-
-    @* --- QUEUES --- *@
-    <div class="row g-4">
-        @* PENDING TRANSACTIONS *@
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-5 bg-white h-100">
-                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Disbursement Queue</h6>
-                    <a href="/Admin/PayoutControl" class="text-primary text-decoration-none fw-bold small">Manage All</a>
-                </div>
-                <div class="px-4 pb-4">
-                    @if (Model.PendingTransactions.Any()) {
-                        @foreach (var tx in Model.PendingTransactions.Take(3)) {
-                            <div class="d-flex align-items-center justify-content-between p-3 border rounded-4 mb-2 bg-light bg-opacity-50">
-                                <div>
-                                    <p class="fw-bold mb-0 small">@tx.UserEmail.Split('@')[0]</p>
-                                    @* ✅ FIXED: Using .Id instead of .Reference *@
-                                    <small class="text-muted">TX-ID: #@tx.Id</small>
-                                </div>
-                                <div class="text-end">
-                                    <div class="fw-bold text-danger mb-1">₦@tx.Amount.ToString("N0")</div>
-                                    <a href="/Admin/PayoutControl" class="btn btn-success btn-xs rounded-pill px-3 shadow-sm">View</a>
-                                </div>
-                            </div>
-                        }
-                    } else {
-                        <div class="text-center py-5 text-muted small">No pending requests.</div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        @* AJO GROUPS *@
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm rounded-5 bg-white h-100">
-                <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">Active Ajo Cycles</h6>
-                    <button class="btn btn-dark btn-xs rounded-pill px-3 shadow-sm" onclick="openNewGroupModal()">+ New Cycle</button>
-                </div>
-                <div class="px-4 pb-4">
-                    @if (Model.AllThriftGroups.Any()) {
-                        @foreach(var group in Model.AllThriftGroups.Take(3)) {
-                            <div class="p-3 border rounded-4 mb-2 bg-white shadow-sm border-start border-5 border-success card-hover">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <span class="badge bg-soft-gold text-gold rounded-pill px-2 small mb-1">₦@group.CategoryAmount.ToString("N0")</span>
-                                        <div class="fw-bold small">@group.GroupName</div>
-                                    </div>
-                                    <a href="/Admin/AjoManagement" class="btn btn-outline-dark btn-xs rounded-pill px-3">Manage</a>
-                                </div>
-                            </div>
-                        }
-                    } else {
-                        <div class="text-center py-5 text-muted small">No active cycles created.</div>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@* --- 📦 MODAL: NEW GROUP --- *@
-<div class="modal fade" id="newGroupModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 rounded-5 shadow-lg">
-            <div class="modal-header border-0 p-4 pb-0">
-                <h5 class="fw-bold mb-0">Initialize New Ajo Cycle</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form asp-action="CreateThriftGroup" method="post">
-                    @Html.AntiForgeryToken()
-                    <div class="mb-3">
-                        <label class="small fw-bold mb-1">Group Name</label>
-                        <input type="text" name="GroupName" class="form-control bg-light border-0 py-2" placeholder="e.g. Platinum Hub A" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="small fw-bold mb-1">Contribution Tier</label>
-                        <input type="number" name="CategoryAmount" class="form-control bg-light border-0 py-2" placeholder="Amount per member" required />
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow">Initialize Engine</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function openNewGroupModal() { new bootstrap.Modal(document.getElementById('newGroupModal')).show(); }
-</script>
-
+@{ Layout = "_Layout"; ViewData["Title"] = "Executive Dashboard"; }
 <style>
-    .card-hover { transition: all 0.3s; cursor: pointer; }
-    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.05) !important; }
-    .rounded-5 { border-radius: 2rem !important; }
-    .rounded-4 { border-radius: 1.25rem !important; }
-    .bg-soft-primary { background: rgba(13, 110, 253, 0.08); }
-    .bg-soft-success { background: rgba(25, 135, 84, 0.08); }
-    .bg-soft-danger { background: rgba(220, 53, 69, 0.08); }
-    .bg-soft-warning { background: rgba(255, 193, 7, 0.08); }
-    .bg-soft-info { background: rgba(13, 202, 240, 0.08); }
-    .bg-soft-gold { background: rgba(212, 175, 55, 0.1); }
-    .text-gold { color: #D4AF37 !important; }
-    .icon-box, .op-box { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
-    .op-box { transition: 0.2s; cursor: pointer; }
-    .op-box:hover { transform: scale(1.1); filter: brightness(0.95); }
-    .btn-xs { padding: 0.3rem 0.8rem; font-size: 0.7rem; font-weight: bold; text-transform: uppercase; }
-    .animate-pulse { animation: pulse 2s infinite; }
-    @@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-    .pulse-red { animation: pulse-red-key 2s infinite; }
-    @@keyframes pulse-red-key { 0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); } 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); } }
+.px-page{padding:28px 32px}
+.stat-hero{background:linear-gradient(135deg,#0A0F1E 0%,#1a2744 50%,#0A0F1E 100%);border-radius:24px;padding:36px;color:#fff;position:relative;overflow:hidden}
+.stat-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(26,115,232,.35) 0%,transparent 70%)}
+.stat-hero::after{content:'';position:absolute;bottom:-40px;left:30%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(14,165,233,.2) 0%,transparent 70%)}
+.balance-amount{font-size:clamp(1.8rem,4vw,3rem);font-weight:900;letter-spacing:-1px;position:relative;z-index:1}
+.kpi-card{background:#fff;border-radius:20px;padding:22px;border:1px solid #F1F5F9;transition:.25s;cursor:default}
+.kpi-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.kpi-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:12px}
+.kpi-num{font-size:1.8rem;font-weight:800;color:#0A0F1E;line-height:1}
+.kpi-label{font-size:.75rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+.section-card{background:#fff;border-radius:20px;border:1px solid #F1F5F9;overflow:hidden}
+.section-header{padding:20px 24px;border-bottom:1px solid #F8FAFC;display:flex;justify-content:space-between;align-items:center}
+.section-header h6{font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.8px;color:#374151;margin:0}
+.op-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding:20px 24px}
+.op-btn{display:flex;flex-direction:column;align-items:center;gap:8px;text-decoration:none;border-radius:16px;padding:16px 8px;transition:.2s;border:1px solid #F1F5F9;background:#FAFAFA}
+.op-btn:hover{background:#EFF6FF;border-color:#BFDBFE;transform:translateY(-3px)}
+.op-btn .ic{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.op-btn span{font-size:.72rem;font-weight:600;color:#374151}
+.tx-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #F8FAFC;transition:.15s}
+.tx-row:last-child{border-bottom:none}
+.tx-row:hover{background:#F8FAFC}
+.ajo-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #F8FAFC}
+.ajo-row:last-child{border-bottom:none}
+.badge-pill{font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:99px}
+@@media(max-width:768px){.px-page{padding:16px}.op-grid{grid-template-columns:repeat(3,1fr)}.balance-amount{font-size:2rem}}
 </style>
+
+<div class="px-page">
+
+    @* ── HERO ROW ── *@
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7">
+            <div class="stat-hero h-100">
+                <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;opacity:.6;margin-bottom:8px;position:relative;z-index:1">Total System Liquidity</p>
+                <div class="balance-amount">₦@Model.TotalSystemBalance.ToString("N2")</div>
+                <div style="margin-top:20px;position:relative;z-index:1">
+                    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:6px 16px;font-size:.75rem;font-weight:600">
+                        <i class="bi bi-safe2 me-2" style="color:#F59E0B"></i>Global Wallet &amp; Thrift Pool
+                    </span>
+                </div>
+                @* Decorative SVG graph *@
+                <svg style="position:absolute;bottom:20px;right:24px;width:140px;opacity:.3" viewBox="0 0 140 50">
+                    <polyline points="0,45 20,30 40,38 60,15 80,20 110,8 140,2" fill="none" stroke="#0EA5E9" stroke-width="2.5" stroke-linecap="round"/>
+                    <polyline points="0,45 20,30 40,38 60,15 80,20 110,8 140,2" fill="url(#g)" stroke="none"/>
+                    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0EA5E9" stop-opacity=".3"/><stop offset="100%" stop-color="#0EA5E9" stop-opacity="0"/></linearGradient></defs>
+                </svg>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="row g-3 h-100">
+                <div class="col-6">
+                    <div class="kpi-card h-100">
+                        <div class="kpi-icon" style="background:#EFF6FF"><i class="bi bi-people-fill" style="color:#1A73E8"></i></div>
+                        <div class="kpi-num">@Model.TotalUsers</div>
+                        <div class="kpi-label">Members</div>
+                        <div style="font-size:.72rem;color:#10B981;font-weight:600;margin-top:6px">+@Model.NewUsersCount today</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="kpi-card h-100">
+                        <div class="kpi-icon" style="background:#FEF2F2"><i class="bi bi-exclamation-triangle-fill" style="color:#EF4444"></i></div>
+                        <div class="kpi-num">@Model.FlaggedTransactionCount</div>
+                        <div class="kpi-label">Flagged Txns</div>
+                        @if (Model.FlaggedTransactionCount > 0) { <div style="font-size:.7rem;color:#EF4444;font-weight:700;margin-top:6px">⚠ Needs attention</div> }
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="kpi-card h-100">
+                        <div class="kpi-icon" style="background:#ECFDF5"><i class="bi bi-headset" style="color:#10B981"></i></div>
+                        <div class="kpi-num">@Model.PendingSupportCount</div>
+                        <div class="kpi-label">Open Tickets</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="kpi-card h-100">
+                        <div class="kpi-icon" style="background:#FFF7ED"><i class="bi bi-diagram-3-fill" style="color:#F59E0B"></i></div>
+                        <div class="kpi-num">@Model.AllThriftGroups.Count</div>
+                        <div class="kpi-label">Ajo Cycles</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── OPERATIONAL HUB ── *@
+    <div class="section-card mb-4">
+        <div class="section-header"><h6>Operational Controls</h6></div>
+        <div class="op-grid">
+            @foreach(var op in new[]{
+                new{Icon="bi-people-fill",      Label="Customers",  Url="/Admin/UserManagement", Bg="#EFF6FF",  Color="#1A73E8"},
+                new{Icon="bi-wallet2",          Label="Payouts",    Url="/Admin/PayoutControl",  Bg="#ECFDF5",  Color="#10B981"},
+                new{Icon="bi-cash-coin",        Label="Wallets",    Url="/Admin/WalletControl",  Bg="#FFF7ED",  Color="#F59E0B"},
+                new{Icon="bi-diagram-3-fill",   Label="Ajo Engine", Url="/Admin/AjoManagement",  Bg="#F5F3FF",  Color="#8B5CF6"},
+                new{Icon="bi-shield-exclamation",Label="Risk",      Url="/Admin/RiskControl",    Bg="#FEF2F2",  Color="#EF4444"},
+                new{Icon="bi-gear-fill",        Label="Settings",   Url="/Admin/Settings",       Bg="#F1F5F9",  Color="#64748B"}
+            }){
+                <a href="@op.Url" class="op-btn">
+                    <div class="ic" style="background:@op.Bg"><i class="bi @op.Icon" style="color:@op.Color"></i></div>
+                    <span>@op.Label</span>
+                </a>
+            }
+        </div>
+    </div>
+
+    @* ── QUEUES ── *@
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="section-card">
+                <div class="section-header">
+                    <h6>Disbursement Queue</h6>
+                    <a href="/Admin/PayoutControl" style="font-size:.8rem;color:#1A73E8;font-weight:600;text-decoration:none">Manage All</a>
+                </div>
+                @if (Model.PendingTransactions.Any()){
+                    @foreach(var tx in Model.PendingTransactions.Take(3)){
+                        <div class="tx-row">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <div style="width:38px;height:38px;background:#FEF2F2;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                    <i class="bi bi-arrow-up-right" style="color:#EF4444;font-size:.9rem"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;font-size:.85rem;color:#0F172A">@tx.UserEmail.Split('@')[0]</div>
+                                    <div style="font-size:.72rem;color:#94A3B8">#TX-@tx.Id · @tx.Date.ToString("dd MMM")</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right">
+                                <div style="font-weight:700;font-size:.9rem;color:#EF4444">₦@tx.Amount.ToString("N0")</div>
+                                <span class="badge-pill" style="background:#FEF2F2;color:#EF4444">PENDING</span>
+                            </div>
+                        </div>
+                    }
+                } else {
+                    <div style="padding:40px;text-align:center;color:#CBD5E1">
+                        <i class="bi bi-check-circle" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+                        <span style="font-size:.85rem">No pending withdrawals</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="section-card">
+                <div class="section-header">
+                    <h6>Active Ajo Cycles</h6>
+                    <a href="/Admin/AjoManagement" style="font-size:.8rem;color:#1A73E8;font-weight:600;text-decoration:none">View All</a>
+                </div>
+                @if(Model.AllThriftGroups.Any()){
+                    @foreach(var g in Model.AllThriftGroups.Take(3)){
+                        <div class="ajo-row">
+                            <div style="display:flex;align-items:center;gap:12px">
+                                <div style="width:38px;height:38px;background:#F5F3FF;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                                    <i class="bi bi-diagram-3-fill" style="color:#8B5CF6;font-size:.9rem"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;font-size:.85rem;color:#0F172A">@g.GroupName</div>
+                                    <div style="font-size:.72rem;color:#94A3B8">@(g.MemberPlans?.Count??0) members · @g.Status</div>
+                                </div>
+                            </div>
+                            <span class="badge-pill" style="background:#F5F3FF;color:#8B5CF6">₦@g.CategoryAmount.ToString("N0")</span>
+                        </div>
+                    }
+                } else {
+                    <div style="padding:40px;text-align:center;color:#CBD5E1">
+                        <i class="bi bi-diagram-3" style="font-size:2rem;display:block;margin-bottom:8px"></i>
+                        <span style="font-size:.85rem">No active cycles</span>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

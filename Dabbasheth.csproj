@@ -22,8 +22,4 @@
     <PackageReference Include="PayStack.Net" Version="1.1.3" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Migrations\" />
-  </ItemGroup>
-
 </Project>

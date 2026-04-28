@@ -1,164 +1,315 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var userRole  = TempData.Peek("UserRole")?.ToString()  ?? "";
+    var userName  = TempData.Peek("UserName")?.ToString()  ?? "Guest";
+    var userEmail = TempData.Peek("UserEmail")?.ToString() ?? "";
+    var isLoggedIn = !string.IsNullOrEmpty(userRole);
+    var isAdmin    = userRole == "Admin";
+    var path       = Context.Request.Path.Value?.ToLower() ?? "";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    @* --- 📱 MOBILE VIEWPORT & APP OVERRIDES --- *@
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    @* --- 🎨 THEME COLOR: Matches your new Premium Navy --- *@
-    <meta name="theme-color" content="#050B18">
-    
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1"/>
+    <meta name="theme-color" content="#0A0F1E"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
     <title>@ViewData["Title"] - IES Urban Hub</title>
-    
-    @* --- External Assets --- *@
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <script>
+        (function(){
+            var t = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <style>
-        :root {
-            --navy-deep: #050B18;
-            --blue-light: #00B4D8;
-            --gold: #D4AF37;
-            --white: #FFFFFF;
-        }
+    :root[data-theme="light"] {
+        --surface2:#F8FAFC; --surface:#FFFFFF; --text:#0F172A; --muted:#64748B;
+        --border:#E2E8F0; --card-bg:#FFFFFF; --card-shadow:0 2px 12px rgba(0,0,0,.08);
+        --input-bg:#F1F5F9; --topbar-bg:#FFFFFF; --footer-bg:#FFFFFF;
+        --bnav-bg:#FFFFFF; --bnav-border:#E2E8F0;
+    }
+    :root[data-theme="dark"] {
+        --surface2:#0d1117; --surface:#161b22; --text:#e6edf3; --muted:#8b949e;
+        --border:#30363d; --card-bg:#161b22; --card-shadow:0 2px 12px rgba(0,0,0,.4);
+        --input-bg:#21262d; --topbar-bg:#161b22; --footer-bg:#161b22;
+        --bnav-bg:#161b22; --bnav-border:#30363d;
+    }
+    :root {
+        --navy:#0A0F1E; --navy2:#111827; --blue:#1A73E8; --blue2:#0EA5E9;
+        --gold:#F59E0B; --green:#10B981; --red:#EF4444; --sidebar-w:260px;
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{margin:0;padding:0;font-family:'Inter',sans-serif;background:var(--surface2);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+    ::-webkit-scrollbar{width:4px;height:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:99px}
+    a{color:var(--blue)}
+    input,select,textarea{background:var(--input-bg)!important;color:var(--text)!important;border-color:var(--border)!important}
+    input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(26,115,232,.15)!important;border-color:var(--blue)!important}
+    .card{background:var(--card-bg)!important;box-shadow:var(--card-shadow)!important;border-color:var(--border)!important}
+    .btn:focus{box-shadow:none}
+    .rounded-4{border-radius:1rem!important}
+    .rounded-5{border-radius:1.5rem!important}
 
-        /* --- GLOBAL APP FEEL --- */
-        body { 
-            background-color: var(--navy-deep) !important; 
-            font-family: 'Inter', sans-serif; 
-            min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
-        }
+    /* ── SIDEBAR ── */
+    #sidebar{position:fixed;top:0;left:0;height:100vh;width:var(--sidebar-w);background:var(--navy);z-index:200;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+    #sidebar .brand{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,.06)}
+    #sidebar .brand h5{color:#fff;font-weight:800;font-size:1.1rem;margin:0;letter-spacing:-.3px}
+    #sidebar .brand small{color:rgba(255,255,255,.35);font-size:.6rem;text-transform:uppercase;letter-spacing:2px}
+    #sidebar nav{flex:1;padding:16px 12px;overflow-y:auto}
+    .s-link{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;color:rgba(255,255,255,.55);text-decoration:none;font-size:.875rem;font-weight:500;margin-bottom:2px;transition:all .2s;position:relative}
+    .s-link:hover{background:rgba(255,255,255,.06);color:#fff;transform:translateX(3px)}
+    .s-link.active{background:linear-gradient(135deg,rgba(26,115,232,.25),rgba(14,165,233,.15));color:#fff;box-shadow:inset 3px 0 0 var(--blue)}
+    .s-link i{font-size:1.1rem;width:20px;text-align:center}
+    .s-link .badge-dot{position:absolute;right:14px;background:var(--red);border-radius:99px;font-size:.6rem;padding:1px 6px;color:#fff}
+    #sidebar .foot{padding:16px 12px;border-top:1px solid rgba(255,255,255,.06)}
+    .user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04)}
+    .user-chip .av{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem;flex-shrink:0}
+    .user-chip .info small{color:rgba(255,255,255,.35);font-size:.6rem;text-transform:uppercase;letter-spacing:1px;display:block}
+    .user-chip .info span{color:#fff;font-size:.8rem;font-weight:600}
 
-        /* --- DESKTOP SIDEBAR (Admin Only) --- */
-        #sidebar-wrapper { 
-            width: 280px; 
-            background: #0A192F !important; 
-            min-height: 100vh; 
-            position: sticky; 
-            top: 0; 
-            border-right: 1px solid rgba(0, 180, 216, 0.1);
-        }
+    /* ── DESKTOP HEADER ── */
+    #desktop-header{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;transition:background .25s}
+    #desktop-header .page-title{font-weight:700;font-size:1rem;color:var(--text)}
+    #desktop-header .hdr-actions{display:flex;align-items:center;gap:12px}
 
-        /* --- CUSTOMER MOBILE BOTTOM NAV --- */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            height: 70px;
-            background: rgba(10, 25, 47, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 2000;
-            border-top: 1px solid rgba(0, 180, 216, 0.1);
-            padding-bottom: env(safe-area-inset-bottom);
-        }
+    /* ── THEME TOGGLE ── */
+    .theme-btn{width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#1A73E8,#0EA5E9);color:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(26,115,232,.4);transition:transform .2s;flex-shrink:0}
+    .theme-btn:hover{transform:scale(1.1)}
 
-        .mobile-nav .nav-item {
-            text-decoration: none;
-            color: rgba(255, 255, 255, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            font-size: 10px;
-            font-weight: 500;
-            transition: 0.3s;
-        }
+    /* ── MAIN CONTENT ── */
+    #main-content{margin-left:var(--sidebar-w);min-height:100vh;transition:margin .3s}
+    #page-wrap{padding:0;min-height:calc(100vh - 60px)}
 
-        .mobile-nav .nav-item i { font-size: 22px; margin-bottom: 2px; }
-        .mobile-nav .nav-item.active { color: var(--gold) !important; }
-        .mobile-nav .nav-item.active i { transform: scale(1.1); color: var(--gold); }
+    /* ── TOP BAR (mobile only) ── */
+    #topbar{display:none;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--topbar-bg);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;transition:background .25s}
+    #topbar .brand{font-weight:800;font-size:1rem;color:var(--text)}
+    #topbar .actions{display:flex;gap:10px;align-items:center}
+    #menu-btn{background:none;border:none;color:var(--text);font-size:1.4rem;padding:0;cursor:pointer}
 
-        #wrapper { display: flex; width: 100%; }
-        #page-content-wrapper { flex: 1; min-height: 100vh; }
+    /* ── MOBILE BOTTOM NAV ── */
+    #bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:68px;background:var(--bnav-bg);border-top:1px solid var(--bnav-border);z-index:200;box-shadow:0 -4px 20px rgba(0,0,0,.06);padding-bottom:env(safe-area-inset-bottom);transition:background .25s}
+    #bottom-nav .b-nav{display:flex;justify-content:space-around;align-items:center;height:100%}
+    .b-item{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none;color:var(--muted);font-size:.6rem;font-weight:600;padding:4px 12px;border-radius:12px;transition:.2s;position:relative}
+    .b-item i{font-size:1.35rem}
+    .b-item.active{color:var(--blue)}
+    .b-item .dot{position:absolute;top:2px;right:8px;width:8px;height:8px;background:var(--red);border-radius:99px;border:2px solid var(--bnav-bg)}
 
-        ::-webkit-scrollbar { display: none; }
+    /* ── FOOTER ── */
+    #site-footer{text-align:center;padding:20px;color:var(--muted);font-size:.75rem;border-top:1px solid var(--border);background:var(--footer-bg);margin-top:20px;transition:background .25s}
+
+    /* ── ALERTS ── */
+    .toast-wrap{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+    .toast-msg{padding:12px 18px;border-radius:14px;font-size:.85rem;font-weight:500;pointer-events:all;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);animation:slideIn .3s ease;min-width:280px;max-width:380px}
+    .toast-success{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0}
+    .toast-error{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA}
+    @@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @@keyframes slideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(100%);opacity:0}}
+
+    /* ── SIDEBAR OVERLAY ── */
+    #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px)}
+
+    @@media(max-width:991px){
+        #sidebar{transform:translateX(-100%)}
+        #sidebar.open{transform:translateX(0)}
+        #main-content{margin-left:0!important;padding-bottom:80px}
+        #topbar{display:flex}
+        #bottom-nav{display:block}
+        #desktop-header{display:none}
+        #sidebar-overlay.open{display:block}
+    }
+    @@media(max-width:768px){
+        .container{padding-left:16px;padding-right:16px}
+    }
     </style>
 </head>
 <body>
-    @{
-        var userRole = TempData.Peek("UserRole")?.ToString();
-        var isLoggedIn = !string.IsNullOrEmpty(userRole);
+
+@* ── TOAST ALERTS ── *@
+<div class="toast-wrap" id="toastWrap">
+    @if (TempData["Message"] != null) {
+        <div class="toast-msg toast-success" onclick="this.style.animation='slideOut .3s ease forwards';setTimeout(()=>this.remove(),300)">
+            <i class="bi bi-check-circle-fill"></i><span>@TempData["Message"]</span>
+        </div>
     }
+    @if (TempData["Error"] != null) {
+        <div class="toast-msg toast-error" onclick="this.style.animation='slideOut .3s ease forwards';setTimeout(()=>this.remove(),300)">
+            <i class="bi bi-exclamation-triangle-fill"></i><span>@TempData["Error"]</span>
+        </div>
+    }
+</div>
 
-    <div id="wrapper">
-        @* --- 🖥️ SIDEBAR: ADMIN ONLY --- *@
-        @if (isLoggedIn && userRole == "Admin")
-        {
-            <aside class="sidebar d-none d-lg-block" id="sidebar-wrapper">
-                <div class="p-4 text-center">
-                    <h4 class="fw-bold text-gold mb-0">IES HUB</h4>
-                    <small class="text-white opacity-50 x-small tracking-widest">EXECUTIVE</small>
-                </div>
-                
-                <div class="list-group list-group-flush px-3 mt-4">
-                    <a href="/Admin/Index" class="nav-link text-white py-3"><i class="bi bi-speedometer2 me-3"></i> Dashboard</a>
-                    <a href="/Admin/UserManagement" class="nav-link text-white py-3"><i class="bi bi-people me-3"></i> Customers</a>
-                    <a href="/Admin/PayoutControl" class="nav-link text-white py-3"><i class="bi bi-cash-stack me-3"></i> Payouts</a>
-                    <a href="/Admin/AjoManagement" class="nav-link text-white py-3"><i class="bi bi-diagram-3 me-3"></i> Ajo Engine</a>
-                    <a href="/Account/Logout" class="nav-link text-danger mt-5"><i class="bi bi-power me-3"></i> Logout</a>
-                </div>
-            </aside>
-        }
+<div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-        @* 🚀 MAIN CONTENT AREA *@
-        <div id="page-content-wrapper">
-            <main role="main">
-                @RenderBody()
-            </main>
-
-            @* Only show the footer for Admins or on Desktop to keep mobile clean *@
-            @if (isLoggedIn && (userRole == "Admin" || Context.Request.Headers["User-Agent"].ToString().Contains("Windows")))
-            {
-                <footer class="py-4 mt-5 text-center opacity-25">
-                    <p class="mb-0 x-small text-white">IES URBAN HUB &bull; Powered by Dabbasheth &copy; 2026</p>
-                </footer>
-            }
+@if (isLoggedIn) {
+<aside id="sidebar">
+    <div class="brand">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-shield-fill-check" style="color:#fff;font-size:1rem;"></i>
+            </div>
+            <div>
+                <h5>IES HUB</h5>
+                <small>@(isAdmin ? "Executive" : "Urban Hub")</small>
+            </div>
         </div>
     </div>
-
-    @* --- 📱 MOBILE BOTTOM BAR: CLEAN & LUXE --- *@
-    @if (isLoggedIn)
-    {
-        <div class="mobile-nav d-lg-none">
-            @if (userRole == "Admin")
-            {
-                <a href="/Admin/Index" class="nav-item"><i class="bi bi-grid-fill"></i><span>Stats</span></a>
-                <a href="/Admin/UserManagement" class="nav-item"><i class="bi bi-people-fill"></i><span>Users</span></a>
-                <a href="/Admin/PayoutControl" class="nav-item"><i class="bi bi-wallet2"></i><span>Payouts</span></a>
-                <a href="/Account/Logout" class="nav-item"><i class="bi bi-door-open"></i><span>Exit</span></a>
-            }
-            else
-            {
-                <a href="/Home/Index" class="nav-item"><i class="bi bi-house-fill"></i><span>Home</span></a>
-                <a href="/Home/Thrift" class="nav-item"><i class="bi bi-piggy-bank-fill"></i><span>Savings</span></a>
-                <a href="/Home/Rewards" class="nav-item"><i class="bi bi-stars"></i><span>Win</span></a>
-                <a href="/Home/Profile" class="nav-item"><i class="bi bi-person-fill"></i><span>Me</span></a>
-            }
+    <nav>
+        @if (isAdmin) {
+            <a href="/Admin/Index"          class="s-link @(path.Contains("/admin/index")||path=="/admin"?"active":"")"><i class="bi bi-speedometer2"></i>Dashboard</a>
+            <a href="/Admin/UserManagement" class="s-link @(path.Contains("usermanagement")?"active":"")"><i class="bi bi-people-fill"></i>Customers</a>
+            <a href="/Admin/PayoutControl"  class="s-link @(path.Contains("payoutcontrol")?"active":"")"><i class="bi bi-wallet2"></i>Payouts</a>
+            <a href="/Admin/WalletControl"  class="s-link @(path.Contains("walletcontrol")?"active":"")"><i class="bi bi-cash-coin"></i>Wallet Control</a>
+            <a href="/Admin/AjoManagement"  class="s-link @(path.Contains("ajomanagement")?"active":"")"><i class="bi bi-diagram-3-fill"></i>Ajo Engine</a>
+            <a href="/Admin/RiskControl"    class="s-link @(path.Contains("riskcontrol")?"active":"")"><i class="bi bi-shield-exclamation"></i>Risk Control</a>
+            <a href="/Admin/SupportCenter"  class="s-link @(path.Contains("supportcenter")?"active":"")"><i class="bi bi-headset"></i>Support & Chat</a>
+            <a href="/Admin/Settings"       class="s-link @(path.Contains("settings")?"active":"")"><i class="bi bi-gear-fill"></i>Settings</a>
+        } else {
+            <a href="/Home/Index"      class="s-link @(path.Contains("/home/index")||path=="/home"?"active":"")"><i class="bi bi-house-fill"></i>Dashboard</a>
+            <a href="/Home/Thrift"     class="s-link @(path.Contains("thrift")?"active":"")"><i class="bi bi-piggy-bank-fill"></i>Savings</a>
+            <a href="/Home/Airtime"    class="s-link @(path.Contains("airtime")?"active":"")"><i class="bi bi-phone-fill"></i>Airtime</a>
+            <a href="/Home/Data"       class="s-link @(path.Contains("/home/data")?"active":"")"><i class="bi bi-wifi"></i>Data</a>
+            <a href="/Home/PayBills"   class="s-link @(path.Contains("paybills")?"active":"")"><i class="bi bi-lightning-fill"></i>Bills</a>
+            <a href="/Home/Chat"       class="s-link @(path.Contains("chat")?"active":"")"><i class="bi bi-chat-dots-fill"></i>Chat Support</a>
+            <a href="/Account/Profile" class="s-link @(path.Contains("profile")?"active":"")"><i class="bi bi-person-fill"></i>Profile</a>
+        }
+    </nav>
+    <div class="foot">
+        <div class="user-chip mb-2">
+            <div class="av">@(userName.Length>0?userName[0].ToString().ToUpper():"U")</div>
+            <div class="info">
+                <small>@(isAdmin?"Administrator":"Member")</small>
+                <span>@userName</span>
+            </div>
         </div>
+        <a href="/Account/Logout" class="s-link" style="color:#EF4444!important;margin:0">
+            <i class="bi bi-box-arrow-left"></i>Logout
+        </a>
+    </div>
+</aside>
+}
+
+<div id="main-content">
+
+    @* ── DESKTOP HEADER WITH THEME TOGGLE ── *@
+    @if (isLoggedIn) {
+    <div id="desktop-header">
+        <span class="page-title">@ViewData["Title"]</span>
+        <div class="hdr-actions">
+            @if (!isAdmin) {
+                <a href="/Home/Chat" style="color:var(--text);font-size:1.3rem;text-decoration:none;">
+                    <i class="bi bi-chat-dots-fill"></i>
+                </a>
+            }
+            <button class="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">
+                <span id="themeIconDesktop">🌙</span>
+            </button>
+            <a href="@(isAdmin?"/Admin/Index":"/Home/Index")" style="width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:9px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                <span style="color:#fff;font-weight:700;font-size:.8rem;">@(userName.Length>0?userName[0].ToString().ToUpper():"U")</span>
+            </a>
+        </div>
+    </div>
     }
 
-    @* --- Scripts --- *@
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        $(document).ready(function() {
-            const path = window.location.pathname.toLowerCase();
-            $('.nav-link, .nav-item').each(function() {
-                const href = $(this).attr('href')?.toLowerCase();
-                if (href && (path === href || (href !== "/" && path.startsWith(href)))) {
-                    $(this).addClass('active');
-                }
-            });
+    @* ── MOBILE TOP BAR WITH THEME TOGGLE ── *@
+    @if (isLoggedIn) {
+    <div id="topbar">
+        <button id="menu-btn" onclick="openSidebar()"><i class="bi bi-list"></i></button>
+        <span class="brand">IES Urban Hub</span>
+        <div class="actions">
+            @if (!isAdmin) {
+                <a href="/Home/Chat" style="color:var(--text);font-size:1.3rem;text-decoration:none;">
+                    <i class="bi bi-chat-dots-fill"></i>
+                </a>
+            }
+            <button class="theme-btn" onclick="toggleTheme()" title="Toggle light/dark mode">
+                <span id="themeIconMobile">🌙</span>
+            </button>
+            <a href="@(isAdmin?"/Admin/Index":"/Home/Index")" style="width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--blue2));border-radius:9px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+                <span style="color:#fff;font-weight:700;font-size:.8rem;">@(userName.Length>0?userName[0].ToString().ToUpper():"U")</span>
+            </a>
+        </div>
+    </div>
+    }
+
+    <div id="page-wrap">
+        @RenderBody()
+    </div>
+
+    @if (isLoggedIn) {
+    <footer id="site-footer">
+        <strong style="color:var(--navy)">IES URBAN HUB</strong> &nbsp;·&nbsp; Powered by Dabbasheth &copy; 2026
+    </footer>
+    }
+</div>
+
+@* ── MOBILE BOTTOM NAV ── *@
+@if (isLoggedIn) {
+<nav id="bottom-nav" class="d-lg-none">
+    <div class="b-nav">
+        @if (isAdmin) {
+            <a href="/Admin/Index"          class="b-item @(path.Contains("/admin/index")||path=="/admin"?"active":"")"><i class="bi bi-speedometer2"></i>Stats</a>
+            <a href="/Admin/UserManagement" class="b-item @(path.Contains("usermanagement")?"active":"")"><i class="bi bi-people-fill"></i>Users</a>
+            <a href="/Admin/PayoutControl"  class="b-item @(path.Contains("payoutcontrol")?"active":"")"><i class="bi bi-cash-stack"></i>Payouts</a>
+            <a href="/Admin/SupportCenter"  class="b-item @(path.Contains("supportcenter")?"active":"")"><i class="bi bi-headset"></i>Chat</a>
+            <a href="/Admin/AjoManagement"  class="b-item @(path.Contains("ajomanagement")?"active":"")"><i class="bi bi-diagram-3-fill"></i>Ajo</a>
+        } else {
+            <a href="/Home/Index"      class="b-item @(path.Contains("/home/index")||path=="/home"?"active":"")"><i class="bi bi-house-fill"></i>Home</a>
+            <a href="/Home/Thrift"     class="b-item @(path.Contains("thrift")?"active":"")"><i class="bi bi-piggy-bank-fill"></i>Savings</a>
+            <a href="/Home/Airtime"    class="b-item @(path.Contains("airtime")?"active":"")"><i class="bi bi-phone-fill"></i>Airtime</a>
+            <a href="/Home/Chat"       class="b-item @(path.Contains("chat")?"active":"")"><i class="bi bi-chat-dots-fill"></i>Chat</a>
+            <a href="/Account/Profile" class="b-item @(path.Contains("profile")?"active":"")"><i class="bi bi-person-fill"></i>Me</a>
+        }
+    </div>
+</nav>
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openSidebar(){
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebar-overlay').classList.add('open');
+    }
+    function closeSidebar(){
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('open');
+    }
+
+    setTimeout(()=>{
+        document.querySelectorAll('.toast-msg').forEach(t=>{
+            t.style.animation='slideOut .3s ease forwards';
+            setTimeout(()=>t.remove(),300);
         });
-    </script>
-    @await RenderSectionAsync("Scripts", required: false)
+    }, 5000);
+
+    function applyTheme(theme){
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        var emoji = theme === 'dark' ? '☀️' : '🌙';
+        var d = document.getElementById('themeIconDesktop');
+        var m = document.getElementById('themeIconMobile');
+        if(d) d.textContent = emoji;
+        if(m) m.textContent = emoji;
+    }
+    function toggleTheme(){
+        var current = document.documentElement.getAttribute('data-theme') || 'light';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+    }
+    (function(){
+        var saved = localStorage.getItem('theme') || 'light';
+        var emoji = saved === 'dark' ? '☀️' : '🌙';
+        var d = document.getElementById('themeIconDesktop');
+        var m = document.getElementById('themeIconMobile');
+        if(d) d.textContent = emoji;
+        if(m) m.textContent = emoji;
+    })();
+</script>
+@await RenderSectionAsync("Scripts", required:false)
 </body>
 </html>

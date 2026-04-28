@@ -1,0 +1,50 @@
+﻿@{
+    Layout = "_Layout"; ViewData["Title"] = "Fund Wallet";
+}
+
+<div class="container py-4" style="padding-bottom:90px!important;">
+    <div class="d-flex align-items-center mb-4">
+        <a href="/Home/Index" class="text-dark me-3 fs-4 text-decoration-none"><i class="bi bi-arrow-left"></i></a>
+        <h5 class="fw-bold mb-0">Fund Wallet</h5>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 text-center mb-4 bg-white">
+        <div class="icon-box mx-auto mb-2" style="background:#e3f0fd;width:60px;height:60px;">
+            <i class="bi bi-bank2" style="color:#1A73E8;font-size:1.5rem;"></i>
+        </div>
+        <h5 class="fw-bold mb-1">Instant Top-up</h5>
+        <p class="small text-muted mb-0">Add funds to your IES Urban Hub wallet securely.</p>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <form asp-controller="Payment" asp-action="InitializePayment" method="post">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">Email Address</label>
+                <input type="email" name="email" class="form-control border-0 bg-light py-3 rounded-4"
+                       placeholder="your@email.com" value="@TempData.Peek("UserEmail")" required />
+            </div>
+            <div class="mb-4">
+                <label class="small fw-bold text-muted mb-1">Amount (₦)</label>
+                <input type="number" name="amount" class="form-control border-0 bg-light py-3 rounded-4"
+                       placeholder="e.g. 5000" min="100" required />
+                <div class="d-flex gap-2 mt-2 flex-wrap">
+                    @foreach (var a in new[] { "1000", "2000", "5000", "10000" })
+                    {
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3"
+                                onclick="document.querySelector('[name=amount]').value=@a">
+                            ₦@int.Parse(a).ToString("N0")
+                        </button>
+                    }
+                </div>
+            </div>
+            <button type="submit" class="btn w-100 rounded-pill py-3 fw-bold text-white shadow"
+                    style="background:linear-gradient(135deg,#1A73E8,#00B4DB);">
+                <i class="bi bi-lock-fill me-2"></i>Initialize Secure Payment
+            </button>
+        </form>
+    </div>
+    <div class="text-center mt-3 text-muted small">
+        <i class="bi bi-shield-check me-1"></i>256-bit Encrypted Transaction
+    </div>
+</div>

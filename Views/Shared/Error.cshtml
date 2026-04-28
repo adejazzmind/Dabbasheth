@@ -1,26 +1,20 @@
-﻿@model ErrorViewModel
+﻿@model Dabbasheth.Models.ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
-    Layout = "_Layout";
+    Layout = "_Layout"; ViewData["Title"] = "Error";
 }
 
-<div class="container mt-5">
+<div class="container mt-5 py-4">
     <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <div class="mb-4">
-                <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size: 4.5rem;"></i>
-            </div>
-            <h1 class="text-danger fw-bold">Something Went Wrong</h1>
-            <p class="lead text-muted">We encountered an unexpected error.</p>
-
+        <div class="col-md-7 text-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size:4.5rem;"></i>
+            <h2 class="fw-bold text-danger mt-3 mb-2">Something Went Wrong</h2>
+            <p class="text-muted lead mb-4">We encountered an unexpected error.</p>
             @if (TempData["Error"] != null)
             {
-                <div class="alert alert-danger">
-                    @TempData["Error"]
-                </div>
+                <div class="alert alert-danger rounded-4 border-0 mb-4">@TempData["Error"]</div>
             }
-
-            <a href="/" class="btn btn-primary btn-lg px-5">Return to Home</a>
+            <a href="/" class="btn rounded-pill px-5 py-3 fw-bold text-white"
+               style="background:linear-gradient(135deg,#1A73E8,#00B4DB);">Return to Home</a>
         </div>
     </div>
 </div>

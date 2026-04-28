@@ -1,61 +1,95 @@
 ﻿@model Dabbasheth.Models.AdminDashboardViewModel
-@{
-    Layout = "_Layout";
-}
+@{ Layout = "_Layout"; ViewData["Title"] = "Support & Chat"; }
+<style>
+.px-page{padding:28px 32px}
+.section-card{background:#fff;border-radius:20px;border:1px solid #F1F5F9;overflow:hidden;margin-bottom:20px}
+.section-header{padding:18px 24px;border-bottom:1px solid #F8FAFC;display:flex;justify-content:space-between;align-items:center}
+.section-header h6{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.8px;color:#374151;margin:0}
+.customer-chat-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #F8FAFC;transition:.15s}
+.customer-chat-row:last-child{border-bottom:none}
+.customer-chat-row:hover{background:#F8FAFC}
+.av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0}
+.chat-btn{background:linear-gradient(135deg,#1A73E8,#0EA5E9);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none;font-family:'Inter',sans-serif;transition:.2s}
+.chat-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,115,232,.3);color:#fff}
+.ticket-card{margin:0 24px 16px;border-radius:16px;border:1px solid #F1F5F9;padding:18px}
+.priority-bar{width:4px;border-radius:99px;align-self:stretch;flex-shrink:0}
+@@media(max-width:768px){.px-page{padding:16px}}
+</style>
 
-<div class="container-fluid py-4 bg-light min-vh-100 px-lg-4">
-    <div class="mb-4 px-2">
-        <h4 class="fw-bold mb-0 text-dark"><i class="bi bi-headset me-2 text-primary"></i>Customer Support Center</h4>
-        <p class="text-muted small">Manage and resolve member complaints (Point 12)</p>
+<div class="px-page">
+    <div class="mb-4">
+        <h4 style="font-weight:800;margin:0 0 4px">Support &amp; Chat Center</h4>
+        <p style="color:#64748B;font-size:.85rem;margin:0">Chat directly with customers and resolve tickets.</p>
     </div>
 
-    <div class="row g-3">
-        @if (Model.SupportTickets != null && Model.SupportTickets.Any())
-        {
-            @foreach (var ticket in Model.SupportTickets)
-            {
-                <div class="col-12 col-lg-6">
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-4 @(ticket.Priority == "High" ? "border-danger" : "border-primary")">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="badge @(ticket.Status == "Open" ? "bg-soft-warning text-warning" : "bg-soft-success text-success") rounded-pill">
-                                @ticket.Status
-                            </span>
-                            <small class="text-muted">@ticket.CreatedAt.ToString("dd MMM, HH:mm")</small>
+    @* ── DIRECT CHAT PANEL ── *@
+    <div class="section-card">
+        <div class="section-header">
+            <h6><i class="bi bi-chat-dots-fill me-2" style="color:#1A73E8"></i>Direct Customer Chat</h6>
+            <span style="font-size:.75rem;color:#94A3B8">@(Model.AllUsers?.Count??0) customers</span>
+        </div>
+        @if(Model.AllUsers!=null&&Model.AllUsers.Any()){
+            @foreach(var u in Model.AllUsers){
+                var colors=new[]{"#1A73E8","#8B5CF6","#10B981","#F59E0B","#EF4444"};
+                var color=colors[Math.Abs(u.Email.GetHashCode())%colors.Length];
+                <div class="customer-chat-row">
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div class="av" style="background:@color">@u.FullName[0].ToString().ToUpper()</div>
+                        <div>
+                            <div style="font-weight:600;font-size:.87rem;color:#0F172A">@u.FullName</div>
+                            <div style="font-size:.73rem;color:#94A3B8">@u.Email</div>
                         </div>
-                        
-                        <h6 class="fw-bold mb-1">@ticket.Subject</h6>
-                        <p class="text-muted small mb-3">User: <strong>@ticket.UserEmail</strong></p>
-                        
-                        <div class="bg-light rounded-3 p-3 mb-3 small italic">
-                            "@ticket.Message"
-                        </div>
-
-                        @if (ticket.Status == "Open")
-                        {
-                            <form asp-action="ResolveTicket" method="post">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="ticketId" value="@ticket.Id" />
-                                <div class="input-group input-group-sm">
-                                    <input type="text" name="response" class="form-control border-0 bg-light" placeholder="Type resolution message..." required>
-                                    <button type="submit" class="btn btn-primary px-3 fw-bold">Resolve</button>
-                                </div>
-                            </form>
-                        }
-                        else
-                        {
-                            <div class="small text-success fw-bold">
-                                <i class="bi bi-check2-circle me-1"></i> Resolved: @ticket.AdminResponse
-                            </div>
-                        }
                     </div>
+                    <a href="/Admin/ChatWith?customerEmail=@Uri.EscapeDataString(u.Email)" class="chat-btn">
+                        <i class="bi bi-chat-fill me-1"></i>Open Chat
+                    </a>
                 </div>
             }
+        } else {
+            <div style="padding:40px;text-align:center;color:#CBD5E1;font-size:.85rem">No customers yet</div>
         }
-        else
-        {
-            <div class="col-12 text-center py-5">
-                <i class="bi bi-emoji-smile h1 text-muted opacity-25"></i>
-                <p class="text-muted">No pending complaints. All customers are happy!</p>
+    </div>
+
+    @* ── SUPPORT TICKETS ── *@
+    <div class="section-card">
+        <div class="section-header"><h6><i class="bi bi-ticket-fill me-2" style="color:#F59E0B"></i>Support Tickets</h6></div>
+        @if(Model.SupportTickets!=null&&Model.SupportTickets.Any()){
+            <div style="padding:16px 0">
+                @foreach(var t in Model.SupportTickets){
+                    <div class="ticket-card">
+                        <div style="display:flex;gap:14px">
+                            <div class="priority-bar" style="background:@(t.Priority=="High"?"#EF4444":t.Priority=="Medium"?"#F59E0B":"#10B981")"></div>
+                            <div style="flex:1">
+                                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+                                    <div>
+                                        <span style="font-weight:700;font-size:.87rem;color:#0F172A">@t.Subject</span>
+                                        <span style="font-size:.72rem;color:#94A3B8;margin-left:8px">@t.UserEmail</span>
+                                    </div>
+                                    <div style="display:flex;align-items:center;gap:8px">
+                                        <span style="font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:99px;background:@(t.Status=="Open"?"#FFFBEB":"#ECFDF5");color:@(t.Status=="Open"?"#92400E":"#065F46")">@t.Status</span>
+                                        <span style="font-size:.7rem;color:#94A3B8">@t.CreatedAt.ToString("dd MMM")</span>
+                                    </div>
+                                </div>
+                                <p style="font-size:.82rem;color:#64748B;font-style:italic;background:#F8FAFC;padding:10px 14px;border-radius:10px;margin:0 0 10px">"@t.Message"</p>
+                                @if(t.Status=="Open"){
+                                    <form asp-action="ResolveTicket" method="post" style="display:flex;gap:8px">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="ticketId" value="@t.Id"/>
+                                        <input type="text" name="response" style="flex:1;border:1.5px solid #E2E8F0;border-radius:10px;padding:9px 14px;font-size:.82rem;font-family:'Inter',sans-serif;outline:none" placeholder="Type resolution…" required/>
+                                        <button type="submit" style="background:#1A73E8;color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif">Resolve</button>
+                                    </form>
+                                } else {
+                                    <div style="font-size:.8rem;color:#10B981;font-weight:600"><i class="bi bi-check2-circle me-1"></i>@t.AdminResponse</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        } else {
+            <div style="padding:50px;text-align:center;color:#CBD5E1">
+                <i class="bi bi-emoji-smile" style="font-size:3rem;display:block;margin-bottom:10px"></i>
+                <span style="font-size:.85rem">No open complaints. All customers are happy!</span>
             </div>
         }
     </div>

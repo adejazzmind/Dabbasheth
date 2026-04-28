@@ -1,85 +1,89 @@
 ﻿@model IEnumerable<Dabbasheth.Models.User>
-@{
-    Layout = "_Layout";
-}
+@{ Layout = "_Layout"; ViewData["Title"] = "Customer Ledger"; }
+<style>
+.px-page{padding:28px 32px}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.search-box{border:1.5px solid #E2E8F0;border-radius:12px;padding:10px 16px;font-size:.85rem;width:260px;outline:none;font-family:'Inter',sans-serif}
+.search-box:focus{border-color:#1A73E8}
+.section-card{background:#fff;border-radius:20px;border:1px solid #F1F5F9;overflow:hidden}
+.u-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #F8FAFC;transition:.15s}
+.u-row:last-child{border-bottom:none}
+.u-row:hover{background:#F8FAFC}
+.av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0}
+.badge-v{font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:99px;display:inline-flex;align-items:center;gap:4px}
+.action-btn{border:none;border-radius:10px;padding:7px 14px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s}
+.action-btn:hover{transform:translateY(-1px)}
+.bulk-bar{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:14px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px}
+@@media(max-width:768px){.px-page{padding:16px}.search-box{width:100%}.page-header{flex-direction:column;align-items:flex-start}.u-row{flex-direction:column;align-items:flex-start;gap:12px}}
+</style>
 
-<div class="p-4">
-    @* --- Header Section --- *@
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="px-page">
+    <div class="page-header">
         <div>
-            <h4 class="fw-bold mb-1">Customer Ledger</h4>
-            <p class="text-muted small mb-0">Manage hub members, verification status, and account security.</p>
+            <h4 style="font-weight:800;margin:0 0 4px">Customer Ledger</h4>
+            <p style="color:#64748B;font-size:.85rem;margin:0">@Model.Count() registered members</p>
         </div>
-        <button class="btn btn-dark rounded-pill px-4 shadow-sm">+ Add User</button>
+        <input class="search-box" type="text" id="searchInput" placeholder="🔍  Search by name or email..." oninput="filterTable()"/>
     </div>
 
-    @* --- Stats Bar (Optional but World-Class) --- *@
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card card-dab p-3 border-0 shadow-sm rounded-4">
-                <small class="text-muted d-block">Total Members</small>
-                <h4 class="fw-bold mb-0">@Model.Count()</h4>
-            </div>
+    @* Bulk actions *@
+    <div class="bulk-bar">
+        <span style="font-size:.82rem;font-weight:600;color:#1E40AF"><i class="bi bi-lightning-charge-fill me-2"></i>Bulk Actions</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <form asp-action="VerifyAllUsers" method="post" style="display:inline">
+                @Html.AntiForgeryToken()
+                <button class="action-btn" style="background:#10B981;color:#fff" onclick="return confirm('Verify all pending customers?')">
+                    <i class="bi bi-patch-check-fill me-1"></i>Verify All Pending
+                </button>
+            </form>
         </div>
     </div>
 
-    @* --- Main Ledger Table --- *@
-    <div class="card border-0 shadow-sm rounded-5 overflow-hidden bg-white">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr>
-                        <th class="ps-4 py-3">Full Name</th>
-                        <th>Email</th>
-                        <th>Identity</th>
-                        <th>Account Status</th>
-                        <th class="text-end pe-4">Executive Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var user in Model)
-                    {
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3 fw-bold text-white" style="background: var(--brand-blue); border-radius: 10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
-                                        @user.FullName.Substring(0, 1)
-                                    </div>
-                                    <span class="fw-bold">@user.FullName</span>
-                                </div>
-                            </td>
-                            <td class="text-muted">@user.Email</td>
-                            <td>
-                                @* Verification Status Check *@
-                                <span class="badge @(user.IsVerified ? "bg-soft-success text-success" : "bg-soft-warning text-warning") rounded-pill px-3">
-                                    <i class="bi @(user.IsVerified ? "bi-patch-check-fill" : "bi-hourglass-split") me-1"></i>
-                                    @(user.IsVerified ? "Verified" : "Pending")
-                                </span>
-                            </td>
-                            <td>
-                                @* ❄️ Freeze/Unfreeze Status Display *@
-                                <span class="badge @(user.Status == "Active" ? "bg-success" : "bg-danger") px-3">
-                                    @user.Status
-                                </span>
-                            </td>
-                            <td class="text-end pe-4">
-                                <div class="d-flex justify-content-end gap-2">
-                                    @* ✅ View Profile Button *@
-                                    <button class="btn btn-light btn-sm rounded-pill px-3 fw-bold">View</button>
-
-                                    @* ❄️ Toggle Status Form *@
-                                    <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" method="post" style="display:inline;">
-                                        <button type="submit" class="btn btn-sm rounded-pill px-3 @(user.Status == "Active" ? "btn-outline-danger" : "btn-success")">
-                                            <i class="bi @(user.Status == "Active" ? "bi-snow" : "bi-play-fill") me-1"></i>
-                                            @(user.Status == "Active" ? "Freeze" : "Unfreeze")
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="section-card">
+        <div id="userTable">
+            @foreach(var user in Model){
+                var colors = new[]{"#1A73E8","#8B5CF6","#10B981","#F59E0B","#EF4444","#0EA5E9"};
+                var color  = colors[Math.Abs(user.Email.GetHashCode())%colors.Length];
+                <div class="u-row" data-name="@user.FullName.ToLower()" data-email="@user.Email.ToLower()">
+                    <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+                        <div class="av" style="background:@color">@user.FullName[0].ToString().ToUpper()</div>
+                        <div style="min-width:0">
+                            <div style="font-weight:600;font-size:.88rem;color:#0F172A">@user.FullName</div>
+                            <div style="font-size:.75rem;color:#94A3B8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@user.Email</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap">
+                        <span class="badge-v" style="background:@(user.IsVerified?"#ECFDF5":"#FFFBEB");color:@(user.IsVerified?"#065F46":"#92400E")">
+                            <i class="bi @(user.IsVerified?"bi-patch-check-fill":"bi-hourglass-split")"></i>
+                            @(user.IsVerified?"Verified":"Pending")
+                        </span>
+                        <span class="badge-v" style="background:@(user.Status=="Active"?"#ECFDF5":"#FEF2F2");color:@(user.Status=="Active"?"#065F46":"#991B1B")">
+                            @user.Status
+                        </span>
+                        <a href="/Admin/ChatWith?customerEmail=@Uri.EscapeDataString(user.Email)" class="action-btn" style="background:#EFF6FF;color:#1A73E8;text-decoration:none">
+                            <i class="bi bi-chat-dots-fill me-1"></i>Chat
+                        </a>
+                        <a href="/Admin/WalletControl" class="action-btn" style="background:#ECFDF5;color:#10B981;text-decoration:none">
+                            <i class="bi bi-cash-coin me-1"></i>Wallet
+                        </a>
+                        <form asp-action="ToggleUserStatus" asp-route-id="@user.Id" method="post" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <button class="action-btn" style="background:@(user.Status=="Active"?"#FEF2F2":"#ECFDF5");color:@(user.Status=="Active"?"#EF4444":"#10B981")">
+                                <i class="bi @(user.Status=="Active"?"bi-snow":"bi-play-fill") me-1"></i>@(user.Status=="Active"?"Freeze":"Restore")
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
+<script>
+function filterTable(){
+    const q=document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#userTable .u-row').forEach(r=>{
+        const n=r.dataset.name,e=r.dataset.email;
+        r.style.display=(n.includes(q)||e.includes(q))?'':'none';
+    });
+}
+</script>

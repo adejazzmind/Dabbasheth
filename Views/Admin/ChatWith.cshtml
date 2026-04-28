@@ -1,0 +1,70 @@
+﻿@{ 
+    Layout = "_Layout"; ViewData["Title"] = "Chat";
+    var messages = ViewBag.Messages as List<Dabbasheth.Models.ChatMessage>;
+    var customerEmail = ViewBag.CustomerEmail as string ?? "";
+    var adminEmail    = ViewBag.AdminEmail    as string ?? "";
+    var customerName  = ViewBag.CustomerName  as string ?? customerEmail;
+}
+<style>
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 120px);max-width:800px;margin:0 auto;padding:20px}
+.chat-header{background:#fff;border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:14px;border:1px solid #F1F5F9;margin-bottom:12px}
+.chat-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 2px}
+.chat-footer{background:#fff;border-radius:18px;padding:14px 16px;border:1px solid #F1F5F9;margin-top:12px;display:flex;gap:10px;align-items:flex-end}
+.msg{max-width:72%;padding:11px 16px;border-radius:18px;font-size:.875rem;line-height:1.5;word-break:break-word}
+.msg.admin{background:linear-gradient(135deg,#1A73E8,#0EA5E9);color:#fff;border-radius:18px 18px 4px 18px;align-self:flex-end}
+.msg.customer{background:#F1F5F9;color:#0F172A;border-radius:18px 18px 18px 4px;align-self:flex-start}
+.msg-time{font-size:.65rem;opacity:.65;margin-top:4px}
+.msg-wrap{display:flex;flex-direction:column}
+.msg-wrap.admin{align-items:flex-end}
+.msg-wrap.customer{align-items:flex-start}
+.chat-input{flex:1;border:1.5px solid #E2E8F0;border-radius:14px;padding:12px 16px;font-size:.875rem;font-family:'Inter',sans-serif;outline:none;resize:none;min-height:46px;max-height:120px;transition:.2s}
+.chat-input:focus{border-color:#1A73E8;box-shadow:0 0 0 3px rgba(26,115,232,.1)}
+.send-btn{background:linear-gradient(135deg,#1A73E8,#0EA5E9);color:#fff;border:none;border-radius:14px;padding:12px 18px;font-size:1.1rem;cursor:pointer;flex-shrink:0;transition:.2s}
+.send-btn:hover{transform:scale(1.05)}
+.online-dot{width:10px;height:10px;background:#10B981;border-radius:99px;box-shadow:0 0 6px #10B981;flex-shrink:0}
+</style>
+
+<div class="chat-wrap">
+    <div class="chat-header">
+        <a href="/Admin/SupportCenter" style="color:#94A3B8;text-decoration:none;font-size:1.2rem"><i class="bi bi-arrow-left"></i></a>
+        <div style="width:42px;height:42px;background:linear-gradient(135deg,#1A73E8,#0EA5E9);border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;flex-shrink:0">
+            @(customerName.Length>0?customerName[0].ToString().ToUpper():"C")
+        </div>
+        <div style="flex:1">
+            <div style="font-weight:700;font-size:.95rem;color:#0F172A">@customerName</div>
+            <div style="font-size:.75rem;color:#94A3B8">@customerEmail</div>
+        </div>
+        <div class="online-dot"></div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+        @if(messages == null || !messages.Any()){
+            <div style="text-align:center;color:#CBD5E1;padding:40px;font-size:.85rem">
+                <i class="bi bi-chat-dots" style="font-size:2.5rem;display:block;margin-bottom:10px"></i>
+                Start a conversation with @customerName
+            </div>
+        }
+        @foreach(var m in messages ?? new List<Dabbasheth.Models.ChatMessage>()){
+            var isAdmin = m.IsAdminMessage;
+            <div class="msg-wrap @(isAdmin?"admin":"customer")">
+                <div class="msg @(isAdmin?"admin":"customer")">@m.Message</div>
+                <div class="msg-time">@m.SentAt.ToLocalTime().ToString("dd MMM, HH:mm")</div>
+            </div>
+        }
+    </div>
+
+    <div class="chat-footer">
+        <form asp-action="SendAdminMessage" method="post" style="display:flex;gap:10px;flex:1;align-items:flex-end">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="customerEmail" value="@customerEmail"/>
+            <textarea name="message" class="chat-input" placeholder="Type a message…" rows="1" required
+                      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit()}"></textarea>
+            <button type="submit" class="send-btn"><i class="bi bi-send-fill"></i></button>
+        </form>
+    </div>
+</div>
+<script>
+const cb=document.getElementById('chatBody');
+if(cb)cb.scrollTop=cb.scrollHeight;
+</script>
+

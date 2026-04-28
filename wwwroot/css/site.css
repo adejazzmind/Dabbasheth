@@ -1,156 +1,32 @@
-/* ======================================================
-   IES URBAN HUB x DABBASHETH THEME v10.2 (PLATINUM)
-   THEME: Deep Navy & Sky Blue Professional Fintech
-   GOAL: Total Consistency from Login to Dashboard
-   ====================================================== */
+/* IES URBAN HUB - site.css */
+/* All primary styles live in _Layout.cshtml for simplicity.
+   Add any global overrides here. */
 
-:root {
-    /* --- 1. BRAND IDENTITY VARIABLES --- */
-    --brand-navy: #0D2149;
-    --brand-blue: #1A73E8;
-    --brand-sky: #00B4DB;
-    --brand-gold: #FFB800;
-    --app-bg: #F8FAFC;
-    --card-shadow: 0 10px 30px rgba(13, 33, 73, 0.07);
+a {
+    color: #1A73E8;
 }
 
-/* --- 2. GLOBAL BASE STYLES --- */
-body {
-    background-color: var(--app-bg) !important;
-    font-family: 'Poppins', sans-serif;
-    color: var(--brand-navy);
+.rounded-4 {
+    border-radius: 1rem !important;
 }
 
-::-webkit-scrollbar {
-    display: none; /* Clean native app look */
+.rounded-5 {
+    border-radius: 1.5rem !important;
 }
 
-/* --- 3. PLATINUM GATEWAY (LOGIN PAGE) --- */
-.login-bg, .auth-container {
-    background: radial-gradient(circle at top right, var(--brand-blue) 0%, var(--brand-navy) 60%) !important;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.btn:focus {
+    box-shadow: none;
 }
 
-.login-card {
-    background: #FFFFFF !important;
-    border-radius: 35px !important;
-    padding: 40px;
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(26,115,232,0.15) !important;
+    border-color: #1A73E8 !important;
 }
 
-    .login-card h4 {
-        color: var(--brand-navy) !important;
-        font-weight: 800;
+/* App-style page padding on mobile */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 16px;
+        padding-right: 16px;
     }
-
-    .login-card .text-muted {
-        color: var(--brand-blue) !important;
-        font-weight: 500;
-    }
-
-.login-btn, .btn-authorize {
-    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-sky) 100%) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 15px !important;
-    height: 55px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(26, 115, 232, 0.3) !important;
-}
-
-    .login-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 15px 35px rgba(26, 115, 232, 0.4) !important;
-    }
-
-/* --- 4. THE SIDEBAR (PLATINUM NAVIGATION) --- */
-aside, .sidebar, #sidebar-wrapper {
-    background: var(--brand-navy) !important;
-    border-right: none !important;
-    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.1);
-}
-
-    .sidebar .nav-link {
-        margin: 4px 15px;
-        border-radius: 12px !important;
-        padding: 12px 20px !important;
-        color: rgba(255, 255, 255, 0.7) !important;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-        .sidebar .nav-link:hover {
-            background: rgba(255, 255, 255, 0.05) !important;
-            transform: translateX(5px);
-            color: white !important;
-        }
-
-        .sidebar .nav-link.active {
-            background: rgba(26, 115, 232, 0.15) !important;
-            color: white !important;
-            box-shadow: inset 4px 0 0 var(--brand-blue);
-        }
-
-/* --- 5. PREMIUM DASHBOARD COMPONENTS --- */
-.premium-card, .balance-card {
-    background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-sky) 100%) !important;
-    border-radius: 30px !important;
-    border: none !important;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(26, 115, 232, 0.25);
-}
-
-    .premium-card::before {
-        content: "";
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-        pointer-events: none;
-    }
-
-.card-dab, .card {
-    background: #FFFFFF !important;
-    border: 1px solid rgba(225, 230, 239, 0.8) !important;
-    border-radius: 24px !important;
-    box-shadow: var(--card-shadow) !important;
-    transition: transform 0.3s ease;
-}
-
-    .card-dab:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 45px rgba(13, 33, 73, 0.12) !important;
-    }
-
-/* --- 6. FEATURE ICONS --- */
-.icon-box {
-    width: 55px;
-    height: 55px;
-    border-radius: 18px;
-    background: #F1F5F9;
-    color: var(--brand-blue);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-    .icon-box:hover {
-        background: var(--brand-blue);
-        color: white;
-        transform: rotate(10deg);
-    }
-
-/* --- 7. FOOTER & SPECIAL BUTTONS --- */
-.sidebar .nav-link.text-danger {
-    margin-top: auto;
-    color: #ff6b6b !important;
-    border-top: 1px solid rgba(255,255,255,0.05);
 }

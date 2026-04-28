@@ -9,21 +9,21 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         [Required]
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         public string Role { get; set; } = "Customer";
 
         public string Status { get; set; } = "Active";
+
         public bool IsVerified { get; set; } = false;
 
-        // ✅ ADD THIS LINE TO FIX THE ERROR
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

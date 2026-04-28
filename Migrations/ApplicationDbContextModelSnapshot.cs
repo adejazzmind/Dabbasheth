@@ -23,342 +23,116 @@ namespace Dabbasheth.Migrations
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Dabbasheth.Models.SupportTicket", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdminResponse")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("adminresponse");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("createdat");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("message");
-
-                    b.Property<string>("Priority")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("priority");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("subject");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("useremail");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("supporttickets");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<string>("AdminResponse").IsRequired().HasColumnType("text").HasColumnName("adminresponse");
+                b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("createdat");
+                b.Property<string>("Message").IsRequired().HasColumnType("text").HasColumnName("message");
+                b.Property<string>("Priority").IsRequired().HasColumnType("text").HasColumnName("priority");
+                b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("status");
+                b.Property<string>("Subject").IsRequired().HasColumnType("text").HasColumnName("subject");
+                b.Property<string>("UserEmail").IsRequired().HasColumnType("text").HasColumnName("useremail");
+                b.HasKey("Id"); b.ToTable("supporttickets");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.SystemSetting", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("SettingKey")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("settingkey");
-
-                    b.Property<decimal>("SettingValue")
-                        .HasColumnType("numeric")
-                        .HasColumnName("settingvalue");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("systemsettings");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<string>("Description").IsRequired().HasColumnType("text").HasColumnName("description");
+                b.Property<string>("SettingKey").IsRequired().HasColumnType("text").HasColumnName("settingkey");
+                b.Property<decimal>("SettingValue").HasColumnType("numeric").HasColumnName("settingvalue");
+                b.HasKey("Id"); b.ToTable("systemsettings");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.ThriftGroup", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("CategoryAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("categoryamount");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("createdat");
-
-                    b.Property<int>("DurationMonths")
-                        .HasColumnType("integer")
-                        .HasColumnName("durationmonths");
-
-                    b.Property<string>("Frequency")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("frequency");
-
-                    b.Property<string>("GroupName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("groupname");
-
-                    b.Property<decimal>("MonthlyContribution")
-                        .HasColumnType("numeric")
-                        .HasColumnName("monthlycontribution");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("startdate");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<int>("TotalMembers")
-                        .HasColumnType("integer")
-                        .HasColumnName("totalmembers");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("thriftgroups");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<decimal>("CategoryAmount").HasColumnType("numeric").HasColumnName("categoryamount");
+                b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("createdat");
+                b.Property<int>("DurationMonths").HasColumnType("integer").HasColumnName("durationmonths");
+                b.Property<string>("Frequency").IsRequired().HasColumnType("text").HasColumnName("frequency");
+                b.Property<string>("GroupName").IsRequired().HasColumnType("text").HasColumnName("groupname");
+                b.Property<decimal>("MonthlyContribution").HasColumnType("numeric").HasColumnName("monthlycontribution");
+                b.Property<DateTime>("StartDate").HasColumnType("timestamp with time zone").HasColumnName("startdate");
+                b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("status");
+                b.Property<int>("TotalMembers").HasColumnType("integer").HasColumnName("totalmembers");
+                b.HasKey("Id"); b.ToTable("thriftgroups");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.ThriftPlan", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("CurrentSavings")
-                        .HasColumnType("numeric")
-                        .HasColumnName("currentsavings");
-
-                    b.Property<string>("Frequency")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("frequency");
-
-                    b.Property<bool>("HasCollected")
-                        .HasColumnType("boolean")
-                        .HasColumnName("hascollected");
-
-                    b.Property<DateTime>("MaturityDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("maturitydate");
-
-                    b.Property<DateTime?>("PayoutDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("payoutdate");
-
-                    b.Property<int>("PayoutOrder")
-                        .HasColumnType("integer")
-                        .HasColumnName("payoutorder");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("startdate");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<decimal>("TargetAmount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("targetamount");
-
-                    b.Property<int?>("ThriftGroupId")
-                        .HasColumnType("integer")
-                        .HasColumnName("thriftgroupid");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("title");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("useremail");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ThriftGroupId");
-
-                    b.ToTable("thriftplans");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<decimal>("CurrentSavings").HasColumnType("numeric").HasColumnName("currentsavings");
+                b.Property<string>("Frequency").IsRequired().HasColumnType("text").HasColumnName("frequency");
+                b.Property<bool>("HasCollected").HasColumnType("boolean").HasColumnName("hascollected");
+                b.Property<DateTime>("MaturityDate").HasColumnType("timestamp with time zone").HasColumnName("maturitydate");
+                b.Property<DateTime?>("PayoutDate").HasColumnType("timestamp with time zone").HasColumnName("payoutdate");
+                b.Property<int>("PayoutOrder").HasColumnType("integer").HasColumnName("payoutorder");
+                b.Property<DateTime>("StartDate").HasColumnType("timestamp with time zone").HasColumnName("startdate");
+                b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("status");
+                b.Property<decimal>("TargetAmount").HasColumnType("numeric").HasColumnName("targetamount");
+                b.Property<int?>("ThriftGroupId").HasColumnType("integer").HasColumnName("thriftgroupid");
+                b.Property<string>("Title").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)").HasColumnName("title");
+                b.Property<string>("UserEmail").IsRequired().HasColumnType("text").HasColumnName("useremail");
+                b.HasKey("Id"); b.HasIndex("ThriftGroupId"); b.ToTable("thriftplans");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.Transaction", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric")
-                        .HasColumnName("amount");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("date");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("type");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("useremail");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("transactions");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<decimal>("Amount").HasColumnType("numeric").HasColumnName("amount");
+                b.Property<DateTime>("Date").HasColumnType("timestamp with time zone").HasColumnName("date");
+                b.Property<string>("Description").IsRequired().HasColumnType("text").HasColumnName("description");
+                b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("status");
+                b.Property<string>("Type").IsRequired().HasColumnType("text").HasColumnName("type");
+                b.Property<string>("UserEmail").IsRequired().HasColumnType("text").HasColumnName("useremail");
+                b.HasKey("Id"); b.ToTable("transactions");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("createdat");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("email");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("fullname");
-
-                    b.Property<bool>("IsVerified")
-                        .HasColumnType("boolean")
-                        .HasColumnName("isverified");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("password");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("role");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("status");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("users");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("createdat");
+                b.Property<string>("Email").IsRequired().HasColumnType("text").HasColumnName("email");
+                b.Property<string>("FullName").IsRequired().HasColumnType("text").HasColumnName("fullname");
+                b.Property<bool>("IsVerified").HasColumnType("boolean").HasColumnName("isverified");
+                b.Property<string>("Password").IsRequired().HasColumnType("text").HasColumnName("password");
+                b.Property<string>("Role").IsRequired().HasColumnType("text").HasColumnName("role");
+                b.Property<string>("Status").IsRequired().HasColumnType("text").HasColumnName("status");
+                b.HasKey("Id"); b.ToTable("users");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.Wallet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("numeric")
-                        .HasColumnName("balance");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("createdat");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("currency");
-
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("useremail");
-
-                    b.Property<string>("WalletNumber")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("walletnumber");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("wallets");
-                });
+            {
+                b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                b.Property<decimal>("Balance").HasColumnType("numeric").HasColumnName("balance");
+                b.Property<DateTime>("CreatedAt").HasColumnType("timestamp with time zone").HasColumnName("createdat");
+                b.Property<string>("Currency").IsRequired().HasColumnType("text").HasColumnName("currency");
+                b.Property<string>("UserEmail").IsRequired().HasColumnType("text").HasColumnName("useremail");
+                b.Property<string>("WalletNumber").IsRequired().HasColumnType("text").HasColumnName("walletnumber");
+                b.HasKey("Id"); b.ToTable("wallets");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.ThriftPlan", b =>
-                {
-                    b.HasOne("Dabbasheth.Models.ThriftGroup", "ThriftGroup")
-                        .WithMany("MemberPlans")
-                        .HasForeignKey("ThriftGroupId");
-
-                    b.Navigation("ThriftGroup");
-                });
+            {
+                b.HasOne("Dabbasheth.Models.ThriftGroup", "ThriftGroup")
+                    .WithMany("MemberPlans")
+                    .HasForeignKey("ThriftGroupId")
+                    .HasConstraintName("fk_thriftplans_thriftgroups_thriftgroupid");
+                b.Navigation("ThriftGroup");
+            });
 
             modelBuilder.Entity("Dabbasheth.Models.ThriftGroup", b =>
-                {
-                    b.Navigation("MemberPlans");
-                });
+            {
+                b.Navigation("MemberPlans");
+            });
 #pragma warning restore 612, 618
         }
     }

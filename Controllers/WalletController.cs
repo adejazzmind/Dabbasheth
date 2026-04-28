@@ -1,21 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Dabbasheth.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dabbasheth.Controllers
 {
     public class WalletController : Controller
     {
         private readonly ApplicationDbContext _context;
+        public WalletController(ApplicationDbContext context) => _context = context;
 
-        public WalletController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-
-        // GET: Wallet/FundWallet
+        [HttpGet]
         public IActionResult FundWallet()
         {
+            if (TempData.Peek("UserEmail") == null)
+                return RedirectToAction("Login", "Account");
             return View();
         }
     }

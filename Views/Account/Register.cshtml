@@ -1,104 +1,58 @@
-﻿@{
-    Layout = "_Layout";
-    ViewData["Title"] = "Create Account - Dabbasheth Secure Wallet";
-}
+﻿@{ Layout = "_Layout"; ViewData["Title"] = "Create Account"; }
+<style>
+.auth-bg{min-height:100vh;background:radial-gradient(ellipse at 30% 80%,#0EA5E9 0%,#0A0F1E 60%);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{background:#fff;border-radius:28px;padding:44px 40px;width:100%;max-width:440px;box-shadow:0 40px 80px rgba(0,0,0,.35)}
+.auth-input{border:1.5px solid #E2E8F0;border-radius:14px;padding:14px 16px;font-size:.9rem;width:100%;outline:none;transition:.2s;background:#F8FAFC;font-family:'Inter',sans-serif}
+.auth-input:focus{border-color:#1A73E8;background:#fff;box-shadow:0 0 0 3px rgba(26,115,232,.1)}
+.auth-btn{background:linear-gradient(135deg,#1A73E8,#0EA5E9);color:#fff;border:none;border-radius:14px;padding:15px;font-size:.95rem;font-weight:700;width:100%;cursor:pointer;transition:.3s;font-family:'Inter',sans-serif}
+.auth-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(26,115,232,.35)}
+.pw-wrap{position:relative}
+.pw-wrap .auth-input{padding-right:48px}
+.pw-eye{position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#94A3B8;font-size:1.1rem;padding:0}
+.pw-eye:hover{color:#1A73E8}
+.error-box{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:12px;padding:12px 16px;font-size:.85rem;margin-bottom:20px}
+@@media(max-width:480px){.auth-card{padding:32px 24px}}
+</style>
 
-<div class="container">
-    <div class="row justify-content-center align-items-center" style="min-height: 85vh;">
-        <div class="col-md-6 col-lg-5">
-
-            <!-- Branding -->
-            <div class="text-center mb-4">
-                <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow-sm"
-                     style="width: 65px; height: 65px; background-color: rgba(0, 208, 156, 0.1);">
-                    <i class="bi bi-person-plus-fill" style="font-size: 2.2rem; color: var(--dab-primary);"></i>
-                </div>
-                <h1 class="fw-bold" style="letter-spacing: -1.5px; font-size: 2.5rem;">Join Us</h1>
-                <p class="text-muted fw-medium">Secure banking starts with a single step.</p>
+<div class="auth-bg">
+    <div class="auth-card animate__animated animate__fadeInUp">
+        <div style="text-align:center;margin-bottom:28px">
+            <div style="width:60px;height:60px;background:linear-gradient(135deg,#1A73E8,#0EA5E9);border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+                <i class="bi bi-person-plus-fill" style="color:#fff;font-size:1.5rem;"></i>
             </div>
-
-            <!-- Registration Card -->
-            <div class="card card-dab shadow-lg border-0" id="registerCard" style="opacity: 0;">
-                <div class="card-body p-5">
-                    <h3 class="fw-bold mb-1">Create Account</h3>
-                    <p class="text-muted small mb-4">Please provide your real details for verification.</p>
-
-                    <!-- Messages -->
-                    @if (TempData["Message"] != null)
-                    {
-                        <div class="alert alert-success border-0 mb-4 d-flex align-items-center">
-                            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Message"]
-                        </div>
-                    }
-                    @if (TempData["Error"] != null)
-                    {
-                        <div class="alert alert-danger border-0 mb-4 d-flex align-items-center">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
-                        </div>
-                    }
-
-                    <form asp-controller="Account" asp-action="Register" method="post">
-                        @Html.AntiForgeryToken()
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Full Name</label>
-                            <input type="text" name="FullName" class="form-control py-3 shadow-none"
-                                   placeholder="e.g. Samson Mayowa Braimoh" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Email Address</label>
-                            <input type="email" name="Email" class="form-control py-3 shadow-none"
-                                   placeholder="name@example.com" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Phone Number</label>
-                            <input type="tel" name="PhoneNumber" class="form-control py-3 shadow-none"
-                                   placeholder="08012345678" required />
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-uppercase text-muted" style="letter-spacing: 1px;">Password</label>
-                            <input type="password" name="Password" class="form-control py-3 shadow-none"
-                                   placeholder="••••••••" required />
-                            <div class="form-text small text-muted mt-2">Use at least 8 characters for your security.</div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm py-3 mt-2 rounded-pill fw-bold">
-                            Create My Wallet
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Login Link -->
-            <div class="text-center mt-4 mb-5">
-                <p class="text-muted small">
-                    Already have a Dabbasheth account?
-                    <a asp-controller="Account" asp-action="Login"
-                           class="text-success fw-bold text-decoration-none ms-1">
-                        Login Here
-                    </a>
-                </p>
-            </div>
-
+            <h3 style="font-weight:800;color:#0A0F1E;margin:0 0 4px">Create Wallet</h3>
+            <p style="color:#64748B;font-size:.85rem;margin:0">Join IES Urban Hub today</p>
         </div>
+
+        @if (TempData["Error"] != null) {
+            <div class="error-box"><i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]</div>
+        }
+
+        <form asp-controller="Account" asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+            <div style="margin-bottom:14px">
+                <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:6px">Full Name</label>
+                <input type="text" name="fullName" class="auth-input" placeholder="e.g. Samson Mayowa" required/>
+            </div>
+            <div style="margin-bottom:14px">
+                <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:6px">Email Address</label>
+                <input type="email" name="email" class="auth-input" placeholder="you@example.com" required/>
+            </div>
+            <div style="margin-bottom:24px">
+                <label style="font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:6px">Password</label>
+                <div class="pw-wrap">
+                    <input type="password" name="password" id="rpw" class="auth-input" placeholder="Min. 6 characters" required/>
+                    <button type="button" class="pw-eye" onclick="togglePw('rpw','rEye')"><i class="bi bi-eye" id="rEye"></i></button>
+                </div>
+            </div>
+            <button type="submit" class="auth-btn">Initialize My Wallet</button>
+        </form>
+
+        <p style="text-align:center;font-size:.85rem;color:#64748B;margin-top:20px;margin-bottom:0">
+            Already registered? <a asp-action="Login" style="color:#1A73E8;font-weight:700;text-decoration:none;">Login Here</a>
+        </p>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function() {
-            $("#registerCard").animate({
-                "opacity": "1"
-            }, {
-                step: function(now) {
-                    $(this).css("transform", "translateY(" + (20 - (now * 20)) + "px)");
-                },
-                duration: 600,
-                easing: "swing"
-            });
-        });
-    </script>
-}
+<script>
+function togglePw(id,iconId){const i=document.getElementById(id),ic=document.getElementById(iconId);if(i.type==='password'){i.type='text';ic.className='bi bi-eye-slash'}else{i.type='password';ic.className='bi bi-eye'}}
+</script>

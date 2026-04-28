@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "_Layout"; ViewData["Title"] = "My Account";
+}
+
+<div class="container py-4" style="padding-bottom:90px!important;">
+    <div class="text-center py-4 mb-3"
+         style="background:linear-gradient(135deg,#1A73E8,#00B4DB);border-radius:24px;">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2 shadow"
+             style="width:70px;height:70px;background:rgba(255,255,255,0.2);">
+            <i class="bi bi-person-fill text-white" style="font-size:2rem;"></i>
+        </div>
+        <h5 class="fw-bold text-white mb-0">@TempData.Peek("UserName")</h5>
+        <small class="text-white opacity-75">@ViewBag.UserEmail</small>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        @foreach (var item in new[] {
+            new { Icon="bi-list-ul",       Color="text-primary", Label="Transaction History", Href="#" },
+            new { Icon="bi-speedometer2",  Color="text-success", Label="Account Limits",      Href="#" },
+            new { Icon="bi-credit-card",   Color="text-info",    Label="Bank Card / Account", Href="#" },
+            new { Icon="bi-headset",       Color="text-warning", Label="Contact Support",     Href="#" }
+        })
+        {
+            <a href="@item.Href" class="d-flex align-items-center p-3 text-decoration-none text-dark border-bottom">
+                <i class="bi @item.Icon @item.Color h4 mb-0 me-3"></i>
+                <div class="flex-grow-1">@item.Label</div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </a>
+        }
+        <a href="@Url.Action("Logout", "Account")" class="d-flex align-items-center p-3 text-decoration-none">
+            <i class="bi bi-box-arrow-right text-danger h4 mb-0 me-3"></i>
+            <div class="flex-grow-1 text-danger fw-bold">Sign Out</div>
+        </a>
+    </div>
+</div>

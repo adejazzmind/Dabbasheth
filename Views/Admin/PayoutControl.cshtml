@@ -1,13 +1,15 @@
 ﻿@model Dabbasheth.Models.AdminDashboardViewModel
-@{ Layout = "_Layout"; }
+@{
+    Layout = "_Layout"; ViewData["Title"] = "Payout Control";
+}
 
-<div class="container-fluid py-4 bg-light min-vh-100 px-lg-4">
-    <div class="mb-4 px-2">
-        <h4 class="fw-bold mb-0 text-dark">Disbursement Control</h4>
-        <p class="text-muted small">Manage system exits and automated Ajo payouts</p>
+<div class="container-fluid p-4">
+    <div class="mb-4">
+        <h4 class="fw-bold mb-1">Disbursement Control</h4>
+        <p class="text-muted small">Approve withdrawals and process Ajo payouts.</p>
     </div>
 
-    @* --- 🏦 SECTION 1: WITHDRAWAL REQUESTS (WALLET EXITS) --- *@
+    @* ── WITHDRAWAL REQUESTS ── *@
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white">
         <div class="card-header bg-white py-3 border-0">
             <h6 class="fw-bold mb-0 text-primary"><i class="bi bi-bank me-2"></i>Withdrawal Requests</h6>
@@ -18,12 +20,13 @@
                     <tr>
                         <th class="ps-4">Member</th>
                         <th>Amount</th>
-                        <th>Internal ID</th>
+                        <th>TX&nbsp;ID</th>
+                        <th>Description</th>
                         <th class="text-end pe-4">Decision</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.PendingTransactions != null && Model.PendingTransactions.Any())
+                    @if (Model.PendingTransactions.Any())
                     {
                         @foreach (var tx in Model.PendingTransactions)
                         {
@@ -33,100 +36,99 @@
                                     <small class="text-muted">@tx.Date.ToString("dd MMM, HH:mm")</small>
                                 </td>
                                 <td class="fw-bold text-danger">₦@tx.Amount.ToString("N2")</td>
-                                @* ✅ FIXED: Using .Id instead of .Reference *@
-                                <td><code class="small bg-light px-2 rounded">TX-@tx.Id</code></td>
+                                <td><code class="small bg-light px-2 py-1 rounded">TX-@tx.Id</code></td>
+                                <td class="small text-muted">@tx.Description</td>
                                 <td class="text-end pe-4">
-                                    <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                                        <form asp-action="ApproveTransaction" method="post" class="d-inline">
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <form asp-action="ApproveTransaction" method="post">
                                             @Html.AntiForgeryToken()
-                                            @* ✅ FIXED: Form input name matches the backend ID logic *@
                                             <input type="hidden" name="transactionId" value="@tx.Id" />
-                                            <button type="submit" class="btn btn-success btn-sm px-3 fw-bold">Pay</button>
+                                            <button type="submit" class="btn btn-success btn-sm px-3 fw-bold rounded-pill">Pay</button>
                                         </form>
-                                        <form asp-action="DeclineTransaction" method="post" class="d-inline">
+                                        <form asp-action="DeclineTransaction" method="post">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="transactionId" value="@tx.Id" />
-                                            <button type="submit" class="btn btn-light btn-sm px-3 fw-bold border-start">Block</button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm px-3 fw-bold rounded-pill">Block</button>
                                         </form>
                                     </div>
-                                </td>
-                            </tr>
-                        }
-                    } else {
-                        <tr><td colspan="4" class="text-center py-5 text-muted small">No pending withdrawals in the queue.</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    @* --- 🗓️ SECTION 2: AJO Payouts (ROTATIONAL SAVINGS) --- *@
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
-        <div class="card-header bg-white py-3 border-0 d-flex justify-content-between">
-            <h6 class="fw-bold mb-0 text-success"><i class="bi bi-calendar-check me-2"></i>Ajo Payout Queue</h6>
-            <span class="badge bg-soft-success text-success rounded-pill px-3">Live Rotation</span>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light small text-muted text-uppercase">
-                    <tr>
-                        <th class="ps-4">Group Name</th>
-                        <th>Category</th>
-                        <th>Active Slot</th>
-                        <th class="text-end pe-4">Disbursement</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if(Model.AllThriftGroups != null && Model.AllThriftGroups.Any())
-                    {
-                        @foreach (var group in Model.AllThriftGroups)
-                        {
-                            var currentMonthOrder = ((DateTime.Now.Year - group.StartDate.Year) * 12) + DateTime.Now.Month - group.StartDate.Month + 1;
-                            if (currentMonthOrder < 1) currentMonthOrder = 1;
-                            
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="fw-bold">@group.GroupName</div>
-                                    <small class="text-muted">@(group.MemberPlans?.Count ?? 0) Members Active</small>
-                                </td>
-                                <td><span class="badge bg-soft-gold text-gold rounded-pill px-3">₦@group.CategoryAmount.ToString("N0")</span></td>
-                                <td class="fw-bold text-primary">Slot @currentMonthOrder</td>
-                                <td class="text-end pe-4">
-                                    <form asp-action="ProcessMonthlyPayout" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="thriftGroupId" value="@group.Id" />
-                                        @* Logic to select the member whose PayoutOrder matches the current month *@
-                                        @{
-                                            var targetMember = group.MemberPlans?.FirstOrDefault(m => m.PayoutOrder == currentMonthOrder);
-                                        }
-                                        @if(targetMember != null)
-                                        {
-                                            <input type="hidden" name="memberPlanId" value="@targetMember.Id" />
-                                            <button type="submit" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold shadow-sm" @(targetMember.HasCollected ? "disabled" : "")>
-                                                @(targetMember.HasCollected ? "Paid" : $"Release ₦{(group.CategoryAmount * (group.MemberPlans?.Count ?? 0)):N0}")
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted small">No member assigned to this slot</span>
-                                        }
-                                    </form>
                                 </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="4" class="text-center py-5 text-muted small">No active Ajo groups found.</td></tr>
+                        <tr><td colspan="5" class="text-center py-5 text-muted small">No pending withdrawals.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @* ── AJO PAYOUT QUEUE ── *@
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="card-header bg-white py-3 border-0">
+            <h6 class="fw-bold mb-0 text-success"><i class="bi bi-calendar-check me-2"></i>Ajo Payout Queue</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light small text-muted text-uppercase">
+                    <tr>
+                        <th class="ps-4">Group</th>
+                        <th>Category</th>
+                        <th>Active Slot</th>
+                        <th class="text-end pe-4">Disbursement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AllThriftGroups.Any())
+                    {
+                        @foreach (var group in Model.AllThriftGroups)
+                        {
+                            var monthOrder = Math.Max(1,
+                                ((DateTime.Now.Year - group.StartDate.Year) * 12) +
+                                DateTime.Now.Month - group.StartDate.Month + 1);
+                            var target = group.MemberPlans?.FirstOrDefault(m => m.PayoutOrder == monthOrder);
+
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">@group.GroupName</div>
+                                    <small class="text-muted">@(group.MemberPlans?.Count ?? 0) members</small>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-3"
+                                          style="background:rgba(255,184,0,0.15);color:#b8860b;">
+                                        ₦@group.CategoryAmount.ToString("N0")
+                                    </span>
+                                </td>
+                                <td class="fw-bold text-primary">Slot @monthOrder</td>
+                                <td class="text-end pe-4">
+                                    @if (target != null)
+                                    {
+                                        <form asp-action="ProcessMonthlyPayout" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="thriftGroupId" value="@group.Id" />
+                                            <input type="hidden" name="memberPlanId" value="@target.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm rounded-pill px-3 fw-bold @(target.HasCollected ? "btn-secondary" : "btn-dark")"
+                                                @(target.HasCollected ? "disabled" : "")>
+                                                @(target.HasCollected ? "Paid ✓" : $"Release ₦{(group.CategoryAmount * (group.MemberPlans?.Count ?? 0)):N0}")
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">No member in slot @monthOrder</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="4" class="text-center py-5 text-muted small">No active Ajo groups.</td></tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-
-<style>
-    .bg-soft-gold { background: rgba(212, 175, 55, 0.1); }
-    .text-gold { color: #D4AF37; }
-    .bg-soft-success { background: rgba(25, 135, 84, 0.1); }
-</style>

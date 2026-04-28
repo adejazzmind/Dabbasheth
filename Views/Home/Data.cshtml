@@ -1,152 +1,48 @@
 ﻿@{
-    Layout = "_Layout";
+    Layout = "_Layout"; ViewData["Title"] = "Buy Data";
 }
 
-<style>
-    :root {
-        --navy-deep: #050B18;
-        --blue-light: #00B4D8;
-        --gold: #D4AF37;
-        --white: #FFFFFF;
-    }
-
-    html, body {
-        background-color: var(--navy-deep) !important;
-        color: var(--white);
-        font-family: 'Inter', sans-serif;
-    }
-
-    .premium-container {
-        max-width: 500px;
-        margin: 0 auto;
-        background: var(--navy-deep);
-        min-height: 100vh;
-    }
-
-    .glass-card {
-        background: rgba(255, 255, 255, 0.02);
-        border-radius: 25px;
-        border: 1px solid rgba(0, 180, 216, 0.1);
-        backdrop-filter: blur(10px);
-    }
-
-    .network-pill {
-        width: 60px;
-        height: 60px;
-        border-radius: 15px;
-        background: rgba(255,255,255,0.05);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid transparent;
-        transition: 0.3s;
-        cursor: pointer;
-    }
-
-        .network-pill.active {
-            border-color: var(--gold);
-            background: rgba(212, 175, 55, 0.1);
-        }
-
-    .data-plan-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 15px;
-        padding: 15px;
-        margin-bottom: 10px;
-        transition: 0.3s;
-        cursor: pointer;
-    }
-
-        .data-plan-card:hover {
-            border-color: var(--blue-light);
-            background: rgba(0, 180, 216, 0.05);
-        }
-
-    .form-control-lux {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(0, 180, 216, 0.15);
-        color: white;
-        border-radius: 15px;
-        padding: 14px;
-    }
-
-    .btn-gold {
-        background: var(--gold);
-        color: var(--navy-deep);
-        border-radius: 16px;
-        padding: 15px;
-        font-weight: bold;
-        border: none;
-    }
-</style>
-
-<div class="premium-container py-4 px-3">
-    @* --- Header --- *@
+<div class="container py-4" style="padding-bottom:90px!important;">
     <div class="d-flex align-items-center mb-4">
-        <a href="@Url.Action("Index", "Home")" class="text-white me-3 fs-4 text-decoration-none">
-            <i class="bi bi-chevron-left"></i>
-        </a>
-        <h4 class="fw-bold mb-0 text-gradient-gold">Buy Data Bundle</h4>
+        <a href="/Home/Index" class="text-dark me-3 fs-4 text-decoration-none"><i class="bi bi-arrow-left"></i></a>
+        <h5 class="fw-bold mb-0">Buy Data Bundle</h5>
     </div>
 
-    @* --- Network Selection --- *@
-    <div class="glass-card p-4 mb-4">
-        <label class="small text-gold fw-bold mb-3 tracking-widest text-uppercase d-block">Network Provider</label>
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="network-pill active"><img src="https://upload.wikimedia.org/wikipedia/commons/a/af/MTN_Logo.svg" width="30" /></div>
-            <div class="network-pill"><img src="https://upload.wikimedia.org/wikipedia/en/9/91/Airtel_logo.svg" width="30" /></div>
-            <div class="network-pill"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/3/3b/Glo_Limited_logo.svg/1200px-Glo_Limited_logo.svg.png" width="30" /></div>
-            <div class="network-pill"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/07/9mobile_logo.svg/1200px-9mobile_logo.svg.png" width="30" /></div>
-        </div>
-    </div>
-
-    @* --- Form Area --- *@
-    <div class="glass-card p-4">
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
         <form>
-            <div class="mb-4">
-                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Phone Number</label>
-                <input type="tel" class="form-control form-control-lux" placeholder="08012345678">
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">Phone Number</label>
+                <input type="tel" class="form-control border-0 bg-light py-3 rounded-4" placeholder="08012345678" />
             </div>
-
             <div class="mb-4">
-                <label class="small text-gold fw-bold mb-2 tracking-widest text-uppercase">Select Plan</label>
-                
-                @* Mock Data Plans *@
-                <div class="data-plan-card d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-0 fw-bold">1.5GB / 30 Days</p>
-                        <small class="opacity-50 text-light-blue">Standard Plan</small>
+                <label class="small fw-bold text-muted mb-2 d-block">Select Plan</label>
+                @foreach (var plan in new[] {
+                    new { Size="500MB", Days=14,  Price=300  },
+                    new { Size="1.5GB", Days=30,  Price=1000 },
+                    new { Size="3GB",   Days=30,  Price=1500 },
+                    new { Size="10GB",  Days=30,  Price=3000 }
+                })
+                {
+                    <div class="d-flex justify-content-between align-items-center p-3 rounded-4 border mb-2"
+                         style="cursor:pointer;" onclick="selectPlan(this)">
+                        <div>
+                            <p class="mb-0 fw-bold">@plan.Size / @plan.Days Days</p>
+                            <small class="text-muted">Standard Plan</small>
+                        </div>
+                        <span class="fw-bold text-primary">₦@plan.Price.ToString("N0")</span>
                     </div>
-                    <p class="mb-0 fw-bold text-gold">₦1,000</p>
-                </div>
-
-                <div class="data-plan-card d-flex justify-content-between align-items-center">
-                    <div>
-                        <p class="mb-0 fw-bold">3GB / 30 Days</p>
-                        <small class="opacity-50 text-light-blue">Best Value</small>
-                    </div>
-                    <p class="mb-0 fw-bold text-gold">₦1,500</p>
-                </div>
-
-                <div class="data-plan-card d-flex justify-content-between align-items-center border-gold" style="border-color: var(--gold) !important;">
-                    <div>
-                        <p class="mb-0 fw-bold">10GB / 30 Days</p>
-                        <small class="opacity-50 text-light-blue">Heavy User</small>
-                    </div>
-                    <p class="mb-0 fw-bold text-gold">₦3,000</p>
-                </div>
+                }
             </div>
-
-            <button type="submit" class="btn-gold w-100 mt-2 shadow-glow">
-                Activate Data Bundle
+            <button type="submit" class="btn w-100 rounded-pill py-3 fw-bold text-white"
+                    style="background:linear-gradient(135deg,#1A73E8,#00B4DB);">
+                Activate Bundle
             </button>
         </form>
     </div>
-
-    @* --- Security Note --- *@
-    <div class="text-center mt-5 opacity-40">
-        <i class="bi bi-lock-fill text-light-blue"></i>
-        <small class="x-small d-block mt-1">IES Urban Hub Secure Payment Gateway</small>
-    </div>
 </div>
+<script>
+    function selectPlan(el) {
+        document.querySelectorAll('[onclick^="selectPlan"]').forEach(e => e.classList.remove('border-primary'));
+        el.classList.add('border-primary');
+    }
+</script>

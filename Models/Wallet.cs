@@ -9,14 +9,14 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
-        public decimal Balance { get; set; }
+        public decimal Balance { get; set; } = 0m;
 
         public string Currency { get; set; } = "NGN";
 
-        // ✅ ADD THESE TWO LINES TO FIX THE ERRORS
-        public string WalletNumber { get; set; }
+        public string WalletNumber { get; set; } = string.Empty;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

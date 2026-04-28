@@ -1,0 +1,273 @@
+﻿@model Dabbasheth.Models.AdminDashboardViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Wallet Control";
+}
+
+<style>
+.wc-wrap{padding:28px 32px}
+.wc-title{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:.3px}
+.wc-sub{color:var(--muted);font-size:.85rem;margin:4px 0 0}
+
+/* ── FUND PANEL ── */
+.fund-panel{background:linear-gradient(135deg,#0A0F1E,#1A73E8);color:#fff;border-radius:20px;padding:28px;height:100%}
+.fund-panel h6{font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.7;font-size:.72rem;margin-bottom:20px}
+.f-label{font-size:.75rem;font-weight:600;opacity:.8;display:block;margin-bottom:6px}
+.f-input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;width:100%;font-family:'Inter',sans-serif;font-size:.9rem;outline:none;transition:.2s}
+.f-input::placeholder{color:rgba(255,255,255,.5)}
+.f-input:focus{border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.15)}
+.f-select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 16px;color:#fff;width:100%;font-family:'Inter',sans-serif;font-size:.9rem;outline:none}
+.f-select option{color:#0A0F1E;background:#fff}
+.radio-row{display:flex;gap:10px;margin-bottom:20px}
+.radio-opt{flex:1;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:10px 14px;border-radius:10px;cursor:pointer;border:1px solid rgba(255,255,255,.15);font-size:.85rem;font-weight:600}
+.btn-execute{background:#F59E0B;color:#0A0F1E;border:none;border-radius:12px;padding:13px 20px;font-weight:700;cursor:pointer;width:100%;font-family:'Inter',sans-serif;font-size:.9rem;transition:.2s}
+.btn-execute:hover{background:#D97706;transform:translateY(-1px)}
+
+/* ── SEARCH ── */
+.search-box{display:flex;gap:8px}
+.search-box input{padding:10px 16px;border:1.5px solid var(--border);border-radius:12px;background:var(--input-bg);color:var(--text);font-size:.875rem;width:220px;outline:none;transition:.2s}
+.search-box input:focus{border-color:var(--blue)}
+.search-box button{padding:10px 18px;background:linear-gradient(135deg,var(--blue),#0EA5E9);color:#fff;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:.875rem}
+
+/* ── WALLET TABLE CARD ── */
+.w-card{background:var(--card-bg);border-radius:20px;border:1px solid var(--border);overflow:hidden;box-shadow:var(--card-shadow)}
+.w-card-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.w-card-header h6{font-weight:700;font-size:.82rem;text-transform:uppercase;letter-spacing:.8px;color:var(--text);margin:0}
+.w-row{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);transition:.15s}
+.w-row:last-child{border-bottom:none}
+.w-row:hover{background:var(--surface2)}
+.w-av{width:40px;height:40px;background:linear-gradient(135deg,var(--blue),#0EA5E9);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0}
+.w-name{font-weight:600;font-size:.85rem;color:var(--text)}
+.w-email{font-size:.72rem;color:var(--muted)}
+.w-bal{font-weight:700;font-size:.9rem}
+.w-num{font-size:.7rem;color:var(--muted)}
+
+/* ── CUSTOMER CARDS (mobile-friendly) ── */
+.cust-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-top:28px}
+.cust-card{background:var(--card-bg);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--card-shadow);transition:.2s}
+.cust-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.1)}
+.cust-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cust-name{font-weight:700;font-size:.9rem;color:var(--text)}
+.cust-email{font-size:.75rem;color:var(--muted)}
+.cust-balance{background:linear-gradient(135deg,#0A0F1E,#1e3a6e);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.bal-label{color:rgba(255,255,255,.55);font-size:.7rem;text-transform:uppercase;letter-spacing:1px}
+.bal-amount{color:#fff;font-size:1.1rem;font-weight:800}
+.action-tabs{display:flex;gap:6px;margin-bottom:10px}
+.tab-btn{flex:1;padding:8px;border-radius:10px;border:1.5px solid var(--border);background:var(--input-bg);color:var(--muted);font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s;text-align:center}
+.tab-btn.credit:hover,.tab-btn.credit.active{background:#ECFDF5;border-color:#10B981;color:#065F46}
+.tab-btn.debit:hover,.tab-btn.debit.active{background:#FEF2F2;border-color:#EF4444;color:#991B1B}
+.action-form{display:none}
+.action-form.show{display:block}
+.amt-row{display:flex;gap:8px;margin-bottom:8px}
+.amt-row input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--input-bg);color:var(--text);font-size:.875rem;outline:none}
+.amt-row input:focus{border-color:var(--blue)}
+.note-input{width:100%;padding:9px 14px;border:1.5px solid var(--border);border-radius:10px;background:var(--input-bg);color:var(--text);font-size:.8rem;outline:none;margin-bottom:10px}
+.credit-btn{width:100%;padding:11px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.875rem}
+.debit-btn{width:100%;padding:11px;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.875rem}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state i{font-size:3rem;margin-bottom:12px;display:block;opacity:.3}
+
+@@media(max-width:768px){
+    .wc-wrap{padding:16px}
+    .cust-grid{grid-template-columns:1fr}
+    .search-box input{width:100%}
+}
+</style>
+
+<div class="wc-wrap">
+
+    {{!-- ── PAGE HEADER ── --}}
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <div class="wc-title"><i class="bi bi-cash-coin me-2" style="color:var(--blue)"></i>Wallet Control Center</div>
+            <p class="wc-sub">Credit or debit any customer wallet instantly.</p>
+        </div>
+        <form method="get" class="search-box">
+            <input type="text" name="search" placeholder="Search by name..." value="@ViewBag.Search" />
+            <button type="submit"><i class="bi bi-search"></i> Search</button>
+        </form>
+    </div>
+
+    {{!-- ── TOP ROW: Fund Panel + Balance Table ── --}}
+    <div class="row g-4 mb-2">
+
+        {{!-- FUND PANEL --}}
+        <div class="col-lg-5">
+            <div class="fund-panel">
+                <h6>Admin Wallet Action</h6>
+                <form asp-action="FundCustomerWallet" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="f-label">Select Customer</label>
+                        <select name="userEmail" class="f-select" required>
+                            <option value="">-- Choose customer --</option>
+                            @foreach (var u in Model.AllUsers)
+                            {
+                                <option value="@u.Email">@u.FullName (@u.Email)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="f-label">Amount (₦)</label>
+                        <input type="number" name="amount" class="f-input" placeholder="e.g. 50000" min="1" required />
+                    </div>
+                    <div class="mb-1">
+                        <label class="f-label">Action Type</label>
+                        <div class="radio-row">
+                            <label class="radio-opt">
+                                <input type="radio" name="action" value="credit" checked style="accent-color:#F59E0B" />
+                                💰 Credit
+                            </label>
+                            <label class="radio-opt">
+                                <input type="radio" name="action" value="debit" style="accent-color:#EF4444" />
+                                💸 Debit
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-execute">Execute Wallet Action</button>
+                </form>
+            </div>
+        </div>
+
+        {{!-- BALANCE TABLE --}}
+        <div class="col-lg-7">
+            <div class="w-card">
+                <div class="w-card-header">
+                    <h6>Customer Wallet Balances</h6>
+                    <span style="font-size:.75rem;color:var(--muted)">@Model.AllUsers.Count customers</span>
+                </div>
+                @if (!Model.AllUsers.Any())
+                {
+                    <div class="empty-state"><i class="bi bi-people"></i><p>No customers found.</p></div>
+                }
+                else
+                {
+                    @foreach (var user in Model.AllUsers)
+                    {
+                        var wallet = Model.AllWallets?.FirstOrDefault(w => w.UserEmail?.ToLower() == user.Email?.ToLower());
+                        <div class="w-row">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="w-av">@(user.FullName?.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")</div>
+                                <div>
+                                    <div class="w-name">@user.FullName</div>
+                                    <div class="w-email">@user.Email</div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="w-bal" style="color:@(wallet != null && wallet.Balance > 0 ? "#10B981" : "var(--muted)")">
+                                    ₦@((wallet?.Balance ?? 0m).ToString("N2"))
+                                </div>
+                                <div class="w-num">@(wallet?.WalletNumber ?? "No wallet")</div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    {{!-- ── CUSTOMER CARDS WITH INLINE CREDIT/DEBIT ── --}}
+    <div style="margin-top:8px;margin-bottom:8px">
+        <div class="wc-title" style="font-size:.9rem;opacity:.7">
+            <i class="bi bi-grid me-1"></i> Quick Action Cards
+        </div>
+    </div>
+
+    @if (!Model.AllUsers.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-people"></i>
+            <p>No customers found@(string.IsNullOrEmpty(ViewBag.Search as string) ? "" : $" for \"{ViewBag.Search}\"").</p>
+        </div>
+    }
+    else
+    {
+        <div class="cust-grid">
+            @foreach (var user in Model.AllUsers)
+            {
+                var wallet   = Model.AllWallets?.FirstOrDefault(w => w.UserEmail?.ToLower() == user.Email?.ToLower());
+                var balance  = wallet?.Balance ?? 0;
+                var initials = user.FullName?.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U";
+                var uid      = (user.Email ?? user.Id.ToString()).Replace("@","_").Replace(".","_").Replace("-","_");
+
+                <div class="cust-card">
+                    <div class="cust-top">
+                        <div class="w-av">@initials</div>
+                        <div>
+                            <div class="cust-name">@user.FullName</div>
+                            <div class="cust-email">@user.Email</div>
+                        </div>
+                    </div>
+
+                    <div class="cust-balance">
+                        <div>
+                            <div class="bal-label">Wallet Balance</div>
+                            <div class="bal-amount">₦@balance.ToString("N2")</div>
+                        </div>
+                        <i class="bi bi-wallet2" style="color:rgba(255,255,255,.2);font-size:1.8rem"></i>
+                    </div>
+
+                    <div class="action-tabs">
+                        <div class="tab-btn credit" onclick="showTab('@uid','credit')">
+                            <i class="bi bi-plus-circle"></i> Credit
+                        </div>
+                        <div class="tab-btn debit" onclick="showTab('@uid','debit')">
+                            <i class="bi bi-dash-circle"></i> Debit
+                        </div>
+                    </div>
+
+                    <div class="action-form" id="credit-@uid">
+                        <form method="post" asp-action="CreditWallet">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="email" value="@user.Email" />
+                            <div class="amt-row">
+                                <input type="number" name="amount" placeholder="Amount (₦)" min="1" step="0.01" required />
+                            </div>
+                            <input type="text" name="note" class="note-input" placeholder="Note (optional)" />
+                            <button type="submit" class="credit-btn">
+                                <i class="bi bi-plus-circle-fill"></i> Credit Wallet
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="action-form" id="debit-@uid">
+                        <form method="post" asp-action="DebitWallet">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="email" value="@user.Email" />
+                            <div class="amt-row">
+                                <input type="number" name="amount" placeholder="Amount (₦)" min="1" step="0.01" required />
+                            </div>
+                            <input type="text" name="note" class="note-input" placeholder="Note (optional)" />
+                            <button type="submit" class="debit-btn">
+                                <i class="bi bi-dash-circle-fill"></i> Debit Wallet
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+function showTab(uid, type) {
+    var creditForm = document.getElementById('credit-' + uid);
+    var debitForm  = document.getElementById('debit-'  + uid);
+    var card       = creditForm.closest('.cust-card');
+    var tabs       = card.querySelectorAll('.tab-btn');
+
+    tabs.forEach(t => t.classList.remove('active'));
+
+    if (type === 'credit') {
+        creditForm.classList.toggle('show');
+        debitForm.classList.remove('show');
+        if (creditForm.classList.contains('show'))
+            card.querySelector('.tab-btn.credit').classList.add('active');
+    } else {
+        debitForm.classList.toggle('show');
+        creditForm.classList.remove('show');
+        if (debitForm.classList.contains('show'))
+            card.querySelector('.tab-btn.debit').classList.add('active');
+    }
+}
+</script>

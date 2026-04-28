@@ -9,17 +9,17 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
         [Required]
-        public string Subject { get; set; }
+        public string Subject { get; set; } = string.Empty;
 
         [Required]
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
-        public string AdminResponse { get; set; }
+        public string AdminResponse { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "Open"; // Open, InProgress, Resolved
+        public string Status { get; set; } = "Open";   // Open, InProgress, Resolved
 
         public string Priority { get; set; } = "Medium"; // Low, Medium, High
 

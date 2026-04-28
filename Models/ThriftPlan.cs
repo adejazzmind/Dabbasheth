@@ -10,56 +10,28 @@ namespace Dabbasheth.Models
         public int Id { get; set; }
 
         [Required]
-        public string UserEmail { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
 
         [Required]
         [StringLength(100)]
-        public string Title { get; set; }
+        public string Title { get; set; } = string.Empty;
 
-        // --- 💰 FINANCIALS ---
-        [DataType(DataType.Currency)]
         public decimal TargetAmount { get; set; }
-
-        [DataType(DataType.Currency)]
         public decimal CurrentSavings { get; set; }
 
         [Required]
-        public string Frequency { get; set; } // Daily, Weekly, Monthly
+        public string Frequency { get; set; } = "Monthly";
 
-        // --- 📅 TIMELINE & STATUS ---
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
         public DateTime MaturityDate { get; set; }
-        public string Status { get; set; } = "Active"; // Active, Completed
+        public string Status { get; set; } = "Active";
 
-        // --- 👥 AJO GROUP LOGIC ---
-        // Links the individual to a specific Ajo Cycle (e.g., Ogba Market Hub)
         public int? ThriftGroupId { get; set; }
-
-        // Defines the "Packing Order" in the rotation
         public int PayoutOrder { get; set; }
-
-        // Security check: Has this member packed their bulk amount yet?
         public bool HasCollected { get; set; } = false;
-
-        // ✅ FIXED: Track exactly when the payout occurred
         public DateTime? PayoutDate { get; set; }
 
         [ForeignKey("ThriftGroupId")]
         public ThriftGroup? ThriftGroup { get; set; }
-
-        // ==========================================
-        // 🚀 BUSINESS LOGIC ENGINE
-        // ==========================================
-        public void CalculateMaturity()
-        {
-            this.MaturityDate = this.Frequency switch
-            {
-                "Daily" => DateTime.UtcNow.AddDays(30),
-                "Weekly" => DateTime.UtcNow.AddDays(84), // 12 Weeks
-                "Monthly" => DateTime.UtcNow.AddMonths(12),
-                "Yearly" => DateTime.UtcNow.AddYears(1),
-                _ => DateTime.UtcNow.AddMonths(1)
-            };
-        }
     }
 }

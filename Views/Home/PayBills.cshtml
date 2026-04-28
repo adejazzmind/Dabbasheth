@@ -1,44 +1,47 @@
 ﻿@{
-    ViewData["Title"] = "Pay Bills";
+    Layout = "_Layout"; ViewData["Title"] = "Pay Bills";
 }
 
-<div class="container mt-5" style="padding-bottom: 120px;">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card card-dab border-0 shadow-lg p-4">
-                <div class="text-center mb-4">
-                    <div class="bg-soft-warning d-inline-block p-3 rounded-circle mb-3">
-                        <i class="bi bi-lightning-charge-fill text-warning h2"></i>
-                    </div>
-                    <h3 class="fw-bold">Pay Bills</h3>
-                    <p class="text-muted small">Fast airtime and data top-up.</p>
-                </div>
+<div class="container py-4" style="padding-bottom:90px!important;">
+    <div class="d-flex align-items-center mb-4">
+        <a href="/Home/Index" class="text-dark me-3 fs-4 text-decoration-none"><i class="bi bi-arrow-left"></i></a>
+        <h5 class="fw-bold mb-0">Pay Bills</h5>
+    </div>
 
-                <form asp-action="ProcessBillPayment" method="post">
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">SERVICE PROVIDER</label>
-                        <select name="provider" class="form-select" required>
-                            <option value="">Select Provider...</option>
-                            <option>MTN Nigeria</option>
-                            <option>Airtel</option>
-                            <option>Glo</option>
-                            <option>9Mobile</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold">PHONE NUMBER</label>
-                        <input type="number" name="phoneNumber" class="form-control" placeholder="08012345678" required />
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold">AMOUNT (₦)</label>
-                        <input type="number" name="amount" class="form-control" placeholder="0.00" required />
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
-                        Pay Now
-                    </button>
-                </form>
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="text-center mb-4">
+            <div class="icon-box mx-auto mb-2" style="background:#fff3e0;width:60px;height:60px;">
+                <i class="bi bi-lightning-charge-fill" style="color:#e65100;font-size:1.5rem;"></i>
             </div>
+            <p class="text-muted small">Fast airtime, data &amp; utility payments</p>
         </div>
+        <form>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">Service Provider</label>
+                <select class="form-select border-0 bg-light py-3 rounded-4" required>
+                    <option value="">Select provider…</option>
+                    <option>MTN Nigeria</option>
+                    <option>Airtel</option>
+                    <option>Glo</option>
+                    <option>9Mobile</option>
+                    <option>DSTV</option>
+                    <option>GOTV</option>
+                    <option>EKEDC (Electricity)</option>
+                    <option>IKEDC (Electricity)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="small fw-bold text-muted mb-1">Phone / Smart Card No.</label>
+                <input type="text" class="form-control border-0 bg-light py-3 rounded-4" placeholder="Enter number" required />
+            </div>
+            <div class="mb-4">
+                <label class="small fw-bold text-muted mb-1">Amount (₦)</label>
+                <input type="number" class="form-control border-0 bg-light py-3 rounded-4" placeholder="0.00" required />
+            </div>
+            <button type="submit" class="btn w-100 rounded-pill py-3 fw-bold text-white"
+                    style="background:linear-gradient(135deg,#1A73E8,#00B4DB);">
+                Pay Now
+            </button>
+        </form>
     </div>
 </div>
