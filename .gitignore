@@ -2,3 +2,7 @@ bin/
 obj/  
 .vs/  
 *.db 
+
+*_dump.txt
+*_diff.txt
+*_method.txt
