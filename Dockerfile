@@ -1,4 +1,4 @@
-﻿# Use the official .NET SDK to build the app
+# Use the official .NET SDK to build the app
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
@@ -15,4 +15,4 @@ WORKDIR /app
 COPY --from=build /app/out .
 
 # Tell Docker to run your app
-ENTRYPOINT ["dotnet", "Dabbasheth.dll"]
+ENTRYPOINT ["dotnet", "DabbashethApp.dll"]
