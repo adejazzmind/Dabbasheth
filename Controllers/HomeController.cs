@@ -13,7 +13,10 @@ namespace Dabbasheth.Controllers
         private readonly ApplicationDbContext _context;
         public HomeController(ApplicationDbContext context) => _context = context;
 
-        private string? Email() => TempData.Peek("UserEmail")?.ToString();
+        private string? Email() =>
+            HttpContext.Session.GetString("UserEmail")
+            ?? TempData.Peek("UserEmail")?.ToString();
+
         private const string AdminEmail = "adejazzmind@gmail.com";
 
         // ── DASHBOARD ─────────────────────────────────────────────────
@@ -49,9 +52,9 @@ namespace Dabbasheth.Controllers
                              (m.SenderEmail == AdminEmail && m.ReceiverEmail.ToLower() == email.ToLower()))
                 .OrderBy(m => m.SentAt).ToListAsync();
 
-            // Mark admin messages as read
             var unread = await _context.ChatMessages
-                .Where(m => m.ReceiverEmail.ToLower() == email.ToLower() && m.SenderEmail == AdminEmail && !m.IsRead).ToListAsync();
+                .Where(m => m.ReceiverEmail.ToLower() == email.ToLower() &&
+                             m.SenderEmail == AdminEmail && !m.IsRead).ToListAsync();
             unread.ForEach(m => m.IsRead = true);
             await _context.SaveChangesAsync();
 
@@ -69,7 +72,14 @@ namespace Dabbasheth.Controllers
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
             if (!string.IsNullOrWhiteSpace(message))
             {
-                _context.ChatMessages.Add(new ChatMessage { SenderEmail = email, ReceiverEmail = AdminEmail, Message = message.Trim(), IsAdminMessage = false, SentAt = DateTime.UtcNow });
+                _context.ChatMessages.Add(new ChatMessage
+                {
+                    SenderEmail = email,
+                    ReceiverEmail = AdminEmail,
+                    Message = message.Trim(),
+                    IsAdminMessage = false,
+                    SentAt = DateTime.UtcNow
+                });
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Chat));
@@ -93,8 +103,20 @@ namespace Dabbasheth.Controllers
             var email = Email();
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
             var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
-            if (wallet == null || amount <= 0 || wallet.Balance < amount) { TempData["Error"] = "Insufficient funds or invalid amount."; return RedirectToAction("Withdraw"); }
-            _context.Transactions.Add(new Transaction { UserEmail = email, Amount = amount, Type = "Debit", Description = $"Withdrawal: {bankName} ({accountNumber})", Date = DateTime.UtcNow, Status = "Pending" });
+            if (wallet == null || amount <= 0 || wallet.Balance < amount)
+            {
+                TempData["Error"] = "Insufficient funds or invalid amount.";
+                return RedirectToAction("Withdraw");
+            }
+            _context.Transactions.Add(new Transaction
+            {
+                UserEmail = email,
+                Amount = amount,
+                Type = "Debit",
+                Description = $"Withdrawal: {bankName} ({accountNumber})",
+                Date = DateTime.UtcNow,
+                Status = "Pending"
+            });
             await _context.SaveChangesAsync();
             TempData["Message"] = "Withdrawal request submitted — awaiting admin approval.";
             return RedirectToAction("Index");
@@ -117,8 +139,21 @@ namespace Dabbasheth.Controllers
         public async Task<IActionResult> CreateThriftPlan(string title, decimal targetAmount, string frequency)
         {
             var email = Email();
-            if (string.IsNullOrEmpty(email) || targetAmount <= 0) { TempData["Error"] = "Invalid details."; return RedirectToAction("Thrift"); }
-            _context.ThriftPlans.Add(new ThriftPlan { Title = title.Trim(), TargetAmount = targetAmount, Frequency = frequency ?? "Daily", UserEmail = email, Status = "Active", StartDate = DateTime.UtcNow, MaturityDate = DateTime.UtcNow.AddMonths(6) });
+            if (string.IsNullOrEmpty(email) || targetAmount <= 0)
+            {
+                TempData["Error"] = "Invalid details.";
+                return RedirectToAction("Thrift");
+            }
+            _context.ThriftPlans.Add(new ThriftPlan
+            {
+                Title = title.Trim(),
+                TargetAmount = targetAmount,
+                Frequency = frequency ?? "Daily",
+                UserEmail = email,
+                Status = "Active",
+                StartDate = DateTime.UtcNow,
+                MaturityDate = DateTime.UtcNow.AddMonths(6)
+            });
             await _context.SaveChangesAsync();
             TempData["Message"] = "Savings goal created!";
             return RedirectToAction("Thrift");
@@ -132,9 +167,22 @@ namespace Dabbasheth.Controllers
             if (string.IsNullOrEmpty(email)) return RedirectToAction("Login", "Account");
             var wallet = await _context.Wallets.FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
             var plan = await _context.ThriftPlans.FindAsync(planId);
-            if (wallet == null || plan == null || amount <= 0 || wallet.Balance < amount) { TempData["Error"] = "Insufficient balance."; return RedirectToAction("Thrift"); }
-            wallet.Balance -= amount; plan.CurrentSavings += amount;
-            _context.Transactions.Add(new Transaction { UserEmail = email, Amount = amount, Type = "Debit", Description = $"Savings: {plan.Title}", Date = DateTime.UtcNow, Status = "Success" });
+            if (wallet == null || plan == null || amount <= 0 || wallet.Balance < amount)
+            {
+                TempData["Error"] = "Insufficient balance.";
+                return RedirectToAction("Thrift");
+            }
+            wallet.Balance -= amount;
+            plan.CurrentSavings += amount;
+            _context.Transactions.Add(new Transaction
+            {
+                UserEmail = email,
+                Amount = amount,
+                Type = "Debit",
+                Description = $"Savings: {plan.Title}",
+                Date = DateTime.UtcNow,
+                Status = "Success"
+            });
             if (plan.CurrentSavings >= plan.TargetAmount) plan.Status = "Completed";
             await _context.SaveChangesAsync();
             TempData["Message"] = $"₦{amount:N2} added to savings!";

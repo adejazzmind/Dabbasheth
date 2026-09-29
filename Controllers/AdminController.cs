@@ -13,7 +13,37 @@ namespace Dabbasheth.Controllers
         private readonly ApplicationDbContext _context;
         public AdminController(ApplicationDbContext context) => _context = context;
 
-        private bool IsAdmin() => TempData.Peek("UserRole")?.ToString() == "Admin";
+        private bool IsAdmin() =>
+            HttpContext.Session.GetString("UserRole") == "Admin" ||
+            TempData.Peek("UserRole")?.ToString() == "Admin";
+
+        private string GetAdminEmail() =>
+            HttpContext.Session.GetString("UserEmail")
+            ?? TempData.Peek("UserEmail")?.ToString()
+            ?? string.Empty;
+
+        private async Task<Wallet?> GetAdminWalletAsync()
+        {
+            var email = HttpContext.Session.GetString("UserEmail")
+                     ?? TempData.Peek("UserEmail")?.ToString();
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                var w = await _context.Wallets
+                    .FirstOrDefaultAsync(x => x.UserEmail == email);
+                if (w != null) return w;
+
+                var emailLower = email.ToLower();
+                w = await _context.Wallets
+                    .FirstOrDefaultAsync(x => x.UserEmail.ToLower() == emailLower);
+                if (w != null) return w;
+            }
+
+            // Final guaranteed fallback using known CEO wallet numbers
+            return await _context.Wallets
+                .FirstOrDefaultAsync(w => w.WalletNumber == "CEO-9491" ||
+                                          w.WalletNumber == "CEO-9920");
+        }
 
         // ── 1. DASHBOARD ──────────────────────────────────────────────
         [HttpGet]
@@ -21,14 +51,16 @@ namespace Dabbasheth.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var walletTotal = await _context.Wallets.AsNoTracking().SumAsync(w => (decimal?)w.Balance) ?? 0m;
-            var thriftTotal = await _context.ThriftPlans.AsNoTracking().SumAsync(p => (decimal?)p.CurrentSavings) ?? 0m;
+            var adminEmails = new[] { "adejazzmind@gmail.com", "tolubabe2k@gmail.com" };
+            var adminReserve = await _context.Wallets.AsNoTracking()
+                .Where(w => adminEmails.Contains(w.UserEmail))
+                .SumAsync(w => (decimal?)w.Balance) ?? 0m;
 
             var vm = new AdminDashboardViewModel
             {
                 TotalUsers = await _context.Users.AsNoTracking().CountAsync(u => u.Role == "Customer"),
                 NewUsersCount = await _context.Users.AsNoTracking().CountAsync(u => u.CreatedAt >= DateTime.UtcNow.Date),
-                TotalSystemBalance = walletTotal + thriftTotal,
+                TotalSystemBalance = adminReserve,
                 PendingSupportCount = await _context.SupportTickets.AsNoTracking().CountAsync(t => t.Status == "Open"),
                 FlaggedTransactionCount = await _context.Transactions.AsNoTracking().CountAsync(t => t.Status == "Flagged"),
                 AllUsers = await _context.Users.AsNoTracking().OrderByDescending(u => u.CreatedAt).Take(5).ToListAsync(),
@@ -107,24 +139,43 @@ namespace Dabbasheth.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var wallet = await _context.Wallets
+            var customerWallet = await _context.Wallets
                 .FirstOrDefaultAsync(w => w.UserEmail.ToLower() == userEmail.ToLower());
-            if (wallet == null)
+            if (customerWallet == null)
             {
-                TempData["Error"] = "Wallet not found.";
+                TempData["Error"] = "Customer wallet not found.";
+                return RedirectToAction(nameof(WalletControl));
+            }
+
+            var adminWallet = await GetAdminWalletAsync();
+            if (adminWallet == null)
+            {
+                TempData["Error"] = "Admin wallet not found.";
                 return RedirectToAction(nameof(WalletControl));
             }
 
             var type = action == "debit" ? "Debit" : "Credit";
 
-            if (action == "debit" && wallet.Balance < amount)
+            if (action == "credit")
             {
-                TempData["Error"] = $"Insufficient balance. Current: ₦{wallet.Balance:N2}";
-                return RedirectToAction(nameof(WalletControl));
+                if (adminWallet.Balance < amount)
+                {
+                    TempData["Error"] = $"Insufficient admin balance. Your balance: ₦{adminWallet.Balance:N2}";
+                    return RedirectToAction(nameof(WalletControl));
+                }
+                adminWallet.Balance -= amount;
+                customerWallet.Balance += amount;
             }
-
-            if (action == "debit") wallet.Balance -= amount;
-            else wallet.Balance += amount;
+            else
+            {
+                if (customerWallet.Balance < amount)
+                {
+                    TempData["Error"] = $"Insufficient customer balance. Their balance: ₦{customerWallet.Balance:N2}";
+                    return RedirectToAction(nameof(WalletControl));
+                }
+                customerWallet.Balance -= amount;
+                adminWallet.Balance += amount;
+            }
 
             _context.Transactions.Add(new Transaction
             {
@@ -137,7 +188,7 @@ namespace Dabbasheth.Controllers
             });
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = $"₦{amount:N2} {type}ed to {userEmail}'s wallet.";
+            TempData["Message"] = $"₦{amount:N2} {type}ed — customer wallet updated.";
             return RedirectToAction(nameof(WalletControl));
         }
 
@@ -147,15 +198,29 @@ namespace Dabbasheth.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var wallet = await _context.Wallets
+            var customerWallet = await _context.Wallets
                 .FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
-            if (wallet == null)
+            if (customerWallet == null)
             {
-                TempData["Error"] = "Wallet not found for this user.";
+                TempData["Error"] = "Customer wallet not found.";
                 return RedirectToAction(nameof(WalletControl));
             }
 
-            wallet.Balance += amount;
+            var adminWallet = await GetAdminWalletAsync();
+            if (adminWallet == null)
+            {
+                TempData["Error"] = "Admin wallet not found.";
+                return RedirectToAction(nameof(WalletControl));
+            }
+
+            if (adminWallet.Balance < amount)
+            {
+                TempData["Error"] = $"Insufficient admin balance. Your balance: ₦{adminWallet.Balance:N2}";
+                return RedirectToAction(nameof(WalletControl));
+            }
+
+            adminWallet.Balance -= amount;
+            customerWallet.Balance += amount;
 
             _context.Transactions.Add(new Transaction
             {
@@ -168,7 +233,7 @@ namespace Dabbasheth.Controllers
             });
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = $"₦{amount:N2} credited to {email} successfully.";
+            TempData["Message"] = $"₦{amount:N2} credited to {email}. Admin wallet debited.";
             return RedirectToAction(nameof(WalletControl));
         }
 
@@ -178,21 +243,29 @@ namespace Dabbasheth.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
 
-            var wallet = await _context.Wallets
+            var customerWallet = await _context.Wallets
                 .FirstOrDefaultAsync(w => w.UserEmail.ToLower() == email.ToLower());
-            if (wallet == null)
+            if (customerWallet == null)
             {
-                TempData["Error"] = "Wallet not found for this user.";
+                TempData["Error"] = "Customer wallet not found.";
                 return RedirectToAction(nameof(WalletControl));
             }
 
-            if (wallet.Balance < amount)
+            if (customerWallet.Balance < amount)
             {
-                TempData["Error"] = $"Insufficient balance. Current balance: ₦{wallet.Balance:N2}";
+                TempData["Error"] = $"Insufficient customer balance. Their balance: ₦{customerWallet.Balance:N2}";
                 return RedirectToAction(nameof(WalletControl));
             }
 
-            wallet.Balance -= amount;
+            var adminWallet = await GetAdminWalletAsync();
+            if (adminWallet == null)
+            {
+                TempData["Error"] = "Admin wallet not found.";
+                return RedirectToAction(nameof(WalletControl));
+            }
+
+            customerWallet.Balance -= amount;
+            adminWallet.Balance += amount;
 
             _context.Transactions.Add(new Transaction
             {
@@ -205,7 +278,7 @@ namespace Dabbasheth.Controllers
             });
 
             await _context.SaveChangesAsync();
-            TempData["Message"] = $"₦{amount:N2} debited from {email} successfully.";
+            TempData["Message"] = $"₦{amount:N2} debited from {email}. Admin wallet credited.";
             return RedirectToAction(nameof(WalletControl));
         }
 
@@ -445,7 +518,7 @@ namespace Dabbasheth.Controllers
         public async Task<IActionResult> ChatWith(string customerEmail)
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
-            var adminEmail = TempData.Peek("UserEmail")?.ToString() ?? "adejazzmind@gmail.com";
+            var adminEmail = GetAdminEmail();
 
             var messages = await _context.ChatMessages.AsNoTracking()
                 .Where(m => (m.SenderEmail == adminEmail && m.ReceiverEmail == customerEmail) ||
@@ -474,7 +547,7 @@ namespace Dabbasheth.Controllers
         public async Task<IActionResult> SendAdminMessage(string customerEmail, string message)
         {
             if (!IsAdmin()) return RedirectToAction("Login", "Account");
-            var adminEmail = TempData.Peek("UserEmail")?.ToString() ?? "adejazzmind@gmail.com";
+            var adminEmail = GetAdminEmail();
             if (!string.IsNullOrWhiteSpace(message))
             {
                 _context.ChatMessages.Add(new ChatMessage
